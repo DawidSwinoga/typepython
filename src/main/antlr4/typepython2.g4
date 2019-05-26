@@ -34,6 +34,24 @@ compound_stmt
     | while_stmt
     | for_stmt
     | funcdef
+    ;
+
+if_stmt: 'if' test ':' suite ('elif' test ':' suite)* ('else' ':' suite)?;
+while_stmt: 'while' test ':' suite;
+for_stmt: 'for' IDENTIFIER 'in' IDENTIFIER ':' suite;
+
+test: or_test;
+or_test: and_test ('or' and_test)*;
+and_test: not_test ('and' not_test)*;
+not_test: 'not' not_test | comparison;
+comparison: expr (comp_op expr)*;
+
+comp_op: '<'|'>'|'=='|'<='|'>='|'not'|'!=';
+expr: term (('+'|'-') term)*;
+term: factor (('*'|'/'|'%') factor)*;
+factor: ('+'|'-') factor | atom_expr;
+atom_expr: atom trailer*;
+
 
 IF                      : 'if';
 ELSE                    : 'else';
