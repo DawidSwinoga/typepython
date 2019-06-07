@@ -62,7 +62,7 @@ tokens { INDENT, DEDENT }
       }
 
       // First emit an extra line break that serves as the end of the statement.
-      this.emit(commonToken(Python3Parser.NEWLINE, "\n"));
+//      this.emit(commonToken(Python3Parser.NEWLINE, "\n"));
 
       // Now emit as much DEDENT tokens as needed.
       while (!indents.isEmpty()) {
@@ -71,7 +71,7 @@ tokens { INDENT, DEDENT }
       }
 
       // Put the EOF back on the token stream.
-      this.emit(commonToken(Python3Parser.EOF, "<EOF>"));
+//      this.emit(commonToken(Python3Parser.EOF, "<EOF>"));
     }
 
     Token next = super.nextToken();
@@ -85,7 +85,7 @@ tokens { INDENT, DEDENT }
   }
 
   private Token createDedent() {
-    CommonToken dedent = commonToken(Python3Parser.DEDENT, "");
+//    CommonToken dedent = commonToken(Python3Parser.DEDENT, "");
     dedent.setLine(this.lastToken.getLine());
     return dedent;
   }
@@ -343,7 +343,7 @@ NEWLINE
        }
        else if (indent > previous) {
          indents.push(indent);
-         emit(commonToken(Python3Parser.INDENT, spaces));
+//         emit(commonToken(Python3Parser.INDENT, spaces));
        }
        else {
          // Possibly emit more than 1 DEDENT token.
