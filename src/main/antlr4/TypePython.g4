@@ -97,11 +97,11 @@ tokens { INDENT, DEDENT }
   }
 }
 
-file_input
-    : (NEWLINE | statement)* EOF                #fileInput
+fileInput
+    : (NEWLINE | statement)* EOF
     ;
 
-funcdef
+funcDefinition
     : DEF IDENTIFIER parameters ':' suite
     ;
 suite
@@ -109,13 +109,13 @@ suite
     ;
 
 parameters
-    : '(' (typedargslist)? ')'
+    : '(' (typeDeclarationArgsList)? ')'
     ;
 
-typedargslist
-    : tfpdef (',' tfpdef)*
+typeDeclarationArgsList
+    : variableDeclaration (',' variableDeclaration)*
     ;
-tfpdef
+variableDeclaration
     : IDENTIFIER (':' type)?
     ;
 
@@ -137,43 +137,43 @@ customType
     ;
 
 statement
-    : simple_stmt
-    | compound_stmt
+    : simpleStatement
+    | compoundStatement
     ;
 
-simple_stmt
-    : small_stmt NEWLINE
+simpleStatement
+    : smallStatement NEWLINE
     ;
-small_stmt
-    : expr_stmt
-    | pass_stmt
-    | flow_stmt
-    | import_stmt
+smallStatement
+    : expressionStatement
+    | passStatement
+    | flowStatement
+    | importStatement
     ;
 
-expr_stmt
+expressionStatement
     : assignable '=' test
     ;
 
-pass_stmt
+passStatement
     : 'pass'
     ;
 
-flow_stmt
-    : return_stmt
+flowStatement
+    : returnStatement
     ;
 
-return_stmt
+returnStatement
     : 'return' test
     ;
 
-import_stmt
+importStatement
     : 'import' IDENTIFIER
     ;
 
 assignable
-    : declaration
-    | test
+    : declaration       #assignableDeclaration
+    | IDENTIFIER        #assignableIdentifier
     ;
 
 declaration
@@ -181,34 +181,34 @@ declaration
     ;
 
 
-compound_stmt
-    : if_stmt
-    | while_stmt
-    | for_stmt
-    | funcdef
+compoundStatement
+    : ifStatement
+    | whileStatement
+    | forStatement
+    | funcDefinition
     ;
 
-if_stmt: 'if' test ':' suite ('elif' test ':' suite)* ('else' ':' suite)?;
-while_stmt: 'while' test ':' suite;
-for_stmt: 'for' IDENTIFIER 'in' IDENTIFIER ':' suite;
+ifStatement: 'if' test ':' suite ('elif' test ':' suite)* ('else' ':' suite)?;
+whileStatement: 'while' test ':' suite;
+forStatement: 'for' IDENTIFIER 'in' IDENTIFIER ':' suite;
 
-test: or_test;
-or_test: and_test ('or' and_test)*;
-and_test: not_test ('and' not_test)*;
-not_test: 'not' not_test | comparison;
-comparison: expr (comp_op expr)*;
+test: orStatement;
+orStatement: andStatement ('or' andStatement)*;
+andStatement: notTest ('and' notTest)*;
+notTest: 'not' notTest | comparison;
+comparison: expr (compareOperator expr)*;
 
-comp_op: '<'|'>'|'=='|'<='|'>='|'not'|'!=';
+compareOperator: '<'|'>'|'=='|'<='|'>='|'not'|'!=';
 expr: term (('+'|'-') term)*;
 term: factor (('*'|'/'|'%') factor)*;
-factor: ('+'|'-') factor | atom_expr;
-atom_expr: atom trailer*;
+factor: ('+'|'-') factor | atomExpression;
+atomExpression: atom trailer*;
 
 
 atom
     : '(' (arguments)? ')'
     | '[' (arguments)? ')'
-    | '{' (dictorsetmakers)? '}'
+    | '{' (dictorySetMakers)? '}'
     | IDENTIFIER
     | literal
     ;
@@ -216,23 +216,23 @@ atom
 arguments: argument (',' argument)*;
 argument: test;
 
-dictorsetmakers
-    : dictorsetmaker (',' dictorsetmaker)*
+dictorySetMakers
+    : dictorySetMaker (',' dictorySetMaker)*
     ;
 
-dictorsetmaker
+dictorySetMaker
     : test ':' test
     ;
 
 trailer: '(' (arguments)? ')' | '[' argument ']' | '.' IDENTIFIER;
 
 literal
-    : INTEGER_LITERAL
-    | FLOAT_LITERAL
-    | DOUBLE_LITERAL
-    | LONG_LITERAL
-    | STRING_LITERAL
-    | BOOLEAN_LITERAL
+    : INTEGER_LITERAL       #integerLiteral
+    | FLOAT_LITERAL         #floatLiteral
+    | DOUBLE_LITERAL        #doubleLiteral
+    | LONG_LITERAL          #longLiteral
+    | STRING_LITERAL        #stringLiteral
+    | BOOLEAN_LITERAL       #booleanLiteral
     ;
 
 IF                      : 'if';
@@ -317,6 +317,10 @@ NEWLINE
            }
          }
        ;
+
+SKIP_
+ : ( SPACES ) -> skip
+ ;
 
 fragment SPACES
  : [ \t]+
