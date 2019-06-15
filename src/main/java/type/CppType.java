@@ -1,5 +1,6 @@
 package type;
 
+import com.dawid.typepython.symtab.symbol.type.Type;
 import lombok.Getter;
 
 /**
@@ -7,13 +8,18 @@ import lombok.Getter;
  */
 
 @Getter
-public enum  Type {
+public enum CppType implements Type {
     INT("int"),
     LONG("long"),;
 
-    Type(String name) {
+    CppType(String name) {
         this.name = name;
     }
 
     private String name;
+
+    @Override
+    public String getNameType() {
+        return name;
+    }
 }

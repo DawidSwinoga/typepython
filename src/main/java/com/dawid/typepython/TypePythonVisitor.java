@@ -2,40 +2,51 @@ package com.dawid.typepython;
 
 import com.dawid.typepython.cpp.code.CodeWriter;
 import com.dawid.typepython.generated.TypePythonParser;
-import org.antlr.symtab.GlobalScope;
-import org.antlr.symtab.PrimitiveType;
-import org.antlr.symtab.Scope;
-import org.antlr.symtab.Symbol;
-import org.antlr.symtab.VariableSymbol;
-import type.Type;
+import com.dawid.typepython.symtab.GlobalScope;
+import com.dawid.typepython.symtab.Scope;
+import com.dawid.typepython.symtab.symbol.Symbol;
+import com.dawid.typepython.symtab.symbol.VariableSymbol;
+import type.CppType;
+
+import java.util.Optional;
 
 public class TypePythonVisitor extends com.dawid.typepython.generated.TypePythonBaseVisitor<Symbol> {
+    private final CodeWriter codeWriter;
     private Scope currentScope;
+
+    public TypePythonVisitor(CodeWriter codeWriter) {
+        super();
+        this.codeWriter = codeWriter;
+    }
 
     @Override
     public Symbol visitFileInput(TypePythonParser.FileInputContext ctx) {
-        pushScope(new GlobalScope(null));
-        CodeWriter.INSTANCE.appendMainCode("int main() {");
+        pushScope(new GlobalScope());
+        codeWriter.writeStartMain();
         ctx.children.forEach(this::visit);
-        CodeWriter.INSTANCE.appendMainCode("return 0; }");
+        codeWriter.writeEndMain();
         return null;
     }
 
     @Override
-    public Symbol visitExpressionStatement(TypePythonParser.ExpressionStatementContext ctx) {
-        VariableSymbol symbol = (VariableSymbol)visit(ctx.test());
-        VariableSymbol assignalbe = (VariableSymbol)visit(ctx.assignable());
+    public Symbol visitAssignableExpressionStatement(TypePythonParser.AssignableExpressionStatementContext ctx) {
+        VariableSymbol symbol = (VariableSymbol) visit(ctx.test());
+        VariableSymbol assignable = (VariableSymbol) visit(ctx.assignable());
 
         if (symbol.getType() == null) {
             throw new RuntimeException();
         }
 
-        if (assignalbe.getType() == null) {
-            assignalbe.setType(symbol.getType());
+        if (assignable.getType() == null) {
+            assignable.setType(symbol.getType());
         }
         // TODO check in sym table
         // TODO check type if defined
-        CodeWriter.INSTANCE.appendMainCode(assignalbe.getType().getName() + " " + assignalbe.getName() + " = " + symbol.getName() + ";");
+
+        codeWriter.writeAssignment(assignable, symbol);
+        if (assignable.isDeclaredInScope()) {
+            currentScope.addVariable(assignable);
+        }
 
         return null;
     }
@@ -43,18 +54,22 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     @Override
     public Symbol visitIntegerLiteral(TypePythonParser.IntegerLiteralContext ctx) {
         VariableSymbol variableSymbol = new VariableSymbol(ctx.getText());
-        variableSymbol.setType(new PrimitiveType(Type.INT.getName()));
+        variableSymbol.setType(CppType.INT);
         return variableSymbol;
     }
 
     @Override
     public Symbol visitAssignableIdentifier(TypePythonParser.AssignableIdentifierContext ctx) {
-            //TODO share in symTable
-            return new VariableSymbol(ctx.getText());
+        Optional<VariableSymbol> variable = currentScope.findVariable(ctx.getText());
+        return variable.orElseGet(() -> new VariableSymbol(ctx.getText()));
     }
 
     private void pushScope(Scope scope) {
+        if (currentScope != null) {
+            scope.setEnclosingScope(currentScope);
+        }
         currentScope = scope;
+        codeWriter.setScope(scope);
     }
 
 }

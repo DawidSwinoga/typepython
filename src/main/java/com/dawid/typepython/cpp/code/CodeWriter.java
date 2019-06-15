@@ -1,15 +1,20 @@
 package com.dawid.typepython.cpp.code;
 
-public enum CodeWriter {
-    INSTANCE;
+import com.dawid.typepython.symtab.Scope;
+import com.dawid.typepython.symtab.symbol.VariableSymbol;
 
-    private StringBuilder main = new StringBuilder();
+public interface CodeWriter {
+    void writeInclude(String include);
+    void writeNamespace(String namespace);
+    void writeGlobal(String code);
+    void writeMain(String code);
+    void finish();
 
-    public void appendMainCode(String code) {
-        main.append(code);
-    }
+    void setScope(Scope scope);
 
-    public void writeAll() {
-        System.out.println(main.toString());
-    }
+    void writeStartMain();
+
+    void writeEndMain();
+
+    void writeAssignment(VariableSymbol assignable, VariableSymbol symbol);
 }
