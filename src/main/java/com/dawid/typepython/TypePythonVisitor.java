@@ -53,9 +53,22 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
     @Override
     public Symbol visitIntegerLiteral(TypePythonParser.IntegerLiteralContext ctx) {
-        VariableSymbol variableSymbol = new VariableSymbol(ctx.getText());
-        variableSymbol.setType(CppType.INT);
-        return variableSymbol;
+        return new VariableSymbol(ctx.getText(), CppType.INT);
+    }
+
+    @Override
+    public Symbol visitLongLiteral(TypePythonParser.LongLiteralContext ctx) {
+        return new VariableSymbol(ctx.getText(), CppType.LONG);
+    }
+
+    @Override
+    public Symbol visitDoubleLiteral(TypePythonParser.DoubleLiteralContext ctx) {
+        return new VariableSymbol(ctx.getText(), CppType.DOUBLE);
+    }
+
+    @Override
+    public Symbol visitFloatLiteral(TypePythonParser.FloatLiteralContext ctx) {
+        return new VariableSymbol(ctx.getText(), CppType.FLOAT);
     }
 
     @Override

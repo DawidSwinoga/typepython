@@ -118,7 +118,8 @@ comparison: expr (compareOperator expr)*;
 compareOperator: '<'|'>'|'=='|'<='|'>='|'not'|'!=';
 expr: term (('+'|'-') term)*;
 term: factor (('*'|'/'|'%') factor)*;
-factor: ('+'|'-') factor | atomExpression;
+factor: ('+'|'-') factor | power;
+power: atomExpression ('**' factor)?;
 atomExpression: atom trailer*;
 
 
@@ -169,16 +170,16 @@ NOT                     : 'not';
 ASSIGN                  : '=';
 EQUAL                   : '==';
 NOT_EQUAL               : '!=';
-GREATHER_THEN           : '>';
-GREATHER_EQUEAL_THEN    : '>=';
+GREATER_THEN           : '>';
+GREATER_THEN_OR_EQUAL_TO    : '>=';
 LOWER_THEN              : '<';
-LOWER_EQUAL_THEN        : '<=';
+LOWER_THEN_OR_EQUAL_TO        : '<=';
 
 LPAREN                  : '(';
 RPAREN                  : ')';
 LEFT_BRACE              : '[';
 RIGHT_BRACE             : ']';
-COMA                    : '.';
+DOT                     : '.';
 
 BOOLEAN_LITERAL         : 'true'
                         | 'false'
@@ -196,8 +197,8 @@ STRING_LITERAL          : '"' .*? '"';
 
 INTEGER_LITERAL         : DECIMAL_NUMERAL;
 LONG_LITERAL            : DECIMAL_NUMERAL  LONG_TYPE_SUFFIX;
-FLOAT_LITERAL           : DECIMAL_FLOATING_POINT_LITERAL;
-DOUBLE_LITERAL          : DECIMAL_FLOATING_POINT_LITERAL DOUBLE_TYPE_SUFFIX;
+FLOAT_LITERAL           : DECIMAL_FLOATING_POINT_LITERAL FLOAT_TYPE_SUFFIX;
+DOUBLE_LITERAL          : DECIMAL_FLOATING_POINT_LITERAL;
 
 NEWLINE
     : ( {atStartOfInput()}?   SPACES
@@ -230,11 +231,11 @@ fragment DIGITS         : DIGIT+;
 
 fragment NON_ZERO_DIGIT : [1-9];
 
-fragment LONG_TYPE_SUFFIX   : 'L';
+fragment LONG_TYPE_SUFFIX   : 'L' | 'l';
 
-fragment DOUBLE_TYPE_SUFFIX : 'd';
+fragment FLOAT_TYPE_SUFFIX : 'f' | 'F';
 
-fragment DECIMAL_FLOATING_POINT_LITERAL : DIGIT '.' DIGITS;
+fragment DECIMAL_FLOATING_POINT_LITERAL : DECIMAL_NUMERAL DOT DIGITS;
 
 fragment IDENTIFIER_START   : '_'
                             | [a-zA-Z]

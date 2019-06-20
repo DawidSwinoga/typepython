@@ -14,6 +14,7 @@ public abstract class Scope {
     private List<VariableSymbol> variables;
 
     public Scope(ScopeType scopeType) {
+        this.scopeType = scopeType;
         this.variables = new ArrayList<>();
     }
 

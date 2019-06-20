@@ -10,7 +10,10 @@ import lombok.Getter;
 @Getter
 public enum CppType implements Type {
     INT("int"),
-    LONG("long"),;
+    LONG("long"),
+    DOUBLE("double"),
+    FLOAT("float");
+
 
     CppType(String name) {
         this.name = name;
