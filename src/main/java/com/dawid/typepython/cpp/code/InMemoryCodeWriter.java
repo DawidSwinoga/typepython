@@ -71,14 +71,14 @@ public class InMemoryCodeWriter implements CodeWriter {
     @Override
     public void writeAssignment(VariableSymbol assignable, VariableSymbol symbol) {
         if (!assignable.isDeclaredInScope() && !scope.isLocalScope()) {
-            global.append(assignable.getTypeName()).append(" ").append(assignable.getName()).append(";");
-            cursor.append(assignable.getName()).append(" = ").append(symbol.getName()).append(";");
+            global.append(assignable.getTypeName()).append(" ").append(assignable.getText()).append(";");
+            cursor.append(assignable.getText()).append(" = ").append(symbol.getText()).append(";");
         }
 
         if (assignable.isDeclaredInScope()) {
-            cursor.append(assignable.getName()).append(" = ").append(symbol.getName()).append(";");
+            cursor.append(assignable.getText()).append(" = ").append(symbol.getText()).append(";");
         } else if (scope.isLocalScope()) {
-            cursor.append(assignable.getTypeName()).append(" ").append(assignable.getName()).append(" = ").append(symbol.getName()).append(";");
+            cursor.append(assignable.getTypeName()).append(" ").append(assignable.getText()).append(" = ").append(symbol.getText()).append(";");
         }
     }
 }

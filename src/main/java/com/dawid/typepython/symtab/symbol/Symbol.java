@@ -9,11 +9,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public abstract class Symbol {
-    private String name;
+    private String text;
     private Scope scope;
 
     public Symbol(String name) {
-        this.name = name;
+        this.text = name;
     }
 
     public boolean isDeclaredInScope() {

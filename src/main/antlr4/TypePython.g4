@@ -94,7 +94,7 @@ importStatement
 
 assignable
     : variableDeclaration       #assignableDeclaration
-    | IDENTIFIER        #assignableIdentifier
+    | IDENTIFIER                #assignableIdentifier
     ;
 
 
