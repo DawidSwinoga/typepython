@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public abstract class Symbol {
+public class Symbol {
     private String text;
     private Scope scope;
 

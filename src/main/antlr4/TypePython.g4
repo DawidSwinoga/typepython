@@ -109,10 +109,18 @@ ifStatement: 'if' test ':' suite ('elif' test ':' suite)* ('else' ':' suite)?;
 whileStatement: 'while' test ':' suite;
 forStatement: 'for' IDENTIFIER 'in' IDENTIFIER ':' suite;
 
-test: orStatement;
-orStatement: andStatement ('or' andStatement)*;
-andStatement: notTest ('and' notTest)*;
-notTest: 'not' notTest | comparison;
+test: conditionalOrStatement;
+conditionalOrStatement
+    : conditionalAndStatement      #notOrStatement
+    | left=conditionalOrStatement operator='or' right=conditionalAndStatement  #orStatement
+    ;
+conditionalAndStatement
+    : notTest #notAndStatement
+    | left=conditionalAndStatement operator='and' right=notTest #andStatement
+    ;
+notTest
+    : 'not' notTest
+    | comparison;
 comparison: expr (compareOperator expr)*;
 
 compareOperator: '<'|'>'|'=='|'<='|'>='|'not'|'!=';

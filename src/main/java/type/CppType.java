@@ -12,7 +12,8 @@ public enum CppType implements Type {
     INT("int"),
     LONG("long"),
     DOUBLE("double"),
-    FLOAT("float");
+    FLOAT("float"),
+    BOOLEAN("bool");
 
 
     CppType(String name) {
