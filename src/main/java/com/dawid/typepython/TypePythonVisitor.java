@@ -65,6 +65,15 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     }
 
     @Override
+    public Symbol visitWhileStatement(TypePythonParser.WhileStatementContext ctx) {
+        codeWriter.write(" while (");
+        codeWriter.write(visit(ctx.test()).getText());
+        codeWriter.write(")");
+        visit(ctx.suite());
+        return null;
+    }
+
+    @Override
     public Symbol visitFileInput(TypePythonParser.FileInputContext ctx) {
         pushScope(new GlobalScope());
         codeWriter.writeStartMain();
