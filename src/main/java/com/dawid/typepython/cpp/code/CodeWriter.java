@@ -17,4 +17,10 @@ public interface CodeWriter {
     void writeEndMain();
 
     void writeAssignment(VariableSymbol assignable, VariableSymbol symbol);
+
+    void startScope();
+
+    void endScope();
+
+    void write(String code);
 }

@@ -39,6 +39,8 @@ public class InMemoryCodeWriter implements CodeWriter {
         main.append(code);
     }
 
+
+
     @Override
     public void finish() {
         StringBuilder all = new StringBuilder();
@@ -66,6 +68,21 @@ public class InMemoryCodeWriter implements CodeWriter {
     @Override
     public void writeEndMain() {
         main.append("return 0;\n }");
+    }
+
+    @Override
+    public void startScope() {
+        cursor.append("{").append("\n");
+    }
+
+    @Override
+    public void endScope() {
+        cursor.append("}").append("\n");
+    }
+
+    @Override
+    public void write(String code) {
+        cursor.append(code);
     }
 
     @Override

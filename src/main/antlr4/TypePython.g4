@@ -105,7 +105,10 @@ compoundStatement
     | funcDefinition
     ;
 
-ifStatement: 'if' test ':' suite ('elif' test ':' suite)* ('else' ':' suite)?;
+ifStatement: 'if' test ':' suite elifStatement* elseStatement?;
+elifStatement: 'elif' test ':' suite;
+elseStatement: 'else' ':' suite;
+
 whileStatement: 'while' test ':' suite;
 forStatement: 'for' IDENTIFIER 'in' IDENTIFIER ':' suite;
 
@@ -132,11 +135,11 @@ atomExpression: atom trailer*;
 
 
 atom
-    : '(' (arguments)? ')'
-    | '[' (arguments)? ')'
-    | '{' (dictorySetMakers)? '}'
-    | IDENTIFIER
-    | literal
+    : '(' (arguments)? ')'          #tupleAtom
+    | '[' (arguments)? ']'          #listAtom
+    | '{' (dictorySetMakers)? '}'   #dictorySetMakersAtom
+    | literal                       #literalAtom
+    | IDENTIFIER                    #identifierAtom
     ;
 
 arguments: argument (',' argument)*;
@@ -189,8 +192,8 @@ LEFT_BRACE              : '[';
 RIGHT_BRACE             : ']';
 DOT                     : '.';
 
-BOOLEAN_LITERAL         : 'true'
-                        | 'false'
+BOOLEAN_LITERAL         : 'True'
+                        | 'False'
                         ;
 
 BOOLEAN                 : 'boolean';

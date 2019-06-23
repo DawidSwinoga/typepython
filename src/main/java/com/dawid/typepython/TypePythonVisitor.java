@@ -1,10 +1,12 @@
 package com.dawid.typepython;
 
 import com.dawid.typepython.cpp.code.CodeWriter;
+import com.dawid.typepython.cpp.code.literal.BooleanIiteral;
 import com.dawid.typepython.cpp.code.operator.CompareOperator;
 import com.dawid.typepython.cpp.code.operator.LogicalOperator;
 import com.dawid.typepython.generated.TypePythonParser;
 import com.dawid.typepython.symtab.GlobalScope;
+import com.dawid.typepython.symtab.LocalScope;
 import com.dawid.typepython.symtab.Scope;
 import com.dawid.typepython.symtab.symbol.CompoundTypedSymbol;
 import com.dawid.typepython.symtab.symbol.Symbol;
@@ -22,6 +24,44 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     public TypePythonVisitor(CodeWriter codeWriter) {
         super();
         this.codeWriter = codeWriter;
+    }
+
+    @Override
+    public Symbol visitSuite(TypePythonParser.SuiteContext ctx) {
+        pushScope(new LocalScope());
+        codeWriter.startScope();
+        ctx.children.forEach(this::visit);
+        codeWriter.endScope();
+        popScope();
+        return null;
+    }
+
+    @Override
+    public Symbol visitIfStatement(TypePythonParser.IfStatementContext ctx) {
+        codeWriter.write("if (");
+        codeWriter.write(visit(ctx.test()).getText());
+        codeWriter.write(")");
+
+        visit(ctx.suite());
+        ctx.elifStatement().forEach(this::visit);
+        Optional.ofNullable(ctx.elseStatement()).ifPresent(this::visit);
+        return null;
+    }
+
+    @Override
+    public Symbol visitElseStatement(TypePythonParser.ElseStatementContext ctx) {
+        codeWriter.write("else\n");
+        visit(ctx.suite());
+        return null;
+    }
+
+    @Override
+    public Symbol visitElifStatement(TypePythonParser.ElifStatementContext ctx) {
+        codeWriter.write("else if(");
+        codeWriter.write(visit(ctx.test()).getText());
+        codeWriter.write(")\n");
+        visit(ctx.suite());
+        return null;
     }
 
     @Override
@@ -49,11 +89,16 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         // TODO check type if defined
 
         codeWriter.writeAssignment(assignable, symbol);
-        if (assignable.isDeclaredInScope()) {
+        if (!assignable.isDeclaredInScope()) {
             currentScope.addVariable(assignable);
         }
 
         return null;
+    }
+
+    @Override
+    public Symbol visitIdentifierAtom(TypePythonParser.IdentifierAtomContext ctx) {
+        return currentScope.findVariable(ctx.getText()).orElseThrow(() -> new UndefinedVariableException(ctx.getText()));
     }
 
     @Override
@@ -108,6 +153,11 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     }
 
     @Override
+    public Symbol visitBooleanLiteral(TypePythonParser.BooleanLiteralContext ctx) {
+        return new VariableSymbol(BooleanIiteral.translate(ctx.getText()), CppType.BOOLEAN);
+    }
+
+    @Override
     public Symbol visitAssignableIdentifier(TypePythonParser.AssignableIdentifierContext ctx) {
         Optional<VariableSymbol> variable = currentScope.findVariable(ctx.getText());
         return variable.orElseGet(() -> new VariableSymbol(ctx.getText()));
@@ -119,6 +169,11 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         }
         currentScope = scope;
         codeWriter.setScope(scope);
+    }
+
+    private void popScope() {
+        currentScope = currentScope.getEnclosingScope();
+        codeWriter.setScope(currentScope);
     }
 
 }

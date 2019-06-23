@@ -23,12 +23,10 @@ public abstract class Scope {
     }
 
     public Optional<VariableSymbol> findVariable(String name) {
-        Optional<VariableSymbol> variable = variables.stream().filter(it -> it.getTypeName().equals(name)).findFirst();
+        Optional<VariableSymbol> variable = variables.stream().filter(it -> it.getText().equals(name)).findFirst();
 
         if (!variable.isPresent()) {
             variable = getParentScope().flatMap(it -> it.findVariable(name));
-        } else {
-            variable = Optional.empty();
         }
 
         return variable;
@@ -45,5 +43,9 @@ public abstract class Scope {
     public void addVariable(VariableSymbol assignable) {
         variables.add(assignable);
         assignable.setScope(this);
+    }
+
+    public Scope getEnclosingScope() {
+        return parentScope;
     }
 }
