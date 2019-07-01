@@ -65,6 +65,12 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     }
 
     @Override
+    public Symbol visitBreakStatement(TypePythonParser.BreakStatementContext ctx) {
+        codeWriter.write("break;");
+        return null;
+    }
+
+    @Override
     public Symbol visitWhileStatement(TypePythonParser.WhileStatementContext ctx) {
         codeWriter.write(" while (");
         codeWriter.write(visit(ctx.test()).getText());
@@ -113,6 +119,11 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     @Override
     public Symbol visitIntegerLiteral(TypePythonParser.IntegerLiteralContext ctx) {
         return new VariableSymbol(ctx.getText(), CppType.INT);
+    }
+
+    @Override
+    public Symbol visitStringLiteral(TypePythonParser.StringLiteralContext ctx) {
+        return new VariableSymbol(ctx.getText(), CppType.STRING);
     }
 
     @Override

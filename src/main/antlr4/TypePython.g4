@@ -127,7 +127,9 @@ notTest
 comparison: expr (compareOperator expr)*;
 
 compareOperator: '<'|'>'|'=='|'<='|'>='|'not'|'!=';
-expr: term (('+'|'-') term)*;
+expr
+    : term
+    | expr (operator=('+'|'-') term);
 term: factor (('*'|'/'|'%') factor)*;
 factor: ('+'|'-') factor | power;
 power: atomExpression ('**' factor)?;
