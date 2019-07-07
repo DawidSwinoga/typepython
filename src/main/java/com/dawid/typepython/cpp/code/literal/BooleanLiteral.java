@@ -7,7 +7,7 @@ import static java.util.Arrays.stream;
 
 @AllArgsConstructor
 @Getter
-public enum BooleanIiteral {
+public enum BooleanLiteral {
     TRUE("True", "true"),
     FALSE("False", "false");
 
@@ -18,7 +18,7 @@ public enum BooleanIiteral {
         return stream(values())
                 .filter(it -> it.pythonCode.equals(pythonCode))
                 .findFirst()
-                .map(BooleanIiteral::getCppCode)
+                .map(BooleanLiteral::getCppCode)
                 .orElseThrow(() -> new UnsupportedLiteralException(pythonCode));
     }
 }

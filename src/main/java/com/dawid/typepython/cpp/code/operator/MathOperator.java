@@ -5,19 +5,22 @@ import lombok.Getter;
 import static java.util.Arrays.stream;
 
 /**
- * Created by Dawid on 22.06.2019 at 19:31.
+ * Created by Dawid on 06.07.2019 at 20:02.
  */
 
 @Getter
-public enum  LogicalOperator {
-    AND("and", "&&"),
-    OR("or", "||"),
-    NOT("not", "!");
+public enum MathOperator {
+    PLUS("+", "+"),
+    MINUS("-", "-"),
+    MUL("*", "*"),
+    DIV("/", "/"),
+    MOD("%", "%");
+
 
     private final String pythonOperator;
     private final String cppOperator;
 
-    LogicalOperator(String pythonOperator, String cppOperator) {
+    MathOperator(String pythonOperator, String cppOperator) {
         this.pythonOperator = pythonOperator;
         this.cppOperator = cppOperator;
     }
@@ -26,7 +29,7 @@ public enum  LogicalOperator {
         return stream(values())
                 .filter(it -> it.pythonOperator.equals(pythonOperator))
                 .findFirst()
-                .map(LogicalOperator::getCppOperator)
+                .map(MathOperator::getCppOperator)
                 .orElseThrow(UnsupportedLogicalOperator::new);
     }
 }

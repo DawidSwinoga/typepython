@@ -61,9 +61,14 @@ simpleStatement
     ;
 smallStatement
     : expressionStatement
+    | executeStatement
     | passStatement
     | flowStatement
     | importStatement
+    ;
+
+executeStatement
+    : atom trailer+
     ;
 
 expressionStatement
@@ -122,29 +127,37 @@ conditionalAndStatement
     | left=conditionalAndStatement operator='and' right=notTest #andStatement
     ;
 notTest
-    : 'not' notTest
-    | comparison;
+    : 'not' notTest #negationTest
+    | comparison   #comparisionNotTest
+    ;
 comparison: expr (compareOperator expr)*;
 
 compareOperator: '<'|'>'|'=='|'<='|'>='|'not'|'!=';
 expr
-    : term
-    | expr (operator=('+'|'-') term);
-term: factor (('*'|'/'|'%') factor)*;
-factor: ('+'|'-') factor | power;
-power: atomExpression ('**' factor)?;
+    : term      #termExpression
+    | expr operator=('+'|'-') term  #additiveExpression
+    ;
+term
+    : factor #factorTerm
+    | term operator=('*'|'/'|'%') factor #multiplicativeExpression
+    ;
+factor
+    : sign=('+'|'-') factor #signFactor
+    | conditionalPower #conditioanlPowerFactor
+    ;
+conditionalPower: atomExpression ('**' exponent=factor)?;
 atomExpression: atom trailer*;
 
 
 atom
-    : '(' (arguments)? ')'          #tupleAtom
+    : '(' (arguments)? ')'          #conditionalTupleAtom
     | '[' (arguments)? ']'          #listAtom
     | '{' (dictorySetMakers)? '}'   #dictorySetMakersAtom
     | literal                       #literalAtom
     | IDENTIFIER                    #identifierAtom
     ;
 
-arguments: argument (',' argument)*;
+arguments: first=argument (',' argument)*;
 argument: test;
 
 dictorySetMakers
@@ -155,7 +168,10 @@ dictorySetMaker
     : test ':' test
     ;
 
-trailer: '(' (arguments)? ')' | '[' argument ']' | '.' IDENTIFIER;
+trailer
+    : '(' (arguments)? ')'
+    | '[' argument ']'
+    | '.' IDENTIFIER;
 
 literal
     : INTEGER_LITERAL       #integerLiteral

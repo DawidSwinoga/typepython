@@ -1,6 +1,7 @@
 package com.dawid.typepython.symtab.symbol;
 
 import com.dawid.typepython.symtab.Scope;
+import com.dawid.typepython.symtab.symbol.type.SymbolType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,5 +19,9 @@ public class Symbol {
 
     public boolean isDeclaredInScope() {
         return scope != null;
+    }
+
+    public SymbolType getSymbolType() {
+        return SymbolType.TEXT;
     }
 }

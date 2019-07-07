@@ -1,29 +1,34 @@
 package com.dawid.typepython.symtab.symbol;
 
-import com.dawid.typepython.symtab.symbol.type.Type;
-import lombok.AllArgsConstructor;
+import com.dawid.typepython.symtab.symbol.type.SymbolType;
+import com.dawid.typepython.symtab.symbol.type.VariableType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class VariableSymbol extends Symbol {
-    private Type type;
+    private VariableType variableType;
 
-    public VariableSymbol(Type type) {
-        this.type = type;
+    public VariableSymbol(VariableType variableType) {
+        this.variableType = variableType;
     }
 
     public VariableSymbol(String name) {
         super(name);
     }
 
-    public VariableSymbol(String name, Type type) {
+    public VariableSymbol(String name, VariableType variableType) {
         super(name);
-        this.type = type;
+        this.variableType = variableType;
     }
 
     public String getTypeName() {
-        return type.getNameType();
+        return variableType.getCppNameType();
+    }
+
+    @Override
+    public SymbolType getSymbolType() {
+        return SymbolType.VARIABLE;
     }
 }

@@ -1,9 +1,10 @@
 package com.dawid.typepython;
 
 import com.dawid.typepython.cpp.code.CodeWriter;
-import com.dawid.typepython.cpp.code.literal.BooleanIiteral;
+import com.dawid.typepython.cpp.code.literal.BooleanLiteral;
 import com.dawid.typepython.cpp.code.operator.CompareOperator;
 import com.dawid.typepython.cpp.code.operator.LogicalOperator;
+import com.dawid.typepython.cpp.code.operator.MathOperator;
 import com.dawid.typepython.generated.TypePythonParser;
 import com.dawid.typepython.symtab.GlobalScope;
 import com.dawid.typepython.symtab.LocalScope;
@@ -11,7 +12,8 @@ import com.dawid.typepython.symtab.Scope;
 import com.dawid.typepython.symtab.symbol.CompoundTypedSymbol;
 import com.dawid.typepython.symtab.symbol.Symbol;
 import com.dawid.typepython.symtab.symbol.VariableSymbol;
-import type.CppType;
+import org.antlr.v4.runtime.Token;
+import type.CppVariableType;
 
 import java.util.List;
 import java.util.Optional;
@@ -79,6 +81,85 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         return null;
     }
 
+    //TODO check in compound symbol the best variableType for result ex. 2 + 1.0 should be double
+    @Override
+    public Symbol visitAdditiveExpression(TypePythonParser.AdditiveExpressionContext ctx) {
+        VariableSymbol left = (VariableSymbol) visit(ctx.expr());
+        Symbol mathOperator = new Symbol(MathOperator.translate(ctx.operator.getText()));
+        Symbol right = visit(ctx.term());
+        return CompoundTypedSymbol.of(left.getVariableType(), left, mathOperator, right);
+    }
+
+    @Override
+    public Symbol visitMultiplicativeExpression(TypePythonParser.MultiplicativeExpressionContext ctx) {
+        VariableSymbol left = (VariableSymbol) visit(ctx.term());
+        Symbol mathOperator = new Symbol(MathOperator.translate(ctx.operator.getText()));
+        Symbol right = visit(ctx.factor());
+        return CompoundTypedSymbol.of(left.getVariableType(), left, mathOperator, right);
+    }
+
+    @Override
+    public Symbol visitSignFactor(TypePythonParser.SignFactorContext ctx) {
+        Optional<Symbol> sign = Optional.ofNullable(ctx.sign).map(Token::getText).map(MathOperator::translate).map(Symbol::new);
+        VariableSymbol visit = (VariableSymbol) visit(ctx.factor());
+
+        return sign.map(symbol -> (Symbol) CompoundTypedSymbol.of(visit.getVariableType(), symbol, visit)).orElse(visit);
+    }
+
+    @Override
+    public Symbol visitNegationTest(TypePythonParser.NegationTestContext ctx) {
+        return CompoundTypedSymbol.of(CppVariableType.BOOLEAN, new Symbol(LogicalOperator.NOT.getCppOperator()), visit(ctx.notTest()));
+    }
+
+    @Override
+    public Symbol visitConditionalTupleAtom(TypePythonParser.ConditionalTupleAtomContext ctx) {
+        if (ctx.arguments() != null) {
+            CompoundTypedSymbol visit = (CompoundTypedSymbol) visit(ctx.arguments());
+
+            if (visit.size() == 1) {
+                return CompoundTypedSymbol.of(visit.getVariableType(), new Symbol("("), visit, new Symbol(")"));
+            } else {
+                throw new UnsupportedOperationException();
+            }
+        }
+
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Symbol visitVariableDeclaration(TypePythonParser.VariableDeclarationContext ctx) {
+        return new VariableSymbol(ctx.IDENTIFIER().getText(), CppVariableType.translate(ctx.type().getText()));
+    }
+
+    @Override
+    public Symbol visitArguments(TypePythonParser.ArgumentsContext ctx) {
+        VariableSymbol first = (VariableSymbol) visit(ctx.first);
+        if (ctx.argument().size() == 1) {
+            return CompoundTypedSymbol.of(first.getVariableType(), first);
+        }
+
+        List<Symbol> symbols = ctx.argument().stream().map(this::visit).collect(Collectors.toList());
+        return CompoundTypedSymbol.of(first.getVariableType(), first, symbols);
+    }
+
+    @Override
+    public Symbol visitConditionalPower(TypePythonParser.ConditionalPowerContext ctx) {
+        Symbol atom = visit(ctx.atomExpression());
+
+        if (ctx.exponent != null) {
+            Symbol factor = visit(ctx.factor());
+            return CompoundTypedSymbol.of(CppVariableType.DOUBLE, new Symbol("pow("), atom,
+                    new Symbol(","), factor, new Symbol(")"));
+        }
+
+        return atom;
+    }
+
+    @Override
+    public Symbol visitAtomExpression(TypePythonParser.AtomExpressionContext ctx) {
+        return super.visitAtomExpression(ctx);
+    }
+
     @Override
     public Symbol visitFileInput(TypePythonParser.FileInputContext ctx) {
         pushScope(new GlobalScope());
@@ -93,15 +174,15 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         VariableSymbol symbol = (VariableSymbol) visit(ctx.test());
         VariableSymbol assignable = (VariableSymbol) visit(ctx.assignable());
 
-        if (symbol.getType() == null) {
+        if (symbol.getVariableType() == null) {
             throw new RuntimeException();
         }
 
-        if (assignable.getType() == null) {
-            assignable.setType(symbol.getType());
+        if (assignable.getVariableType() == null) {
+            assignable.setVariableType(symbol.getVariableType());
         }
         // TODO check in sym table
-        // TODO check type if defined
+        // TODO check variableType if defined
 
         codeWriter.writeAssignment(assignable, symbol);
         if (!assignable.isDeclaredInScope()) {
@@ -118,12 +199,12 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
     @Override
     public Symbol visitIntegerLiteral(TypePythonParser.IntegerLiteralContext ctx) {
-        return new VariableSymbol(ctx.getText(), CppType.INT);
+        return new VariableSymbol(ctx.getText(), CppVariableType.INT);
     }
 
     @Override
     public Symbol visitStringLiteral(TypePythonParser.StringLiteralContext ctx) {
-        return new VariableSymbol(ctx.getText(), CppType.STRING);
+        return new VariableSymbol(ctx.getText(), CppVariableType.STRING);
     }
 
     @Override
@@ -131,7 +212,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         Symbol left = visit(ctx.left);
         Symbol operator = new Symbol(LogicalOperator.translate(ctx.operator.getText()));
         Symbol right = visit(ctx.right);
-        return CompoundTypedSymbol.of(CppType.BOOLEAN, left, operator, right);
+        return CompoundTypedSymbol.of(CppVariableType.BOOLEAN, left, operator, right);
     }
 
     @Override
@@ -139,14 +220,14 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         Symbol left = visit(ctx.left);
         Symbol operator = new Symbol(LogicalOperator.translate(ctx.operator.getText()));
         Symbol right = visit(ctx.right);
-        return CompoundTypedSymbol.of(CppType.BOOLEAN, left, operator, right);
+        return CompoundTypedSymbol.of(CppVariableType.BOOLEAN, left, operator, right);
     }
 
     @Override
     public Symbol visitComparison(TypePythonParser.ComparisonContext ctx) {
         if (!ctx.compareOperator().isEmpty()) {
             List<Symbol> symbols = ctx.children.stream().map(this::visit).collect(Collectors.toList());
-            return new CompoundTypedSymbol(symbols, CppType.BOOLEAN);
+            return new CompoundTypedSymbol(symbols, CppVariableType.BOOLEAN);
         }
         return super.visitComparison(ctx);
     }
@@ -159,22 +240,22 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
     @Override
     public Symbol visitLongLiteral(TypePythonParser.LongLiteralContext ctx) {
-        return new VariableSymbol(ctx.getText(), CppType.LONG);
+        return new VariableSymbol(ctx.getText(), CppVariableType.LONG);
     }
 
     @Override
     public Symbol visitDoubleLiteral(TypePythonParser.DoubleLiteralContext ctx) {
-        return new VariableSymbol(ctx.getText(), CppType.DOUBLE);
+        return new VariableSymbol(ctx.getText(), CppVariableType.DOUBLE);
     }
 
     @Override
     public Symbol visitFloatLiteral(TypePythonParser.FloatLiteralContext ctx) {
-        return new VariableSymbol(ctx.getText(), CppType.FLOAT);
+        return new VariableSymbol(ctx.getText(), CppVariableType.FLOAT);
     }
 
     @Override
     public Symbol visitBooleanLiteral(TypePythonParser.BooleanLiteralContext ctx) {
-        return new VariableSymbol(BooleanIiteral.translate(ctx.getText()), CppType.BOOLEAN);
+        return new VariableSymbol(BooleanLiteral.translate(ctx.getText()), CppVariableType.BOOLEAN);
     }
 
     @Override

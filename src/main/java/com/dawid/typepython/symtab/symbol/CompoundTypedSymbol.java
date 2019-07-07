@@ -1,9 +1,11 @@
 package com.dawid.typepython.symtab.symbol;
 
-import com.dawid.typepython.symtab.symbol.type.Type;
+import com.dawid.typepython.symtab.symbol.type.VariableType;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -12,21 +14,33 @@ import java.util.stream.Collectors;
 public class CompoundTypedSymbol extends VariableSymbol {
     private List<Symbol> symbols;
 
-    public CompoundTypedSymbol(List<Symbol> symbols, Type type) {
-        super(type);
+    public CompoundTypedSymbol(List<Symbol> symbols, VariableType variableType) {
+        super(variableType);
         this.symbols = symbols;
+    }
+
+    public static Symbol of(VariableType variableType, VariableSymbol first, List<Symbol> symbols) {
+        List<Symbol> allSymbols = new ArrayList<>();
+        allSymbols.add(first);
+        allSymbols.addAll(symbols);
+        return new CompoundTypedSymbol(allSymbols, variableType);
+    }
+
+    public long size() {
+        return symbols.size();
     }
 
     @Override
     public String getText() {
-        return symbols.stream().map(Symbol::getText).collect(Collectors.joining(" "));
+        return symbols.stream().filter(Objects::nonNull).map(Symbol::getText).collect(Collectors.joining(" "));
     }
 
     public void addSymbols(List<Symbol> symbols) {
         this.symbols.addAll(symbols);
     }
 
-    public static CompoundTypedSymbol of(Type type, Symbol... symbols) {
-        return new CompoundTypedSymbol(Arrays.asList(symbols), type);
+    //TODO remove variableType. Compute variableType from passed symbols
+    public static CompoundTypedSymbol of(VariableType variableType, Symbol... symbols) {
+        return new CompoundTypedSymbol(Arrays.asList(symbols), variableType);
     }
 }
