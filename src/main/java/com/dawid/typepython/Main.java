@@ -32,6 +32,7 @@ public class Main {
         CodeWriter codeWriter = new InMemoryCodeWriter();
         codeWriter.writeInclude("#include <iostream>");
         codeWriter.writeInclude("#include <cmath>");
+        codeWriter.writeInclude("#include <vector>");
         codeWriter.writeNamespace("using namespace std;");
         TypePythonVisitor visitor = new TypePythonVisitor(codeWriter);
         visitor.visit(fileInputContext);

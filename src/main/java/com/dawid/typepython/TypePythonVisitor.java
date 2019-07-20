@@ -11,7 +11,11 @@ import com.dawid.typepython.symtab.LocalScope;
 import com.dawid.typepython.symtab.Scope;
 import com.dawid.typepython.symtab.symbol.CompoundTypedSymbol;
 import com.dawid.typepython.symtab.symbol.Symbol;
+import com.dawid.typepython.symtab.symbol.TypedSymbol;
 import com.dawid.typepython.symtab.symbol.VariableSymbol;
+import com.dawid.typepython.symtab.symbol.type.GenericClassSymbol;
+import com.dawid.typepython.symtab.symbol.type.SupportedGenericType;
+import com.dawid.typepython.symtab.symbol.type.UnsupportedGenericTypeException;
 import org.antlr.v4.runtime.Token;
 import type.CppVariableType;
 
@@ -128,7 +132,14 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
     @Override
     public Symbol visitVariableDeclaration(TypePythonParser.VariableDeclarationContext ctx) {
-        return new VariableSymbol(ctx.IDENTIFIER().getText(), CppVariableType.translate(ctx.type().getText()));
+        TypedSymbol symbol = (TypedSymbol) visit(ctx.type());
+        symbol.setText(ctx.IDENTIFIER().getText());
+        return symbol;
+    }
+
+    @Override
+    public Symbol visitSimpleType(TypePythonParser.SimpleTypeContext ctx) {
+        return new TypedSymbol(ctx.getText(), CppVariableType.translate(ctx.getText()));
     }
 
     @Override
@@ -140,6 +151,24 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
         List<Symbol> symbols = ctx.argument().stream().map(this::visit).collect(Collectors.toList());
         return CompoundTypedSymbol.of(first.getVariableType(), first, symbols);
+    }
+
+    @Override
+    public Symbol visitListAtom(TypePythonParser.ListAtomContext ctx) {
+        if (ctx.arguments().isEmpty()) {
+            return new GenericClassSymbol(SupportedGenericType.LIST);
+        }
+
+        List<Symbol> symbols = ctx.arguments().argument()
+                .stream()
+                .map(this::visit)
+                .map(it -> (VariableSymbol) it)
+                .collect(Collectors.toList());
+        String symbolText = symbols.stream().map(Symbol::getText).collect(Collectors.joining(","));
+        //TODO check symbols and choose the most accuracy type
+        VariableSymbol symbol = (VariableSymbol) symbols.get(0);
+        symbols.remove(0);
+        return new GenericClassSymbol("{" + symbolText + "}",SupportedGenericType.LIST, CompoundTypedSymbol.of(symbol.getVariableType(), symbol, symbols));
     }
 
     @Override
@@ -161,6 +190,18 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     }
 
     @Override
+    public Symbol visitGenericType(TypePythonParser.GenericTypeContext ctx) {
+        String genericType = ctx.IDENTIFIER().getText();
+        if (!SupportedGenericType.isSupported(genericType)) {
+            throw new UnsupportedGenericTypeException(genericType);
+        }
+
+        TypedSymbol visit = (TypedSymbol) visit(ctx.type());
+
+        return new GenericClassSymbol(SupportedGenericType.translate(genericType), visit);
+    }
+
+    @Override
     public Symbol visitFileInput(TypePythonParser.FileInputContext ctx) {
         pushScope(new GlobalScope());
         codeWriter.writeStartMain();
@@ -171,8 +212,8 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
     @Override
     public Symbol visitAssignableExpressionStatement(TypePythonParser.AssignableExpressionStatementContext ctx) {
-        VariableSymbol symbol = (VariableSymbol) visit(ctx.test());
         VariableSymbol assignable = (VariableSymbol) visit(ctx.assignable());
+        VariableSymbol symbol = (VariableSymbol) visit(ctx.test());
 
         if (symbol.getVariableType() == null) {
             throw new RuntimeException();

@@ -19,7 +19,7 @@ public class CompoundTypedSymbol extends VariableSymbol {
         this.symbols = symbols;
     }
 
-    public static Symbol of(VariableType variableType, VariableSymbol first, List<Symbol> symbols) {
+    public static CompoundTypedSymbol of(VariableType variableType, VariableSymbol first, List<Symbol> symbols) {
         List<Symbol> allSymbols = new ArrayList<>();
         allSymbols.add(first);
         allSymbols.addAll(symbols);

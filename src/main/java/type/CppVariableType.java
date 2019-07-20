@@ -38,6 +38,6 @@ public enum CppVariableType implements VariableType {
         return stream(values())
                 .filter(it -> it.getPythonName().equals(pythonName))
                 .findFirst()
-                .orElseThrow(() -> new UnsupportedLiteralException(pythonName));
+                .orElseThrow(() -> new UnsupportedOperationException(pythonName));
     }
 }

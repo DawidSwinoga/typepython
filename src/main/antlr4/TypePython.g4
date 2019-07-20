@@ -35,6 +35,15 @@ variableDeclaration
     ;
 
 type
+    : genericType
+    | simpleType
+    ;
+
+genericType
+    : IDENTIFIER '<' type '>'
+    ;
+
+simpleType
     :   basicType
     |   customType
     ;
