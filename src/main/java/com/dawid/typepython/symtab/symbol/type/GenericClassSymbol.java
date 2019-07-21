@@ -3,6 +3,7 @@ package com.dawid.typepython.symtab.symbol.type;
 import com.dawid.typepython.symtab.symbol.CompoundTypedSymbol;
 import com.dawid.typepython.symtab.symbol.TypedSymbol;
 import com.dawid.typepython.symtab.symbol.VariableSymbol;
+import lombok.Getter;
 
 import static java.util.Optional.ofNullable;
 
@@ -10,6 +11,7 @@ import static java.util.Optional.ofNullable;
  * Created by Dawid on 20.07.2019 at 15:55.
  */
 public class GenericClassSymbol extends VariableSymbol {
+    @Getter
     private TypedSymbol nested;
 
     public GenericClassSymbol(VariableType variableType) {

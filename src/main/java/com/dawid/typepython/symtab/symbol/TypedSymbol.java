@@ -9,7 +9,7 @@ import lombok.Data;
 
 @Data
 public class TypedSymbol extends Symbol {
-    private VariableType variableType;
+    protected VariableType variableType;
 
     public TypedSymbol(VariableType variableType) {
         this.variableType = variableType;

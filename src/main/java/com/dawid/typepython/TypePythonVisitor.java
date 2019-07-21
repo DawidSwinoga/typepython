@@ -1,6 +1,7 @@
 package com.dawid.typepython;
 
 import com.dawid.typepython.cpp.code.CodeWriter;
+import com.dawid.typepython.cpp.code.collection.CollectionTypeAnalyzer;
 import com.dawid.typepython.cpp.code.literal.BooleanLiteral;
 import com.dawid.typepython.cpp.code.operator.CompareOperator;
 import com.dawid.typepython.cpp.code.operator.LogicalOperator;
@@ -16,12 +17,17 @@ import com.dawid.typepython.symtab.symbol.VariableSymbol;
 import com.dawid.typepython.symtab.symbol.type.GenericClassSymbol;
 import com.dawid.typepython.symtab.symbol.type.SupportedGenericType;
 import com.dawid.typepython.symtab.symbol.type.UnsupportedGenericTypeException;
+import com.dawid.typepython.symtab.symbol.type.VariableType;
+import jdk.nashorn.internal.objects.annotations.Getter;
 import org.antlr.v4.runtime.Token;
 import type.CppVariableType;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static com.dawid.typepython.symtab.symbol.type.SupportedGenericType.LIST;
 
 public class TypePythonVisitor extends com.dawid.typepython.generated.TypePythonBaseVisitor<Symbol> {
     private final CodeWriter codeWriter;
@@ -156,19 +162,35 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     @Override
     public Symbol visitListAtom(TypePythonParser.ListAtomContext ctx) {
         if (ctx.arguments().isEmpty()) {
-            return new GenericClassSymbol(SupportedGenericType.LIST);
+            return new GenericClassSymbol(LIST);
         }
 
-        List<Symbol> symbols = ctx.arguments().argument()
+        List<VariableSymbol> symbols = ctx.arguments().argument()
                 .stream()
                 .map(this::visit)
                 .map(it -> (VariableSymbol) it)
                 .collect(Collectors.toList());
+
         String symbolText = symbols.stream().map(Symbol::getText).collect(Collectors.joining(","));
-        //TODO check symbols and choose the most accuracy type
-        VariableSymbol symbol = (VariableSymbol) symbols.get(0);
-        symbols.remove(0);
-        return new GenericClassSymbol("{" + symbolText + "}",SupportedGenericType.LIST, CompoundTypedSymbol.of(symbol.getVariableType(), symbol, symbols));
+        VariableType variableType = CollectionTypeAnalyzer.detectNestedType(new ArrayList<>(symbols));
+        VariableSymbol variableSymbol = symbols.get(0);
+        variableSymbol.setText(null);
+        variableSymbol.setVariableType(variableType);
+
+        if (variableSymbol instanceof GenericClassSymbol) {
+            detectNested(symbols, (GenericClassSymbol) variableSymbol);
+        }
+
+        return new GenericClassSymbol("{" + symbolText + "}", LIST, variableSymbol);
+    }
+
+    private void detectNested(List<? extends TypedSymbol> symbols, GenericClassSymbol variableSymbol) {
+        List<TypedSymbol> nestedSymbols = symbols.stream().map(it -> ((GenericClassSymbol) it).getNested()).collect(Collectors.toList());
+        TypedSymbol nested = variableSymbol.getNested();
+        nested.setVariableType(CollectionTypeAnalyzer.detectNestedType(nestedSymbols));
+        if (nested instanceof GenericClassSymbol) {
+            detectNested(nestedSymbols, (GenericClassSymbol) nested);
+        }
     }
 
     @Override
@@ -220,7 +242,13 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         }
 
         if (assignable.getVariableType() == null) {
-            assignable.setVariableType(symbol.getVariableType());
+            if (symbol instanceof GenericClassSymbol) {
+                String text = assignable.getText();
+                assignable = new GenericClassSymbol(symbol.getVariableType(), ((GenericClassSymbol) symbol).getNested());
+                assignable.setText(text);
+            } else {
+                assignable.setVariableType(symbol.getVariableType());
+            }
         }
         // TODO check in sym table
         // TODO check variableType if defined

@@ -27,10 +27,29 @@ public enum SupportedGenericType implements VariableType {
         return cppGenericType;
     }
 
+    @Override
+    public boolean isCollection() {
+        return true;
+    }
+
+    @Override
+    public boolean isNumeric() {
+        return false;
+    }
+
+
+    @Override
+    public String getPythonType() {
+        return genericType;
+    }
+
+
     public static VariableType translate(String pythonName) {
         return stream(values())
                 .filter(it -> it.genericType.equals(pythonName))
                 .findFirst()
                 .orElseThrow(() -> new UnsupportedGenericTypeException(pythonName));
     }
+
+
 }

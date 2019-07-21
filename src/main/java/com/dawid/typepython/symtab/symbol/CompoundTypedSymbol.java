@@ -26,6 +26,10 @@ public class CompoundTypedSymbol extends VariableSymbol {
         return new CompoundTypedSymbol(allSymbols, variableType);
     }
 
+    public static CompoundTypedSymbol of(VariableType variableType, List<Symbol> symbols) {
+        return new CompoundTypedSymbol(symbols, variableType);
+    }
+
     public long size() {
         return symbols.size();
     }
