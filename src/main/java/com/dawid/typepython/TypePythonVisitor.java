@@ -2,6 +2,7 @@ package com.dawid.typepython;
 
 import com.dawid.typepython.cpp.code.CodeWriter;
 import com.dawid.typepython.cpp.code.collection.CollectionTypeAnalyzer;
+import com.dawid.typepython.cpp.code.generator.TemporaryVariableNameGenerator;
 import com.dawid.typepython.cpp.code.literal.BooleanLiteral;
 import com.dawid.typepython.cpp.code.operator.CompareOperator;
 import com.dawid.typepython.cpp.code.operator.LogicalOperator;
@@ -13,12 +14,13 @@ import com.dawid.typepython.symtab.Scope;
 import com.dawid.typepython.symtab.symbol.CompoundTypedSymbol;
 import com.dawid.typepython.symtab.symbol.Symbol;
 import com.dawid.typepython.symtab.symbol.TypedSymbol;
+import com.dawid.typepython.symtab.symbol.UndefinedVariableException;
 import com.dawid.typepython.symtab.symbol.VariableSymbol;
+import com.dawid.typepython.symtab.symbol.VariableTypeMissmatchException;
 import com.dawid.typepython.symtab.symbol.type.GenericClassSymbol;
 import com.dawid.typepython.symtab.symbol.type.SupportedGenericType;
 import com.dawid.typepython.symtab.symbol.type.UnsupportedGenericTypeException;
 import com.dawid.typepython.symtab.symbol.type.VariableType;
-import jdk.nashorn.internal.objects.annotations.Getter;
 import org.antlr.v4.runtime.Token;
 import type.CppVariableType;
 
@@ -32,6 +34,7 @@ import static com.dawid.typepython.symtab.symbol.type.SupportedGenericType.LIST;
 public class TypePythonVisitor extends com.dawid.typepython.generated.TypePythonBaseVisitor<Symbol> {
     private final CodeWriter codeWriter;
     private Scope currentScope;
+
 
     public TypePythonVisitor(CodeWriter codeWriter) {
         super();
@@ -88,6 +91,42 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         codeWriter.write(visit(ctx.test()).getText());
         codeWriter.write(")");
         visit(ctx.suite());
+        return null;
+    }
+
+    //TODO use reference instead of value (for (int $fd : list))
+    @Override
+    public Symbol visitForStatement(TypePythonParser.ForStatementContext ctx) {
+        VariableSymbol variableSymbol = (VariableSymbol) visit(ctx.collection);
+        String collectionVariableName = variableSymbol.getText();
+
+        VariableSymbol collection;
+        if (variableSymbol.isDeclaredInScope()) {
+            collection = currentScope.findVariable(collectionVariableName)
+                    .orElseThrow(() -> new UndefinedVariableException(collectionVariableName));
+        } else {
+            collection = variableSymbol;
+            String tmpVariable = TemporaryVariableNameGenerator.INSTANCE.generateVariableName(); // because for(vector<int> x : {{1,3}, {4,2}}) in cpp cause error
+            codeWriter.write(collection.getTypeName() + " " +
+                    tmpVariable + " = " + collection.getText() + ";\n");
+            collection.setText(tmpVariable);
+        }
+
+        if (!collection.getVariableType().isCollection()) {
+            throw new VariableTypeMissmatchException(collectionVariableName + ": " + collection.getTypeName());
+        }
+
+        GenericClassSymbol genericCollection = (GenericClassSymbol) collection;
+        VariableSymbol nested = (VariableSymbol) genericCollection.getNested();
+        nested.setText(ctx.variable.getText());
+
+        pushScope(new LocalScope());
+        currentScope.addVariable(nested);
+        codeWriter.write("for (" + nested.getTypeName() + " " + nested.getText() +
+                " : " + genericCollection.getText() + ")");
+        visit(ctx.suite());
+
+        popScope();
         return null;
     }
 
@@ -232,6 +271,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         return null;
     }
 
+    //TODO user reference vector<int> &test = ddd; ??
     @Override
     public Symbol visitAssignableExpressionStatement(TypePythonParser.AssignableExpressionStatementContext ctx) {
         VariableSymbol assignable = (VariableSymbol) visit(ctx.assignable());

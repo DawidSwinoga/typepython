@@ -124,7 +124,7 @@ elifStatement: 'elif' test ':' suite;
 elseStatement: 'else' ':' suite;
 
 whileStatement: 'while' test ':' suite;
-forStatement: 'for' IDENTIFIER 'in' IDENTIFIER ':' suite;
+forStatement: 'for' variable=IDENTIFIER 'in' collection=atomExpression ':' suite;
 
 test: conditionalOrStatement;
 conditionalOrStatement

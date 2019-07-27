@@ -1,4 +1,4 @@
-package com.dawid.typepython;
+package com.dawid.typepython.symtab.symbol;
 
 public class UndefinedVariableException extends RuntimeException {
     public UndefinedVariableException() {
