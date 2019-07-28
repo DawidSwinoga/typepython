@@ -8,6 +8,7 @@ public class InMemoryCodeWriter implements CodeWriter {
     private StringBuilder main;
     private StringBuilder namespace;
     private StringBuilder include;
+    private StringBuilder functionDeclaration;
     private Scope scope;
     private StringBuilder cursor;
 
@@ -16,6 +17,7 @@ public class InMemoryCodeWriter implements CodeWriter {
         this.include = new StringBuilder();
         this.global = new StringBuilder();
         this.main = new StringBuilder();
+        this.functionDeclaration = new StringBuilder();
         this.cursor = main;
     }
 
@@ -50,6 +52,8 @@ public class InMemoryCodeWriter implements CodeWriter {
         all.append("\n");
         all.append(global);
         all.append("\n");
+        all.append(functionDeclaration);
+        all.append("\n");
         all.append(main);
         String code = all.toString();
         System.out.println(code.replaceAll(";", ";\n"));
@@ -83,6 +87,16 @@ public class InMemoryCodeWriter implements CodeWriter {
     @Override
     public void write(String code) {
         cursor.append(code);
+    }
+
+    @Override
+    public void startFunction() {
+        cursor = functionDeclaration;
+    }
+
+    @Override
+    public void endFunction() {
+        cursor = main;
     }
 
     @Override

@@ -17,7 +17,7 @@ fileInput
     ;
 
 funcDefinition
-    : DEF IDENTIFIER parameters ':' suite
+    : DEF IDENTIFIER parameters ':' type ':' suite
     ;
 suite
     : NEWLINE INDENT statement+ DEDENT

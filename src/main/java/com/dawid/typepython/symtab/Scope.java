@@ -1,8 +1,6 @@
 package com.dawid.typepython.symtab;
 
-import com.dawid.typepython.generated.TypePythonParser;
 import com.dawid.typepython.symtab.symbol.VariableSymbol;
-import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;

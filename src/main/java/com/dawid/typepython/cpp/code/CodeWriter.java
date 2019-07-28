@@ -23,4 +23,8 @@ public interface CodeWriter {
     void endScope();
 
     void write(String code);
+
+    void startFunction();
+
+    void endFunction();
 }

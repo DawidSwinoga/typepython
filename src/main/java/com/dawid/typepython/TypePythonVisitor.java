@@ -8,15 +8,8 @@ import com.dawid.typepython.cpp.code.operator.CompareOperator;
 import com.dawid.typepython.cpp.code.operator.LogicalOperator;
 import com.dawid.typepython.cpp.code.operator.MathOperator;
 import com.dawid.typepython.generated.TypePythonParser;
-import com.dawid.typepython.symtab.GlobalScope;
-import com.dawid.typepython.symtab.LocalScope;
-import com.dawid.typepython.symtab.Scope;
-import com.dawid.typepython.symtab.symbol.CompoundTypedSymbol;
-import com.dawid.typepython.symtab.symbol.Symbol;
-import com.dawid.typepython.symtab.symbol.TypedSymbol;
-import com.dawid.typepython.symtab.symbol.UndefinedVariableException;
-import com.dawid.typepython.symtab.symbol.VariableSymbol;
-import com.dawid.typepython.symtab.symbol.VariableTypeMissmatchException;
+import com.dawid.typepython.symtab.*;
+import com.dawid.typepython.symtab.symbol.*;
 import com.dawid.typepython.symtab.symbol.type.GenericClassSymbol;
 import com.dawid.typepython.symtab.symbol.type.SupportedGenericType;
 import com.dawid.typepython.symtab.symbol.type.UnsupportedGenericTypeException;
@@ -30,15 +23,18 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.dawid.typepython.symtab.symbol.type.SupportedGenericType.LIST;
+import static java.util.Optional.ofNullable;
 
 public class TypePythonVisitor extends com.dawid.typepython.generated.TypePythonBaseVisitor<Symbol> {
     private final CodeWriter codeWriter;
     private Scope currentScope;
+    private List<VariableSymbol> parameters;
 
 
     public TypePythonVisitor(CodeWriter codeWriter) {
         super();
         this.codeWriter = codeWriter;
+        this.parameters = new ArrayList<>();
     }
 
     @Override
@@ -52,6 +48,45 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     }
 
     @Override
+    public Symbol visitFuncDefinition(TypePythonParser.FuncDefinitionContext ctx) {
+        TypedSymbol returnType = (TypedSymbol) visit(ctx.type());
+        codeWriter.startFunction();
+        codeWriter.write(returnType.getTypeName() + ctx.IDENTIFIER());
+        visit(ctx.parameters());
+        FunctionScope functionScope = new FunctionScope(ScopeType.LOCAL, parameters, returnType);
+//        currentScope.addFunction(new FunctionSymbol()) //TODO type should be symbol
+        pushScope(functionScope);
+        visit(ctx.suite());
+        popScope();
+        codeWriter.endFunction();
+        return null;
+    }
+
+    @Override
+    public Symbol visitParameters(TypePythonParser.ParametersContext ctx) {
+        codeWriter.write("(");
+        ofNullable(ctx.typeDeclarationArgsList()).ifPresent(this::visit);
+        String parametersString = parameters
+                .stream()
+                .map(it -> it.getVariableType() + " " + it.getText())
+                .collect(Collectors.joining(","));
+        codeWriter.write(parametersString);
+        codeWriter.write(")");
+        return null;
+    }
+
+    @Override
+    public Symbol visitTypeDeclarationArgsList(TypePythonParser.TypeDeclarationArgsListContext ctx) {
+        List<VariableSymbol> parameters = ctx.variableDeclaration()
+                .stream()
+                .map(this::visit)
+                .map(it -> (VariableSymbol)it)
+                .collect(Collectors.toList());
+        this.parameters.addAll(parameters);
+        return null;
+    }
+
+    @Override
     public Symbol visitIfStatement(TypePythonParser.IfStatementContext ctx) {
         codeWriter.write("if (");
         codeWriter.write(visit(ctx.test()).getText());
@@ -59,7 +94,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
         visit(ctx.suite());
         ctx.elifStatement().forEach(this::visit);
-        Optional.ofNullable(ctx.elseStatement()).ifPresent(this::visit);
+        ofNullable(ctx.elseStatement()).ifPresent(this::visit);
         return null;
     }
 
@@ -149,7 +184,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
     @Override
     public Symbol visitSignFactor(TypePythonParser.SignFactorContext ctx) {
-        Optional<Symbol> sign = Optional.ofNullable(ctx.sign).map(Token::getText).map(MathOperator::translate).map(Symbol::new);
+        Optional<Symbol> sign = ofNullable(ctx.sign).map(Token::getText).map(MathOperator::translate).map(Symbol::new);
         VariableSymbol visit = (VariableSymbol) visit(ctx.factor());
 
         return sign.map(symbol -> (Symbol) CompoundTypedSymbol.of(visit.getVariableType(), symbol, visit)).orElse(visit);
