@@ -8,8 +8,18 @@ import com.dawid.typepython.cpp.code.operator.CompareOperator;
 import com.dawid.typepython.cpp.code.operator.LogicalOperator;
 import com.dawid.typepython.cpp.code.operator.MathOperator;
 import com.dawid.typepython.generated.TypePythonParser;
-import com.dawid.typepython.symtab.*;
-import com.dawid.typepython.symtab.symbol.*;
+import com.dawid.typepython.symtab.FunctionScope;
+import com.dawid.typepython.symtab.GlobalScope;
+import com.dawid.typepython.symtab.LocalScope;
+import com.dawid.typepython.symtab.Scope;
+import com.dawid.typepython.symtab.ScopeType;
+import com.dawid.typepython.symtab.symbol.CompoundTypedSymbol;
+import com.dawid.typepython.symtab.symbol.FunctionSymbol;
+import com.dawid.typepython.symtab.symbol.Symbol;
+import com.dawid.typepython.symtab.symbol.TypedSymbol;
+import com.dawid.typepython.symtab.symbol.UndefinedVariableException;
+import com.dawid.typepython.symtab.symbol.VariableSymbol;
+import com.dawid.typepython.symtab.symbol.VariableTypeMissmatchException;
 import com.dawid.typepython.symtab.symbol.type.GenericClassSymbol;
 import com.dawid.typepython.symtab.symbol.type.SupportedGenericType;
 import com.dawid.typepython.symtab.symbol.type.UnsupportedGenericTypeException;
@@ -19,6 +29,7 @@ import type.CppVariableType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -49,16 +60,31 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
     @Override
     public Symbol visitFuncDefinition(TypePythonParser.FuncDefinitionContext ctx) {
-        TypedSymbol returnType = (TypedSymbol) visit(ctx.type());
+        TypedSymbol returnType = ofNullable(ctx.type())
+                .map(this::visit)
+                .map(it -> (TypedSymbol)it)
+                .orElseGet(() -> new TypedSymbol("void", CppVariableType.VOID));
         codeWriter.startFunction();
-        codeWriter.write(returnType.getTypeName() + ctx.IDENTIFIER());
+        codeWriter.write(returnType.getTypeName() + " " + ctx.IDENTIFIER());
         visit(ctx.parameters());
+        FunctionSymbol functionSymbol = new FunctionSymbol(ctx.IDENTIFIER().getText(), returnType, parameters);
+        currentScope.addFunctionSymbol(functionSymbol);
         FunctionScope functionScope = new FunctionScope(ScopeType.LOCAL, parameters, returnType);
-//        currentScope.addFunction(new FunctionSymbol()) //TODO type should be symbol
         pushScope(functionScope);
         visit(ctx.suite());
         popScope();
         codeWriter.endFunction();
+        return null;
+    }
+
+    @Override
+    public Symbol visitReturnStatement(TypePythonParser.ReturnStatementContext ctx) {
+        Symbol returnSymbol = visit(ctx.test());
+        FunctionScope functionScope = currentScope.getFunctionScope();
+        TypedSymbol returnType = functionScope.getReturnType();
+        if (returnType != null) {
+            codeWriter.write("return " + returnSymbol.getText());
+        }
         return null;
     }
 
@@ -68,7 +94,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         ofNullable(ctx.typeDeclarationArgsList()).ifPresent(this::visit);
         String parametersString = parameters
                 .stream()
-                .map(it -> it.getVariableType() + " " + it.getText())
+                .map(it -> it.getTypeName() + " " + it.getText())
                 .collect(Collectors.joining(","));
         codeWriter.write(parametersString);
         codeWriter.write(")");
@@ -80,7 +106,9 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         List<VariableSymbol> parameters = ctx.variableDeclaration()
                 .stream()
                 .map(this::visit)
-                .map(it -> (VariableSymbol)it)
+                .map(it -> (TypedSymbol) it)
+                .map(it -> new VariableSymbol(it.getText(), it.getVariableType()))
+                .peek(it -> it.setScope(currentScope))
                 .collect(Collectors.toList());
         this.parameters.addAll(parameters);
         return null;
@@ -137,7 +165,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
         VariableSymbol collection;
         if (variableSymbol.isDeclaredInScope()) {
-            collection = currentScope.findVariable(collectionVariableName)
+            collection = currentScope.findAtom(collectionVariableName)
                     .orElseThrow(() -> new UndefinedVariableException(collectionVariableName));
         } else {
             collection = variableSymbol;
@@ -282,7 +310,23 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
     @Override
     public Symbol visitAtomExpression(TypePythonParser.AtomExpressionContext ctx) {
-        return super.visitAtomExpression(ctx);
+        Symbol symbol = super.visitAtomExpression(ctx);
+
+
+        return symbol;
+    }
+
+
+
+    @Override
+    public Symbol visitTrailerParenthesis(TypePythonParser.TrailerParenthesisContext ctx) {
+        TypePythonParser.ArgumentsContext argumentsSymbol = ctx.arguments();
+        if (argumentsSymbol != null) {
+            List<Symbol> arguments = argumentsSymbol.children.stream().map(this::visit).filter(Objects::nonNull).collect(Collectors.toList());
+            String text = arguments.stream().map(Symbol::getText).collect(Collectors.joining(","));
+            return CompoundTypedSymbol.of(arguments, text);
+        }
+        return null;
     }
 
     @Override
@@ -338,7 +382,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
     @Override
     public Symbol visitIdentifierAtom(TypePythonParser.IdentifierAtomContext ctx) {
-        return currentScope.findVariable(ctx.getText()).orElseThrow(() -> new UndefinedVariableException(ctx.getText()));
+        return currentScope.findAtom(ctx.getText()).orElseThrow(() -> new UndefinedVariableException(ctx.getText()));
     }
 
     @Override
@@ -404,7 +448,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
     @Override
     public Symbol visitAssignableIdentifier(TypePythonParser.AssignableIdentifierContext ctx) {
-        Optional<VariableSymbol> variable = currentScope.findVariable(ctx.getText());
+        Optional<VariableSymbol> variable = currentScope.findAtom(ctx.getText());
         return variable.orElseGet(() -> new VariableSymbol(ctx.getText()));
     }
 

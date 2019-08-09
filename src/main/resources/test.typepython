@@ -1,2 +1,5 @@
-def test(a: int, v: double): int :
+def test(a: int, v: double):
     dd = a + v
+    v = a + 1
+
+test(10, 11.0)

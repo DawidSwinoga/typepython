@@ -1,22 +1,14 @@
 package com.dawid.typepython.symtab.symbol;
 
-import com.dawid.typepython.symtab.symbol.type.VariableType;
-
-import java.util.ArrayList;
 import java.util.List;
 
-public class FunctionSymbol extends TypedSymbol {
-    private final List<TypedSymbol> parameters = new ArrayList<>();
+public class FunctionSymbol extends VariableSymbol {
+    private final List<VariableSymbol> parameters;
+    private final TypedSymbol returnType;
 
-    public FunctionSymbol(VariableType variableType) {
-        super(variableType);
-    }
-
-    public FunctionSymbol(String name) {
+    public FunctionSymbol(String name, TypedSymbol returnType, List<VariableSymbol> parameters) {
         super(name);
-    }
-
-    public FunctionSymbol(String name, VariableType variableType) {
-        super(name, variableType);
+        this.parameters = parameters;
+        this.returnType = returnType;
     }
 }

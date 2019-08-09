@@ -19,6 +19,11 @@ public class CompoundTypedSymbol extends VariableSymbol {
         this.symbols = symbols;
     }
 
+    public CompoundTypedSymbol(List<Symbol> symbols, String name) {
+        super(name);
+        this.symbols = symbols;
+    }
+
     public static CompoundTypedSymbol of(VariableType variableType, VariableSymbol first, List<Symbol> symbols) {
         List<Symbol> allSymbols = new ArrayList<>();
         allSymbols.add(first);
@@ -28,6 +33,10 @@ public class CompoundTypedSymbol extends VariableSymbol {
 
     public static CompoundTypedSymbol of(VariableType variableType, List<Symbol> symbols) {
         return new CompoundTypedSymbol(symbols, variableType);
+    }
+
+    public static Symbol of(List<Symbol> symbols, String name) {
+        return new CompoundTypedSymbol(symbols, name);
     }
 
     public long size() {

@@ -17,7 +17,7 @@ fileInput
     ;
 
 funcDefinition
-    : DEF IDENTIFIER parameters ':' type ':' suite
+    : DEF IDENTIFIER parameters (':' type)? ':' suite
     ;
 suite
     : NEWLINE INDENT statement+ DEDENT
@@ -178,9 +178,10 @@ dictorySetMaker
     ;
 
 trailer
-    : '(' (arguments)? ')'
-    | '[' argument ']'
-    | '.' IDENTIFIER;
+    : '(' (arguments)? ')' #trailerParenthesis
+    | '[' argument ']'     #trailerBrackets
+    | '.' IDENTIFIER      #trailerIdentifier
+    ;
 
 literal
     : INTEGER_LITERAL       #integerLiteral

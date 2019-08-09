@@ -16,7 +16,8 @@ public enum CppVariableType implements VariableType {
     DOUBLE("double", "double", true),
     FLOAT("float", "float", true),
     BOOLEAN("bool", "bool", true),
-    STRING("string", "string", false);
+    STRING("string", "string", false),
+    VOID(null, "void", false);
 
 
     CppVariableType(String pythonName, String cppName, boolean numeric) {
