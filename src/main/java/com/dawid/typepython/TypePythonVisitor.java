@@ -15,6 +15,7 @@ import com.dawid.typepython.symtab.Scope;
 import com.dawid.typepython.symtab.ScopeType;
 import com.dawid.typepython.symtab.symbol.CompoundTypedSymbol;
 import com.dawid.typepython.symtab.symbol.FunctionSymbol;
+import com.dawid.typepython.symtab.symbol.ReturnStatementMissingException;
 import com.dawid.typepython.symtab.symbol.Symbol;
 import com.dawid.typepython.symtab.symbol.TypedSymbol;
 import com.dawid.typepython.symtab.symbol.UndefinedVariableException;
@@ -71,10 +72,27 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         currentScope.addFunctionSymbol(functionSymbol);
         FunctionScope functionScope = new FunctionScope(ScopeType.LOCAL, parameters, returnType);
         pushScope(functionScope);
+
+        validReturnStatement(ctx, functionScope);
+
         visit(ctx.suite());
         popScope();
         codeWriter.endFunction();
         return null;
+    }
+
+    private void validReturnStatement(TypePythonParser.FuncDefinitionContext ctx, FunctionScope functionScope) {
+        Optional<TypePythonParser.ReturnStatementContext> returnStatementContext = ofNullable(ctx.suite())
+                .map(TypePythonParser.SuiteContext::statement)
+                .map(it -> it.get(it.size() - 1))
+                .map(TypePythonParser.StatementContext::simpleStatement)
+                .map(TypePythonParser.SimpleStatementContext::smallStatement)
+                .map(TypePythonParser.SmallStatementContext::flowStatement)
+                .map(TypePythonParser.FlowStatementContext::returnStatement);
+        TypedSymbol returnType = functionScope.getReturnType();
+        if (!returnStatementContext.isPresent() && returnType.getVariableType() != CppVariableType.VOID) {
+            throw new ReturnStatementMissingException();
+        }
     }
 
     @Override
