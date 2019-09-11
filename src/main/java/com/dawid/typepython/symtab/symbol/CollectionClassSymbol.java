@@ -1,8 +1,7 @@
-package com.dawid.typepython.symtab.symbol.type;
+package com.dawid.typepython.symtab.symbol;
 
-import com.dawid.typepython.symtab.symbol.TypedSymbol;
-import com.dawid.typepython.symtab.symbol.VariableSymbol;
 import com.dawid.typepython.symtab.symbol.matching.MatchType;
+import com.dawid.typepython.symtab.symbol.type.VariableType;
 import lombok.Getter;
 
 import static java.util.Optional.ofNullable;
@@ -10,24 +9,24 @@ import static java.util.Optional.ofNullable;
 /**
  * Created by Dawid on 20.07.2019 at 15:55.
  */
-public class GenericClassSymbol extends VariableSymbol {
+public class CollectionClassSymbol extends ClassSymbol {
     @Getter
     private TypedSymbol nested;
 
-    public GenericClassSymbol(VariableType variableType) {
+    public CollectionClassSymbol(VariableType variableType) {
         super(variableType);
     }
 
-    public GenericClassSymbol(String name) {
+    public CollectionClassSymbol(String name) {
         super(name);
     }
 
-    public GenericClassSymbol(VariableType variableType, TypedSymbol nestedSymbol) {
+    public CollectionClassSymbol(VariableType variableType, TypedSymbol nestedSymbol) {
         super(variableType);
         this.nested = nestedSymbol;
     }
 
-    public GenericClassSymbol(String text, VariableType VariableType, TypedSymbol typedSymbol) {
+    public CollectionClassSymbol(String text, VariableType VariableType, TypedSymbol typedSymbol) {
         super(text, VariableType);
         this.nested = typedSymbol;
     }
@@ -43,14 +42,14 @@ public class GenericClassSymbol extends VariableSymbol {
 
     @Override
     public MatchType match(TypedSymbol typedSymbol) {
-        if (isTheSameGenericType(typedSymbol) && checkNestedType(nested, (GenericClassSymbol) typedSymbol) == MatchType.FULL) {
+        if (isTheSameGenericType(typedSymbol) && checkNestedType(nested, (CollectionClassSymbol) typedSymbol) == MatchType.FULL) {
             return MatchType.FULL;
         }
 
         return MatchType.NONE;
     }
 
-    private MatchType checkNestedType(TypedSymbol nested, GenericClassSymbol typedSymbol) {
+    private MatchType checkNestedType(TypedSymbol nested, CollectionClassSymbol typedSymbol) {
         return nested.match(typedSymbol.nested);
     }
 

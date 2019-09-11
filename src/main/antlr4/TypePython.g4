@@ -109,8 +109,12 @@ importStatement
 assignable
     : variableDeclaration       #assignableDeclaration
     | IDENTIFIER                #assignableIdentifier
+    | atomTrailer               #assignableAtomTrailer
     ;
 
+atomTrailer
+    : atom trailer+
+    ;
 
 compoundStatement
     : ifStatement

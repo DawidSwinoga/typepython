@@ -4,7 +4,7 @@ import com.dawid.typepython.symtab.Scope;
 import com.dawid.typepython.symtab.symbol.TypedSymbol;
 import com.dawid.typepython.symtab.symbol.VariableSymbol;
 
-public class InMemoryCodeWriter implements CodeWriter {
+public class ConsoleCodeWriter implements CodeWriter {
     private StringBuilder global;
     private StringBuilder main;
     private StringBuilder namespace;
@@ -13,7 +13,7 @@ public class InMemoryCodeWriter implements CodeWriter {
     private Scope scope;
     private StringBuilder cursor;
 
-    public InMemoryCodeWriter() {
+    public ConsoleCodeWriter() {
         this.namespace = new StringBuilder();
         this.include = new StringBuilder();
         this.global = new StringBuilder();

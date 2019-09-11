@@ -10,8 +10,6 @@ import static java.util.Optional.ofNullable;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class VariableSymbol extends TypedSymbol {
-
-
     public VariableSymbol(VariableType variableType) {
         super(variableType);
     }
@@ -32,5 +30,4 @@ public class VariableSymbol extends TypedSymbol {
     public SymbolType getSymbolType() {
         return ofNullable(symbolType).orElse(SymbolType.VARIABLE);
     }
-
 }

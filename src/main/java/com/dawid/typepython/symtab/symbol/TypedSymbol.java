@@ -13,6 +13,7 @@ import lombok.Data;
 @Data
 public class TypedSymbol extends Symbol implements TypeMatcher {
     protected VariableType variableType;
+    private boolean collectionElement = false;
 
     public TypedSymbol(VariableType variableType) {
         this.variableType = variableType;
@@ -35,6 +36,10 @@ public class TypedSymbol extends Symbol implements TypeMatcher {
         return variableType.getCppNameType();
     }
 
+    @Override
+    public boolean isDeclaredInScope() {
+        return collectionElement || super.isDeclaredInScope();
+    }
 
     @Override
     public MatchType match(TypedSymbol t) {

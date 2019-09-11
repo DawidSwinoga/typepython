@@ -7,5 +7,6 @@ public enum SymbolType {
     VARIABLE,
     TEXT,
     LOGICAL_OPERATOR,
-    FUNCTION_CALL;
+    FUNCTION_CALL,
+    GET_COLLECTION_ELEMENT;
 }

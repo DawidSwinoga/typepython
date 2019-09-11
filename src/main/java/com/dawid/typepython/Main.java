@@ -1,7 +1,7 @@
 package com.dawid.typepython;
 
 import com.dawid.typepython.cpp.code.CodeWriter;
-import com.dawid.typepython.cpp.code.InMemoryCodeWriter;
+import com.dawid.typepython.cpp.code.ConsoleCodeWriter;
 import com.dawid.typepython.generated.TypePythonParser;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -19,7 +19,6 @@ public class Main {
     public static void main(String[] args) throws IOException {
         InputStream inputFile = Main.class.getResourceAsStream("/test.typepython");
         CharStream inputStream = CharStreams.fromStream(inputFile);
-//        ANTLRInputStream inputStream = new ANTLRInputStream("adsa = 1\n");
         com.dawid.typepython.generated.TypePythonLexer typePythonLexer = new TokenTypePythonLexer(inputStream);
         CommonTokenStream commonTokenStream = new CommonTokenStream(typePythonLexer);
 
@@ -29,7 +28,7 @@ public class Main {
         typePythonParser.getInterpreter().setPredictionMode(PredictionMode.LL_EXACT_AMBIG_DETECTION);
         TypePythonParser.FileInputContext fileInputContext = typePythonParser.fileInput();
 
-        CodeWriter codeWriter = new InMemoryCodeWriter();
+        CodeWriter codeWriter = new ConsoleCodeWriter();
         codeWriter.writeInclude("#include <iostream>");
         codeWriter.writeInclude("#include <cmath>");
         codeWriter.writeInclude("#include <vector>");

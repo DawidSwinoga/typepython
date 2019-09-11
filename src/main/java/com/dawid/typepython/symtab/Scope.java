@@ -17,7 +17,6 @@ public abstract class Scope {
     private Scope parentScope;
     private ScopeType scopeType;
     private List<TypedSymbol> variables;
-    //TODO Add unique function check
     private List<FunctionSymbol> functionSymbols;
 
     public Scope(ScopeType scopeType, List<TypedSymbol> symbols) {

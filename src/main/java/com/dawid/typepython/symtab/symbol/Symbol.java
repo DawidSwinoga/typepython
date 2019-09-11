@@ -6,10 +6,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Symbol {
+public class Symbol implements Serializable {
     private String text;
     private Scope scope;
     protected SymbolType symbolType = SymbolType.TEXT;
