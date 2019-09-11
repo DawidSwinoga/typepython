@@ -47,7 +47,7 @@ import static java.util.Optional.ofNullable;
 public class TypePythonVisitor extends com.dawid.typepython.generated.TypePythonBaseVisitor<Symbol> {
     private final CodeWriter codeWriter;
     private Scope currentScope;
-    private List<VariableSymbol> parameters;
+    private List<TypedSymbol> parameters;
 
 
     public TypePythonVisitor(CodeWriter codeWriter) {
@@ -136,11 +136,10 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
     @Override
     public Symbol visitTypeDeclarationArgsList(TypePythonParser.TypeDeclarationArgsListContext ctx) {
-        List<VariableSymbol> parameters = ctx.variableDeclaration()
+        List<TypedSymbol> parameters = ctx.variableDeclaration()
                 .stream()
                 .map(this::visit)
                 .map(it -> (TypedSymbol) it)
-                .map(it -> new VariableSymbol(it.getText(), it.getVariableType()))
                 .peek(it -> it.setScope(currentScope))
                 .collect(Collectors.toList());
         this.parameters.addAll(parameters);
@@ -193,19 +192,16 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     //TODO use reference instead of value (for (int $fd : list))
     @Override
     public Symbol visitForStatement(TypePythonParser.ForStatementContext ctx) {
-        VariableSymbol variableSymbol = (VariableSymbol) visit(ctx.collection);
+        TypedSymbol variableSymbol = (TypedSymbol) visit(ctx.collection);
         String collectionVariableName = variableSymbol.getText();
 
-        VariableSymbol collection;
+        TypedSymbol collection;
         if (variableSymbol.isDeclaredInScope()) {
             collection = currentScope.findAtom(collectionVariableName)
                     .orElseThrow(() -> new UndefinedVariableException(collectionVariableName));
         } else {
             collection = variableSymbol;
-            String tmpVariable = TemporaryVariableNameGenerator.INSTANCE.generateVariableName(); // because for(vector<int> x : {{1,3}, {4,2}}) in cpp cause error
-            codeWriter.write(collection.getTypeName() + " " +
-                    tmpVariable + " = " + collection.getText() + ";\n");
-            collection.setText(tmpVariable);
+            collection.setText(collection.getTypeName() + collection.getText());
         }
 
         if (!collection.getVariableType().isCollection()) {
@@ -347,6 +343,13 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         List<TypePythonParser.TrailerContext> trailers = ctx.trailer();
 
         if (CollectionUtils.isNotEmpty(trailers)) {
+            return handleTrailerSymbols(trailers, symbol).get();
+        }
+
+        return symbol;
+    }
+
+    public Optional<Symbol> handleTrailerSymbols( List<TypePythonParser.TrailerContext> trailers, Symbol atom) {
             List<Symbol> trailerSymbols = trailers.stream().map(this::visit).collect(Collectors.toList());
 
             Optional<Symbol> resultSymbol = empty();
@@ -354,18 +357,17 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
             for (Symbol trailerSymbol : trailerSymbols) {
                 if (trailerSymbol.getSymbolType() == SymbolType.FUNCTION_CALL) {
                     CompoundTypedSymbol compoundTypedSymbol = (CompoundTypedSymbol) trailerSymbol;
-                    MatchingResult resultFunctionMatching = currentScope.findFunction(ctx.atom().getText(), compoundTypedSymbol.getSymbols());
+                    MatchingResult resultFunctionMatching = currentScope.findFunction(atom.getText(), compoundTypedSymbol.getSymbols());
                     if (resultFunctionMatching.getMatchType() == MatchType.NONE) {
                         throw new NoMatchingFunctionExeption();
                     }
                     FunctionSymbol function = resultFunctionMatching.getFunctionSymbol();
                     //TODO add handling multiple trailers call
-                    return CompoundTypedSymbol.of(function.getVariableType(), function, trailerSymbol);
+                    resultSymbol = Optional.of(CompoundTypedSymbol.of(function.getVariableType(), function, trailerSymbol));
                 }
             }
-        }
 
-        return symbol;
+            return resultSymbol;
     }
 
 
@@ -374,10 +376,21 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         TypePythonParser.ArgumentsContext argumentsSymbol = ctx.arguments();
         if (argumentsSymbol != null) {
             List<Symbol> arguments = argumentsSymbol.children.stream().map(this::visit).filter(Objects::nonNull).collect(Collectors.toList());
-            String text = arguments.stream().map(Symbol::getText).collect(Collectors.joining(","));
+            String text = arguments
+                    .stream()
+                    .map(it -> (TypedSymbol) it)
+                    .map(this::getTrailerText)
+                    .collect(Collectors.joining(","));
             return CompoundTypedSymbol.of(arguments, SymbolType.FUNCTION_CALL, "(" + text + ")");
         }
         return null;
+    }
+
+    private String getTrailerText(TypedSymbol symbol) {
+        if (symbol instanceof GenericClassSymbol && !symbol.isDeclaredInScope()) {
+            return symbol.getTypeName() + symbol.getText();
+        }
+        return symbol.getText();
     }
 
     @Override
@@ -404,21 +417,16 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     @Override
     public Symbol visitExecuteStatement(TypePythonParser.ExecuteStatementContext ctx) {
         Symbol atom = visit(ctx.atom());
-        String trailers = ctx.trailer()
-                .stream()
-                .map(this::visit)
-                .map(Symbol::getText)
-                .collect(Collectors.joining(","));
-
-        codeWriter.write(atom.getText() + trailers + ";");
+        Optional<Symbol> symbol = handleTrailerSymbols(ctx.trailer(), atom);
+        symbol.ifPresent(it -> codeWriter.write(it.getText() + ";"));
         return null;
     }
 
     //TODO user reference vector<int> &test = ddd; ??
     @Override
     public Symbol visitAssignableExpressionStatement(TypePythonParser.AssignableExpressionStatementContext ctx) {
-        VariableSymbol assignable = (VariableSymbol) visit(ctx.assignable());
-        VariableSymbol symbol = (VariableSymbol) visit(ctx.test());
+        TypedSymbol assignable = (TypedSymbol) visit(ctx.assignable());
+        TypedSymbol symbol = (TypedSymbol) visit(ctx.test());
 
         if (symbol.getVariableType() == null) {
             throw new RuntimeException();
@@ -512,7 +520,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
     @Override
     public Symbol visitAssignableIdentifier(TypePythonParser.AssignableIdentifierContext ctx) {
-        Optional<VariableSymbol> variable = currentScope.findAtom(ctx.getText());
+        Optional<TypedSymbol> variable = currentScope.findAtom(ctx.getText());
         return variable.orElseGet(() -> new VariableSymbol(ctx.getText()));
     }
 

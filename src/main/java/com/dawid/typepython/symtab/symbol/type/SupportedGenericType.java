@@ -35,6 +35,11 @@ public enum SupportedGenericType implements VariableType {
     }
 
     @Override
+    public boolean isGenericType() {
+        return true;
+    }
+
+    @Override
     public boolean isNumeric() {
         return false;
     }

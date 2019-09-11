@@ -1,8 +1,8 @@
 package com.dawid.typepython.symtab.symbol.type;
 
-import com.dawid.typepython.symtab.symbol.CompoundTypedSymbol;
 import com.dawid.typepython.symtab.symbol.TypedSymbol;
 import com.dawid.typepython.symtab.symbol.VariableSymbol;
+import com.dawid.typepython.symtab.symbol.matching.MatchType;
 import lombok.Getter;
 
 import static java.util.Optional.ofNullable;
@@ -39,5 +39,22 @@ public class GenericClassSymbol extends VariableSymbol {
 
         ofNullable(nested).map(TypedSymbol::getTypeName).ifPresent(it -> type.append("<").append(it).append(">"));
         return type.toString();
+    }
+
+    @Override
+    public MatchType match(TypedSymbol typedSymbol) {
+        if (isTheSameGenericType(typedSymbol) && checkNestedType(nested, (GenericClassSymbol) typedSymbol) == MatchType.FULL) {
+            return MatchType.FULL;
+        }
+
+        return MatchType.NONE;
+    }
+
+    private MatchType checkNestedType(TypedSymbol nested, GenericClassSymbol typedSymbol) {
+        return nested.match(typedSymbol.nested);
+    }
+
+    private boolean isTheSameGenericType(TypedSymbol typedSymbol) {
+        return super.match(typedSymbol) == MatchType.FULL;
     }
 }

@@ -1,11 +1,14 @@
-def test(a: int, v: double): int:
-    dd = a + v
-    v = a + 1
+
+def test(a: list<int>, v: double): int:
+    dd = a
     return 1
 
-def test(a: double, v: double): int:
-    dd = a + v
-    v = a + 1
+def test(a: list<double>, v: double): int:
+    dd = a
     return 1
 
-sadf = test(10f, 11.0)
+for x in [[1,2], [3,1]]:
+    for y in x:
+        y = y + 1
+
+test([1,2,3],2)

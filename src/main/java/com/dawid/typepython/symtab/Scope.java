@@ -2,6 +2,7 @@ package com.dawid.typepython.symtab;
 
 import com.dawid.typepython.symtab.symbol.FunctionSymbol;
 import com.dawid.typepython.symtab.symbol.Symbol;
+import com.dawid.typepython.symtab.symbol.TypedSymbol;
 import com.dawid.typepython.symtab.symbol.VariableSymbol;
 import com.dawid.typepython.symtab.symbol.matching.AmbiguousFunctionCallException;
 import com.dawid.typepython.symtab.symbol.matching.MatchType;
@@ -15,11 +16,11 @@ import java.util.Optional;
 public abstract class Scope {
     private Scope parentScope;
     private ScopeType scopeType;
-    private List<VariableSymbol> variables;
+    private List<TypedSymbol> variables;
     //TODO Add unique function check
     private List<FunctionSymbol> functionSymbols;
 
-    public Scope(ScopeType scopeType, List<VariableSymbol> symbols) {
+    public Scope(ScopeType scopeType, List<TypedSymbol> symbols) {
         this.scopeType = scopeType;
         this.functionSymbols = new ArrayList<>();
         this.variables = symbols;
@@ -43,8 +44,8 @@ public abstract class Scope {
         functionSymbols.add(functionSymbol);
     }
 
-    public Optional<VariableSymbol> findAtom(String name) {
-        Optional<VariableSymbol> variable = variables.stream().filter(it -> it.getText().equals(name)).findFirst();
+    public Optional<TypedSymbol> findAtom(String name) {
+        Optional<TypedSymbol> variable = variables.stream().filter(it -> it.getText().equals(name)).findFirst();
 
         if (!variable.isPresent()) {
             variable = Optional.of(findFunction(name)).filter(Optional::isPresent).map(Optional::get);
@@ -69,7 +70,7 @@ public abstract class Scope {
         parentScope = enclosingScope;
     }
 
-    public void addVariable(VariableSymbol assignable) {
+    public void addVariable(TypedSymbol assignable) {
         variables.add(assignable);
         assignable.setScope(this);
     }

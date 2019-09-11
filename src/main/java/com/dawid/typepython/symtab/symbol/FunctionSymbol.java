@@ -8,9 +8,9 @@ import java.util.List;
 
 public class FunctionSymbol extends VariableSymbol {
     @Getter
-    private final List<VariableSymbol> parameters;
+    private final List<TypedSymbol> parameters;
 
-    public FunctionSymbol(String name, VariableType returnType, List<VariableSymbol> parameters) {
+    public FunctionSymbol(String name, VariableType returnType, List<TypedSymbol> parameters) {
         super(name);
         this.parameters = parameters;
         this.variableType = returnType;

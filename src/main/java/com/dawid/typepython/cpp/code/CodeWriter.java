@@ -1,6 +1,7 @@
 package com.dawid.typepython.cpp.code;
 
 import com.dawid.typepython.symtab.Scope;
+import com.dawid.typepython.symtab.symbol.TypedSymbol;
 import com.dawid.typepython.symtab.symbol.VariableSymbol;
 
 public interface CodeWriter {
@@ -16,7 +17,7 @@ public interface CodeWriter {
 
     void writeEndMain();
 
-    void writeAssignment(VariableSymbol assignable, VariableSymbol symbol);
+    void writeAssignment(TypedSymbol assignable, TypedSymbol symbol);
 
     void startScope();
 

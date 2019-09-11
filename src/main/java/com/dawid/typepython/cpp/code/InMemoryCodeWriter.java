@@ -1,6 +1,7 @@
 package com.dawid.typepython.cpp.code;
 
 import com.dawid.typepython.symtab.Scope;
+import com.dawid.typepython.symtab.symbol.TypedSymbol;
 import com.dawid.typepython.symtab.symbol.VariableSymbol;
 
 public class InMemoryCodeWriter implements CodeWriter {
@@ -100,7 +101,7 @@ public class InMemoryCodeWriter implements CodeWriter {
     }
 
     @Override
-    public void writeAssignment(VariableSymbol assignable, VariableSymbol symbol) {
+    public void writeAssignment(TypedSymbol assignable, TypedSymbol symbol) {
         if (!assignable.isDeclaredInScope() && !scope.isLocalScope()) {
             global.append(assignable.getTypeName()).append(" ").append(assignable.getText()).append(";");
             cursor.append(assignable.getText()).append(" = ").append(symbol.getText()).append(";");

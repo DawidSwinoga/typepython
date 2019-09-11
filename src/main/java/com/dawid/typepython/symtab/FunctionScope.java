@@ -9,10 +9,10 @@ import java.util.Optional;
 
 @Getter
 public class FunctionScope extends Scope {
-    private List<VariableSymbol> parameters;
+    private List<TypedSymbol> parameters;
     private final TypedSymbol returnType;
 
-    public FunctionScope(ScopeType scopeType, List<VariableSymbol> parameters, TypedSymbol returnType) {
+    public FunctionScope(ScopeType scopeType, List<TypedSymbol> parameters, TypedSymbol returnType) {
         super(scopeType, parameters);
         this.parameters = parameters;
         this.returnType = returnType;
