@@ -258,6 +258,14 @@ SKIP_
  : ( SPACES ) -> skip
  ;
 
+COMMENT
+    :   '/*' .*? '*/' -> skip
+    ;
+
+LINE_COMMENT
+    :   '#' ~[\r\n]* -> skip
+    ;
+
 fragment SPACES
  : [ \t]+
  ;
