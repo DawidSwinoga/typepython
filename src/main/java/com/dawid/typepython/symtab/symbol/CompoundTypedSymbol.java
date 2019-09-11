@@ -1,6 +1,8 @@
 package com.dawid.typepython.symtab.symbol;
 
+import com.dawid.typepython.symtab.symbol.type.SymbolType;
 import com.dawid.typepython.symtab.symbol.type.VariableType;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,6 +14,7 @@ import java.util.stream.Collectors;
  * Created by Dawid on 21.06.2019 at 12:42.
  */
 public class CompoundTypedSymbol extends VariableSymbol {
+    @Getter
     private List<Symbol> symbols;
 
     public CompoundTypedSymbol(List<Symbol> symbols, VariableType variableType) {
@@ -21,6 +24,11 @@ public class CompoundTypedSymbol extends VariableSymbol {
 
     public CompoundTypedSymbol(List<Symbol> symbols, String name) {
         super(name);
+        this.symbols = symbols;
+    }
+
+    public CompoundTypedSymbol(List<Symbol> symbols, SymbolType functionCall, String text) {
+        super(functionCall, text);
         this.symbols = symbols;
     }
 
@@ -39,13 +47,22 @@ public class CompoundTypedSymbol extends VariableSymbol {
         return new CompoundTypedSymbol(symbols, name);
     }
 
+    public static Symbol of(List<Symbol> symbols, SymbolType functionCall, String text) {
+        return new CompoundTypedSymbol(symbols, functionCall, text);
+    }
+
     public long size() {
         return symbols.size();
     }
 
     @Override
     public String getText() {
-        return symbols.stream().filter(Objects::nonNull).map(Symbol::getText).collect(Collectors.joining(" "));
+        String text = super.getText();
+        if (text == null) {
+            return symbols.stream().filter(Objects::nonNull).map(Symbol::getText).collect(Collectors.joining(" "));
+        } else {
+            return text;
+        }
     }
 
     public void addSymbols(List<Symbol> symbols) {

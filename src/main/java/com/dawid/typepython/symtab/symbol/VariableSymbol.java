@@ -5,6 +5,8 @@ import com.dawid.typepython.symtab.symbol.type.VariableType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import static java.util.Optional.ofNullable;
+
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class VariableSymbol extends TypedSymbol {
@@ -22,8 +24,13 @@ public class VariableSymbol extends TypedSymbol {
         super(name, variableType);
     }
 
+    public VariableSymbol(SymbolType symbolType, String text) {
+        super(symbolType, text);
+    }
+
     @Override
     public SymbolType getSymbolType() {
-        return SymbolType.VARIABLE;
+        return ofNullable(symbolType).orElse(SymbolType.VARIABLE);
     }
+
 }

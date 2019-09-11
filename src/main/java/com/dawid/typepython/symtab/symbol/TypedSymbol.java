@@ -1,5 +1,8 @@
 package com.dawid.typepython.symtab.symbol;
 
+import com.dawid.typepython.symtab.symbol.matching.MatchType;
+import com.dawid.typepython.symtab.symbol.type.SymbolType;
+import com.dawid.typepython.symtab.symbol.type.TypeMatcher;
 import com.dawid.typepython.symtab.symbol.type.VariableType;
 import lombok.Data;
 
@@ -8,7 +11,7 @@ import lombok.Data;
  */
 
 @Data
-public class TypedSymbol extends Symbol {
+public class TypedSymbol extends Symbol implements TypeMatcher {
     protected VariableType variableType;
 
     public TypedSymbol(VariableType variableType) {
@@ -24,7 +27,17 @@ public class TypedSymbol extends Symbol {
         this.variableType = variableType;
     }
 
+    public TypedSymbol(SymbolType symbolType, String text) {
+        super(symbolType, text);
+    }
+
     public String getTypeName() {
         return variableType.getCppNameType();
+    }
+
+
+    @Override
+    public MatchType match(TypedSymbol t) {
+        return variableType.match(t);
     }
 }

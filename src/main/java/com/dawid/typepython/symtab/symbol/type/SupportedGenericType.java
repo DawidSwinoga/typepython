@@ -1,5 +1,7 @@
 package com.dawid.typepython.symtab.symbol.type;
 
+import com.dawid.typepython.symtab.symbol.TypedSymbol;
+import com.dawid.typepython.symtab.symbol.matching.MatchType;
 import lombok.AllArgsConstructor;
 
 import java.util.Arrays;
@@ -52,4 +54,12 @@ public enum SupportedGenericType implements VariableType {
     }
 
 
+    @Override
+    public MatchType match(TypedSymbol typedSymbol) {
+        if (this == typedSymbol.getVariableType()) {
+            return MatchType.FULL;
+        }
+
+        return MatchType.NONE;
+    }
 }

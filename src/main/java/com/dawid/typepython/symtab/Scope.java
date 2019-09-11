@@ -1,7 +1,12 @@
 package com.dawid.typepython.symtab;
 
 import com.dawid.typepython.symtab.symbol.FunctionSymbol;
+import com.dawid.typepython.symtab.symbol.Symbol;
 import com.dawid.typepython.symtab.symbol.VariableSymbol;
+import com.dawid.typepython.symtab.symbol.matching.AmbiguousFunctionCallException;
+import com.dawid.typepython.symtab.symbol.matching.MatchType;
+import com.dawid.typepython.symtab.symbol.matching.MatchingResult;
+import com.dawid.typepython.symtab.symbol.matching.NoMatchingFunctionExeption;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +16,7 @@ public abstract class Scope {
     private Scope parentScope;
     private ScopeType scopeType;
     private List<VariableSymbol> variables;
+    //TODO Add unique function check
     private List<FunctionSymbol> functionSymbols;
 
     public Scope(ScopeType scopeType, List<VariableSymbol> symbols) {
@@ -86,5 +92,44 @@ public abstract class Scope {
         }
 
         return null;
+    }
+
+    public MatchingResult findFunction(String text, List<Symbol> symbols) {
+        List<FunctionSymbol> functions = new ArrayList<>();
+        findFunction(text, symbols, functions);
+
+        List<FunctionSymbol> partialMatchingFunction = new ArrayList<>();
+
+        for (FunctionSymbol functionSymbol : functions) {
+            MatchType matchType = functionSymbol.parametersMatch(symbols);
+            if (matchType == MatchType.FULL) {
+                return new MatchingResult(functionSymbol, matchType);
+            }
+
+            if (matchType == MatchType.PARTIAL) {
+                partialMatchingFunction.add(functionSymbol);
+            }
+        }
+
+        if (partialMatchingFunction.size() > 1) {
+            throw new AmbiguousFunctionCallException(partialMatchingFunction);
+        }
+
+        if (partialMatchingFunction.isEmpty()) {
+            return new MatchingResult(null, MatchType.NONE);
+        }
+
+        return new MatchingResult(partialMatchingFunction.get(0), MatchType.PARTIAL);
+    }
+
+    private void findFunction(String text, List<Symbol> parameters, List<FunctionSymbol> functions) {
+        functionSymbols.stream()
+                .filter(it -> it.getText().equals(text))
+                .filter(it -> it.getParametersCount() == parameters.size())
+                .forEach(functions::add);
+
+        if (parentScope != null) {
+            parentScope.findFunction(text, parameters, functions);
+        }
     }
 }

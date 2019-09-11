@@ -1,5 +1,7 @@
 package type;
 
+import com.dawid.typepython.symtab.symbol.TypedSymbol;
+import com.dawid.typepython.symtab.symbol.matching.MatchType;
 import com.dawid.typepython.symtab.symbol.type.VariableType;
 import lombok.Getter;
 
@@ -52,5 +54,17 @@ public enum CppVariableType implements VariableType {
                 .orElseThrow(() -> new UnsupportedOperationException(pythonName));
     }
 
+    @Override
+    public MatchType match(TypedSymbol typedSymbol) {
+        VariableType variableType = typedSymbol.getVariableType();
+        if (this == variableType) {
+            return MatchType.FULL;
+        }
 
+        if (isNumeric() && variableType.isNumeric()) {
+            return MatchType.PARTIAL;
+        }
+
+        return MatchType.NONE;
+    }
 }

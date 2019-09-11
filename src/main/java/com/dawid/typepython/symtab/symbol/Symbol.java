@@ -12,16 +12,18 @@ import lombok.NoArgsConstructor;
 public class Symbol {
     private String text;
     private Scope scope;
+    protected SymbolType symbolType = SymbolType.TEXT;
 
     public Symbol(String name) {
         this.text = name;
     }
 
-    public boolean isDeclaredInScope() {
-        return scope != null;
+    public Symbol(SymbolType symbolType, String text) {
+        this.symbolType = symbolType;
+        this.text = text;
     }
 
-    public SymbolType getSymbolType() {
-        return SymbolType.TEXT;
+    public boolean isDeclaredInScope() {
+        return scope != null;
     }
 }

@@ -61,7 +61,7 @@ public class CollectionTypeAnalyzer {
     private static VariableType detectCollectionType(TypedSymbol first, List<TypedSymbol> symbols) {
         boolean collectionTypeMatch = symbols.stream().map(TypedSymbol::getVariableType).allMatch(it -> it.equals(first.getVariableType()));
         if (!collectionTypeMatch) {
-            throw new CollectionTypesMissmatchException("Collection types not match to " + first.getVariableType().getPythonType());
+            throw new CollectionTypesMissmatchException("Collection types not parametersMatch to " + first.getVariableType().getPythonType());
         }
 
         return first.getVariableType();

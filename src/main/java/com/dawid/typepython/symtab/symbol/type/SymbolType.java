@@ -6,5 +6,6 @@ package com.dawid.typepython.symtab.symbol.type;
 public enum SymbolType {
     VARIABLE,
     TEXT,
-    LOGICAL_OPERATOR
+    LOGICAL_OPERATOR,
+    FUNCTION_CALL;
 }

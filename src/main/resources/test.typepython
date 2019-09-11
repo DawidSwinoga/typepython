@@ -1,5 +1,11 @@
-def test(a: int, v: double):
+def test(a: int, v: double): int:
     dd = a + v
     v = a + 1
+    return 1
 
-test(10, 11.0)
+def test(a: double, v: double): int:
+    dd = a + v
+    v = a + 1
+    return 1
+
+sadf = test(10f, 11.0)

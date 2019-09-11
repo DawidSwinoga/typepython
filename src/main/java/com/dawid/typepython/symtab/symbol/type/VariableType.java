@@ -1,6 +1,6 @@
 package com.dawid.typepython.symtab.symbol.type;
 
-public interface VariableType {
+public interface VariableType extends TypeMatcher {
     String getCppNameType();
     boolean isCollection();
     boolean isNumeric();
