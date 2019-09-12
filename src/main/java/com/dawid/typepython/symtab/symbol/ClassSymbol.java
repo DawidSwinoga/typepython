@@ -2,6 +2,7 @@ package com.dawid.typepython.symtab.symbol;
 
 import com.dawid.typepython.symtab.symbol.type.SymbolType;
 import com.dawid.typepython.symtab.symbol.type.VariableType;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.List;
 /**
  * Created by Dawid on 11.09.2019 at 20:52.
  */
+@Getter
 public class ClassSymbol extends VariableSymbol {
     private List<FunctionSymbol> methods = new ArrayList<>();
 

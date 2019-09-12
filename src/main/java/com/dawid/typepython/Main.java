@@ -17,7 +17,10 @@ import java.io.InputStream;
  */
 public class Main {
     public static void main(String[] args) throws IOException {
-        InputStream inputFile = Main.class.getResourceAsStream("/test.typepython");
+//        InputStream inputFile = Main.class.getResourceAsStream("/bubble_sort.tpy");
+//        InputStream inputFile = Main.class.getResourceAsStream("/prime_numbers.tpy");
+//        InputStream inputFile = Main.class.getResourceAsStream("/factorial.tpy");
+        InputStream inputFile = Main.class.getResourceAsStream("/test.tpy");
         CharStream inputStream = CharStreams.fromStream(inputFile);
         com.dawid.typepython.generated.TypePythonLexer typePythonLexer = new TokenTypePythonLexer(inputStream);
         CommonTokenStream commonTokenStream = new CommonTokenStream(typePythonLexer);

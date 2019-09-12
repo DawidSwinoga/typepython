@@ -9,11 +9,12 @@ import com.dawid.typepython.symtab.symbol.matching.MatchType;
 import com.dawid.typepython.symtab.symbol.matching.MatchingResult;
 import com.dawid.typepython.symtab.symbol.matching.NoMatchingFunctionExeption;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public abstract class Scope {
+public abstract class Scope implements Serializable {
     private Scope parentScope;
     private ScopeType scopeType;
     private List<TypedSymbol> variables;

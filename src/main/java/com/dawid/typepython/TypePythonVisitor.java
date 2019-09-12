@@ -12,10 +12,10 @@ import com.dawid.typepython.symtab.GlobalScope;
 import com.dawid.typepython.symtab.LocalScope;
 import com.dawid.typepython.symtab.Scope;
 import com.dawid.typepython.symtab.ScopeType;
+import com.dawid.typepython.symtab.symbol.CollectionClassSymbol;
 import com.dawid.typepython.symtab.symbol.CompoundTypedSymbol;
 import com.dawid.typepython.symtab.symbol.FunctionAlreadyExistException;
 import com.dawid.typepython.symtab.symbol.FunctionSymbol;
-import com.dawid.typepython.symtab.symbol.CollectionClassSymbol;
 import com.dawid.typepython.symtab.symbol.ReturnStatementMissingException;
 import com.dawid.typepython.symtab.symbol.Symbol;
 import com.dawid.typepython.symtab.symbol.TypedSymbol;
@@ -23,6 +23,8 @@ import com.dawid.typepython.symtab.symbol.UndefinedVariableException;
 import com.dawid.typepython.symtab.symbol.VariableSymbol;
 import com.dawid.typepython.symtab.symbol.VariableTypeMissmatchException;
 import com.dawid.typepython.symtab.symbol.embeded.ListSymbol;
+import com.dawid.typepython.symtab.symbol.embeded.function.EmbeddedFunction;
+import com.dawid.typepython.symtab.symbol.embeded.function.LenFunction;
 import com.dawid.typepython.symtab.symbol.embeded.function.PrintFunction;
 import com.dawid.typepython.symtab.symbol.matching.MatchType;
 import com.dawid.typepython.symtab.symbol.matching.MatchingResult;
@@ -99,17 +101,17 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     }
 
     private void validReturnStatement(TypePythonParser.FuncDefinitionContext ctx, FunctionScope functionScope) {
-        Optional<TypePythonParser.ReturnStatementContext> returnStatementContext = ofNullable(ctx.suite())
-                .map(TypePythonParser.SuiteContext::statement)
-                .map(it -> it.get(it.size() - 1))
-                .map(TypePythonParser.StatementContext::simpleStatement)
-                .map(TypePythonParser.SimpleStatementContext::smallStatement)
-                .map(TypePythonParser.SmallStatementContext::flowStatement)
-                .map(TypePythonParser.FlowStatementContext::returnStatement);
-        TypedSymbol returnType = functionScope.getReturnType();
-        if (!returnStatementContext.isPresent() && returnType.getVariableType() != CppVariableType.VOID) {
-            throw new ReturnStatementMissingException();
-        }
+//        Optional<TypePythonParser.ReturnStatementContext> returnStatementContext = ofNullable(ctx.suite())
+//                .map(TypePythonParser.SuiteContext::statement)
+//                .map(it -> it.get(it.size() - 1))
+//                .map(TypePythonParser.StatementContext::simpleStatement)
+//                .map(TypePythonParser.SimpleStatementContext::smallStatement)
+//                .map(TypePythonParser.SmallStatementContext::flowStatement)
+//                .map(TypePythonParser.FlowStatementContext::returnStatement);
+//        TypedSymbol returnType = functionScope.getReturnType();
+//        if (!returnStatementContext.isPresent() && returnType.getVariableType() != CppVariableType.VOID) {
+//            throw new ReturnStatementMissingException();
+//        }
     }
 
     @Override
@@ -211,7 +213,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         }
 
         CollectionClassSymbol genericCollection = (CollectionClassSymbol) collection;
-        VariableSymbol nested = (VariableSymbol) genericCollection.getNested();
+        TypedSymbol nested = genericCollection.getNested();
         nested.setText(ctx.variable.getText());
 
         pushScope(new LocalScope());
@@ -226,7 +228,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
     @Override
     public Symbol visitAdditiveExpression(TypePythonParser.AdditiveExpressionContext ctx) {
-        VariableSymbol left = (VariableSymbol) visit(ctx.expr());
+        TypedSymbol left = (TypedSymbol) visit(ctx.expr());
         Symbol mathOperator = new Symbol(MathOperator.translate(ctx.operator.getText()));
         Symbol right = visit(ctx.term());
         return CompoundTypedSymbol.of(left.getVariableType(), left, mathOperator, right);
@@ -234,7 +236,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
     @Override
     public Symbol visitMultiplicativeExpression(TypePythonParser.MultiplicativeExpressionContext ctx) {
-        VariableSymbol left = (VariableSymbol) visit(ctx.term());
+        TypedSymbol left = (TypedSymbol) visit(ctx.term());
         Symbol mathOperator = new Symbol(MathOperator.translate(ctx.operator.getText()));
         Symbol right = visit(ctx.factor());
         return CompoundTypedSymbol.of(left.getVariableType(), left, mathOperator, right);
@@ -372,8 +374,9 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
                 CompoundTypedSymbol compoundTypedSymbol = (CompoundTypedSymbol) trailerSymbol;
 
-                if (resultSymbol instanceof PrintFunction) {
-                 return new TypedSymbol(((PrintFunction)resultSymbol).invoke(compoundTypedSymbol.getSymbols()), CppVariableType.VOID);
+                if (resultSymbol instanceof EmbeddedFunction) {
+                    EmbeddedFunction embeddedFunction = (EmbeddedFunction) resultSymbol;
+                    return new TypedSymbol(embeddedFunction.invoke(compoundTypedSymbol.getSymbols()), embeddedFunction.getVariableType());
                 }
 
                 MatchingResult resultFunctionMatching = currentScope.findFunction(atom.getText(), compoundTypedSymbol.getSymbols());
@@ -382,7 +385,8 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
                 }
                 FunctionSymbol function = resultFunctionMatching.getFunctionSymbol();
                 //TODO add handling multiple trailers call
-                resultSymbol = new TypedSymbol(function.getText() + trailerSymbol.getText(), function.getVariableType());
+                resultSymbol = SerializationUtils.clone(function);
+                resultSymbol.setText(function.getText() + trailerSymbol.getText());
             }
 
             if (trailerSymbol.getSymbolType() == SymbolType.GET_COLLECTION_ELEMENT) {
@@ -452,6 +456,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     public Symbol visitFileInput(TypePythonParser.FileInputContext ctx) {
         pushScope(new GlobalScope());
         currentScope.addFunctionSymbol(new PrintFunction());
+        currentScope.addFunctionSymbol(new LenFunction());
         codeWriter.writeStartMain();
         ctx.children.forEach(this::visit);
         codeWriter.writeEndMain();
@@ -483,6 +488,11 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
                 assignable.setText(text);
             } else {
                 assignable.setVariableType(symbol.getVariableType());
+            }
+        } else {
+            MatchType match = symbol.match(assignable);
+            if (match == MatchType.NONE) {
+                throw new VariableTypeMissmatchException();
             }
         }
 

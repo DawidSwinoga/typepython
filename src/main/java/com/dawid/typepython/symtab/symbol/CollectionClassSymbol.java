@@ -26,9 +26,9 @@ public class CollectionClassSymbol extends ClassSymbol {
         this.nested = nestedSymbol;
     }
 
-    public CollectionClassSymbol(String text, VariableType VariableType, TypedSymbol typedSymbol) {
+    public CollectionClassSymbol(String text, VariableType VariableType, TypedSymbol nestedType) {
         super(text, VariableType);
-        this.nested = typedSymbol;
+        this.nested = nestedType;
     }
 
     @Override

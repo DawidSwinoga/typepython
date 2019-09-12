@@ -20,8 +20,8 @@ public class ListSymbol extends CollectionClassSymbol {
         super(variableType, nestedSymbol);
     }
 
-    public ListSymbol(String text, VariableType VariableType, TypedSymbol typedSymbol) {
-        super(text, VariableType, typedSymbol);
+    public ListSymbol(String text, VariableType VariableType, TypedSymbol nestedType) {
+        super(text, VariableType, nestedType);
     }
 
     public TypedSymbol getElement(TypedSymbol argument) {
