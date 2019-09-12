@@ -1,6 +1,6 @@
 package com.dawid.typepython.symtab.symbol;
 
-import com.dawid.typepython.symtab.symbol.type.SymbolType;
+import com.dawid.typepython.symtab.type.SymbolType;
 
 /**
  * Created by Dawid on 07.07.2019 at 15:26.

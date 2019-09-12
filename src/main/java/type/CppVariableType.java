@@ -1,8 +1,8 @@
 package type;
 
 import com.dawid.typepython.symtab.symbol.TypedSymbol;
-import com.dawid.typepython.symtab.symbol.matching.MatchType;
-import com.dawid.typepython.symtab.symbol.type.VariableType;
+import com.dawid.typepython.symtab.matching.MatchType;
+import com.dawid.typepython.symtab.type.VariableType;
 import lombok.Getter;
 
 import static java.util.Arrays.stream;

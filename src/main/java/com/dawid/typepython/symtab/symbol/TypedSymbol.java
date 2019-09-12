@@ -1,9 +1,9 @@
 package com.dawid.typepython.symtab.symbol;
 
-import com.dawid.typepython.symtab.symbol.matching.MatchType;
-import com.dawid.typepython.symtab.symbol.type.SymbolType;
-import com.dawid.typepython.symtab.symbol.type.TypeMatcher;
-import com.dawid.typepython.symtab.symbol.type.VariableType;
+import com.dawid.typepython.symtab.matching.MatchType;
+import com.dawid.typepython.symtab.type.SymbolType;
+import com.dawid.typepython.symtab.type.TypeMatcher;
+import com.dawid.typepython.symtab.type.VariableType;
 import lombok.Data;
 
 /**

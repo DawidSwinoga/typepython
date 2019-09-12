@@ -1,7 +1,7 @@
 package com.dawid.typepython.symtab.symbol;
 
-import com.dawid.typepython.symtab.Scope;
-import com.dawid.typepython.symtab.symbol.type.SymbolType;
+import com.dawid.typepython.symtab.scope.Scope;
+import com.dawid.typepython.symtab.type.SymbolType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

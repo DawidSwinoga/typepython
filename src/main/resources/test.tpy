@@ -1,1 +1,4 @@
-test: list<int> = [11]
+def test(aa: list<int>): list<list<int>>:
+    return [aa]
+
+print(len(1))

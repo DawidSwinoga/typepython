@@ -1,8 +1,7 @@
 package com.dawid.typepython.cpp.code;
 
-import com.dawid.typepython.symtab.Scope;
+import com.dawid.typepython.symtab.scope.Scope;
 import com.dawid.typepython.symtab.symbol.TypedSymbol;
-import com.dawid.typepython.symtab.symbol.VariableSymbol;
 
 public interface CodeWriter {
     void writeInclude(String include);
