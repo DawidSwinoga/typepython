@@ -1,0 +1,16 @@
+n = 100
+lp = 0
+p = 2
+
+while lp < n:
+    t = True
+    d = 2
+    while d < p:
+        if p % d == 0:
+            t = False
+            break
+        d = d + 1
+    if t:
+        print(p)
+        lp = lp + 1
+    p = p + 1

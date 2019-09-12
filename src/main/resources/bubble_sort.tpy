@@ -1,0 +1,26 @@
+def printc(collection: list<int>):
+    for element in collection:
+            print(element)
+
+def bubble_sort(a: list<int>):
+    i = 0
+    while i < len(a):
+        j = 0
+        while j < (len(a) - 1 - i):
+            if a[j] > a[j + 1]:
+                tmp = a[j]
+                a[j] = a[j + 1]
+                a[j+1] = tmp
+            j = j + 1
+        i = i + 1
+    printc(a)
+
+
+abc = [54, 26, 93, 17, 77, 31, 44, 55, 20]
+print("non sorted")
+printc(abc)
+print("sorted")
+bubble_sort(abc)
+
+
+
