@@ -1,6 +1,5 @@
 package com.dawid.typepython.symtab.type;
 
-import com.dawid.typepython.symtab.symbol.TypedSymbol;
 import com.dawid.typepython.symtab.matching.MatchType;
 import lombok.AllArgsConstructor;
 
@@ -12,7 +11,7 @@ import static java.util.Arrays.stream;
  * Created by Dawid on 07.07.2019 at 21:28.
  */
 @AllArgsConstructor
-public enum SupportedGenericType implements VariableType {
+public enum SupportedGenericType implements Type {
     TUPLE("tuple", "vector"),
     LIST("list", "vector");
 
@@ -51,7 +50,7 @@ public enum SupportedGenericType implements VariableType {
     }
 
 
-    public static VariableType translate(String pythonName) {
+    public static Type translate(String pythonName) {
         return stream(values())
                 .filter(it -> it.genericType.equals(pythonName))
                 .findFirst()
@@ -60,8 +59,8 @@ public enum SupportedGenericType implements VariableType {
 
 
     @Override
-    public MatchType match(TypedSymbol typedSymbol) {
-        if (this == typedSymbol.getVariableType()) {
+    public MatchType match(Type typedSymbol) {
+        if (this == typedSymbol) {
             return MatchType.FULL;
         }
 

@@ -1,7 +1,7 @@
 package com.dawid.typepython.symtab.symbol;
 
 import com.dawid.typepython.symtab.type.SymbolType;
-import com.dawid.typepython.symtab.type.VariableType;
+import com.dawid.typepython.symtab.type.Type;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -10,7 +10,7 @@ import static java.util.Optional.ofNullable;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class VariableSymbol extends TypedSymbol {
-    public VariableSymbol(VariableType variableType) {
+    public VariableSymbol(Type variableType) {
         super(variableType);
     }
 
@@ -18,7 +18,7 @@ public class VariableSymbol extends TypedSymbol {
         super(name);
     }
 
-    public VariableSymbol(String name, VariableType variableType) {
+    public VariableSymbol(String name, Type variableType) {
         super(name, variableType);
     }
 

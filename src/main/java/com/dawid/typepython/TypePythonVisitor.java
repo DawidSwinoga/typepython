@@ -1,12 +1,18 @@
 package com.dawid.typepython;
 
 import com.dawid.typepython.cpp.code.CodeWriter;
-import com.dawid.typepython.symtab.type.collection.CollectionTypeAnalyzer;
+import com.dawid.typepython.generated.TypePythonParser;
+import com.dawid.typepython.symtab.embeded.function.EmbeddedFunction;
+import com.dawid.typepython.symtab.embeded.function.LenFunction;
+import com.dawid.typepython.symtab.embeded.function.PrintFunction;
+import com.dawid.typepython.symtab.embeded.list.ListSymbol;
 import com.dawid.typepython.symtab.literal.BooleanLiteral;
+import com.dawid.typepython.symtab.matching.MatchType;
+import com.dawid.typepython.symtab.matching.MatchingResult;
+import com.dawid.typepython.symtab.matching.NoMatchingFunctionExeption;
 import com.dawid.typepython.symtab.operator.CompareOperator;
 import com.dawid.typepython.symtab.operator.LogicalOperator;
 import com.dawid.typepython.symtab.operator.MathOperator;
-import com.dawid.typepython.generated.TypePythonParser;
 import com.dawid.typepython.symtab.scope.FunctionScope;
 import com.dawid.typepython.symtab.scope.GlobalScope;
 import com.dawid.typepython.symtab.scope.LocalScope;
@@ -21,17 +27,12 @@ import com.dawid.typepython.symtab.symbol.TypedSymbol;
 import com.dawid.typepython.symtab.symbol.UndefinedVariableException;
 import com.dawid.typepython.symtab.symbol.VariableSymbol;
 import com.dawid.typepython.symtab.symbol.VariableTypeMissmatchException;
-import com.dawid.typepython.symtab.embeded.ListSymbol;
-import com.dawid.typepython.symtab.embeded.function.EmbeddedFunction;
-import com.dawid.typepython.symtab.embeded.function.LenFunction;
-import com.dawid.typepython.symtab.embeded.function.PrintFunction;
-import com.dawid.typepython.symtab.matching.MatchType;
-import com.dawid.typepython.symtab.matching.MatchingResult;
-import com.dawid.typepython.symtab.matching.NoMatchingFunctionExeption;
+import com.dawid.typepython.symtab.type.GenericType;
 import com.dawid.typepython.symtab.type.SupportedGenericType;
 import com.dawid.typepython.symtab.type.SymbolType;
+import com.dawid.typepython.symtab.type.Type;
 import com.dawid.typepython.symtab.type.UnsupportedGenericTypeException;
-import com.dawid.typepython.symtab.type.VariableType;
+import com.dawid.typepython.symtab.type.collection.CollectionTypeAnalyzer;
 import org.antlr.v4.runtime.Token;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.SerializationUtils;
@@ -76,12 +77,12 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
                 .map(it -> (TypedSymbol) it)
                 .orElseGet(() -> new TypedSymbol("void", CppVariableType.VOID));
         codeWriter.startFunction();
-        codeWriter.write(returnType.getTypeName() + " " + ctx.IDENTIFIER());
+        codeWriter.write(returnType.getCppNameType() + " " + ctx.IDENTIFIER());
         visit(ctx.parameters());
         FunctionSymbol functionSymbol = new FunctionSymbol(ctx.IDENTIFIER().getText(), returnType.getVariableType(), parameters);
         validateFunctionUniqueness(functionSymbol);
         currentScope.addFunctionSymbol(functionSymbol);
-        FunctionScope functionScope = new FunctionScope(ScopeType.LOCAL, parameters, returnType);
+        FunctionScope functionScope = new FunctionScope(ScopeType.LOCAL, parameters, returnType.getVariableType());
         pushScope(functionScope);
 
         validReturnStatement(ctx, functionScope);
@@ -93,7 +94,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     }
 
     private void validateFunctionUniqueness(FunctionSymbol functionSymbol) {
-        MatchingResult result = currentScope.findFunction(functionSymbol.getText(), new ArrayList<>(functionSymbol.getParameters()));
+        MatchingResult result = currentScope.findFunction(functionSymbol.getText(), functionSymbol.getParameterTypes());
         if (result.getMatchType() == MatchType.FULL) {
             throw new FunctionAlreadyExistException("Function: " + functionSymbol.getText() + " already exist");
         }
@@ -117,7 +118,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     public Symbol visitReturnStatement(TypePythonParser.ReturnStatementContext ctx) {
         Symbol returnSymbol = visit(ctx.test());
         FunctionScope functionScope = currentScope.getFunctionScope();
-        TypedSymbol returnType = functionScope.getReturnType();
+        Type returnType = functionScope.getReturnType();
         if (returnType != null) {
             codeWriter.write("return " + returnSymbol.getText() + ";");
         }
@@ -130,7 +131,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         ofNullable(ctx.typeDeclarationArgsList()).ifPresent(this::visit);
         String parametersString = parameters
                 .stream()
-                .map(it -> it.getTypeName() + " " + it.getText())
+                .map(it -> it.getCppNameType() + " " + it.getText())
                 .collect(Collectors.joining(","));
         codeWriter.write(parametersString);
         codeWriter.write(")");
@@ -204,25 +205,27 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
                     .orElseThrow(() -> new UndefinedVariableException(collectionVariableName));
         } else {
             collection = variableSymbol;
-            collection.setText(collection.getTypeName() + collection.getText());
+            collection.setText(collection.getCppNameType() + collection.getText());
         }
 
         if (!collection.getVariableType().isCollection()) {
-            throw new VariableTypeMissmatchException(collectionVariableName + ": " + collection.getTypeName() + ". Expected collection type");
+            throw new VariableTypeMissmatchException(collectionVariableName + ": " + collection.getCppNameType() + ". Expected collection type");
         }
 
         CollectionClassSymbol genericCollection = (CollectionClassSymbol) collection;
-        TypedSymbol nested = genericCollection.getNested();
-        nested.setText(ctx.variable.getText());
-
-        pushScope(new LocalScope());
-        currentScope.addVariable(nested);
-        codeWriter.write("for (" + nested.getTypeName() + " " + nested.getText() +
-                " : " + genericCollection.getText() + ")");
-        visit(ctx.suite());
-
-        popScope();
-        return null;
+        //TODO instead get nested find iterator
+        throw new UnsupportedOperationException();
+//        TypedSymbol nested = genericCollection.getNested();
+//        nested.setText(ctx.variable.getText());
+//
+//        pushScope(new LocalScope());
+//        currentScope.addVariable(nested);
+//        codeWriter.write("for (" + nested.getCppNameType() + " " + nested.getText() +
+//                " : " + genericCollection.getText() + ")");
+//        visit(ctx.suite());
+//
+//        popScope();
+//        return null;
     }
 
     @Override
@@ -305,24 +308,21 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
                 .collect(Collectors.toList());
 
         String symbolText = symbols.stream().map(Symbol::getText).collect(Collectors.joining(","));
-        VariableType variableType = CollectionTypeAnalyzer.detectNestedType(new ArrayList<>(symbols));
-        VariableSymbol variableSymbol = symbols.get(0);
-        variableSymbol.setText(null);
-        variableSymbol.setVariableType(variableType);
+        List<Type> types = symbols.stream().map(TypedSymbol::getVariableType).collect(Collectors.toList());
+        Type variableType = CollectionTypeAnalyzer.detectNestedType(types);
 
-        if (variableSymbol instanceof CollectionClassSymbol) {
-            detectNested(symbols, (CollectionClassSymbol) variableSymbol);
-        }
-
-        return new ListSymbol("{" + symbolText + "}", LIST, variableSymbol);
+        return new ListSymbol("{" + symbolText + "}", new GenericType(LIST, ListSymbol.GENERIC_TEMPLATE_NAME, variableType));
     }
 
-    private void detectNested(List<? extends TypedSymbol> symbols, CollectionClassSymbol variableSymbol) {
-        List<TypedSymbol> nestedSymbols = symbols.stream().map(it -> ((CollectionClassSymbol) it).getNested()).collect(Collectors.toList());
-        TypedSymbol nested = variableSymbol.getNested();
-        nested.setVariableType(CollectionTypeAnalyzer.detectNestedType(nestedSymbols));
-        if (nested instanceof CollectionClassSymbol) {
-            detectNested(nestedSymbols, (CollectionClassSymbol) nested);
+    private void detectNested(List<Type> symbols, Type variableSymbol) {
+        List<Type> nestedSymbols = symbols
+                .stream()
+                .map(it -> ((GenericType) it).getTemplateType(ListSymbol.GENERIC_TEMPLATE_NAME))
+                .collect(Collectors.toList());
+        GenericType nested = (GenericType) ((GenericType) variableSymbol).getTemplateType(ListSymbol.GENERIC_TEMPLATE_NAME);
+        nested.setTemplateNameType(ListSymbol.GENERIC_TEMPLATE_NAME, CollectionTypeAnalyzer.detectNestedType(nestedSymbols));
+        if (nested instanceof GenericType) {
+            detectNested(nestedSymbols, nested);
         }
     }
 
@@ -378,7 +378,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
                     return new TypedSymbol(embeddedFunction.invoke(compoundTypedSymbol.getSymbols()), embeddedFunction.getVariableType());
                 }
 
-                MatchingResult resultFunctionMatching = currentScope.findFunction(atom.getText(), compoundTypedSymbol.getSymbols());
+                MatchingResult resultFunctionMatching = currentScope.findFunction(atom.getText(), compoundTypedSymbol.getVariableTypes());
                 if (resultFunctionMatching.getMatchType() == MatchType.NONE) {
                     throw new NoMatchingFunctionExeption();
                 }
@@ -430,7 +430,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
     private String getTrailerText(TypedSymbol symbol) {
         if (symbol instanceof CollectionClassSymbol && !symbol.isDeclaredInScope()) {
-            return symbol.getTypeName() + symbol.getText();
+            return symbol.getCppNameType() + symbol.getText();
         }
         return symbol.getText();
     }
@@ -444,11 +444,11 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
         TypedSymbol visit = (TypedSymbol) visit(ctx.type());
 
-        VariableType variableType = SupportedGenericType.translate(genericType);
+        Type variableType = SupportedGenericType.translate(genericType);
         if (variableType == LIST) {
-            return new ListSymbol(variableType, visit);
+            return new ListSymbol(new GenericType(variableType, ListSymbol.GENERIC_TEMPLATE_NAME, visit.getVariableType()));
         }
-        return new CollectionClassSymbol(variableType, visit);
+        throw new UnsupportedGenericTypeException(visit.getText());
     }
 
     @Override
@@ -483,7 +483,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         if (assignable.getVariableType() == null) {
             if (symbol instanceof ListSymbol) {
                 String text = assignable.getText();
-                assignable = new ListSymbol(symbol.getVariableType(), ((CollectionClassSymbol) symbol).getNested());
+                assignable = new ListSymbol(symbol.getVariableType());
                 assignable.setText(text);
             } else {
                 assignable.setVariableType(symbol.getVariableType());

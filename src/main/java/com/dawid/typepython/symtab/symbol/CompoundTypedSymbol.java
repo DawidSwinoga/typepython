@@ -1,7 +1,7 @@
 package com.dawid.typepython.symtab.symbol;
 
 import com.dawid.typepython.symtab.type.SymbolType;
-import com.dawid.typepython.symtab.type.VariableType;
+import com.dawid.typepython.symtab.type.Type;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -15,9 +15,10 @@ import java.util.stream.Collectors;
  */
 public class CompoundTypedSymbol extends VariableSymbol {
     @Getter
+    //Should be TypedSymbol
     private List<Symbol> symbols;
 
-    public CompoundTypedSymbol(List<Symbol> symbols, VariableType variableType) {
+    public CompoundTypedSymbol(List<Symbol> symbols, Type variableType) {
         super(variableType);
         this.symbols = symbols;
     }
@@ -32,14 +33,14 @@ public class CompoundTypedSymbol extends VariableSymbol {
         this.symbols = symbols;
     }
 
-    public static CompoundTypedSymbol of(VariableType variableType, VariableSymbol first, List<Symbol> symbols) {
+    public static CompoundTypedSymbol of(Type variableType, VariableSymbol first, List<Symbol> symbols) {
         List<Symbol> allSymbols = new ArrayList<>();
         allSymbols.add(first);
         allSymbols.addAll(symbols);
         return new CompoundTypedSymbol(allSymbols, variableType);
     }
 
-    public static CompoundTypedSymbol of(VariableType variableType, List<Symbol> symbols) {
+    public static CompoundTypedSymbol of(Type variableType, List<Symbol> symbols) {
         return new CompoundTypedSymbol(symbols, variableType);
     }
 
@@ -70,7 +71,16 @@ public class CompoundTypedSymbol extends VariableSymbol {
     }
 
     //TODO remove variableType. Compute variableType from passed symbols
-    public static CompoundTypedSymbol of(VariableType variableType, Symbol... symbols) {
+    public static CompoundTypedSymbol of(Type variableType, Symbol... symbols) {
         return new CompoundTypedSymbol(Arrays.asList(symbols), variableType);
+    }
+
+    public List<Type> getVariableTypes() {
+        return symbols
+                .stream()
+                .filter(it -> it instanceof TypedSymbol)
+                .map(it -> (TypedSymbol)it)
+                .map(it -> getVariableType())
+                .collect(Collectors.toList());
     }
 }

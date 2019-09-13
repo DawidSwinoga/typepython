@@ -1,11 +1,14 @@
 package com.dawid.typepython.symtab.type.collection;
 
-import com.dawid.typepython.symtab.symbol.TypedSymbol;
-import com.dawid.typepython.symtab.type.VariableType;
+import com.dawid.typepython.symtab.embeded.list.ListSymbol;
+import com.dawid.typepython.symtab.type.GenericType;
+import com.dawid.typepython.symtab.type.Type;
 import type.CppVariableType;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Created by Dawid on 21.07.2019 at 01:09.
@@ -13,8 +16,8 @@ import java.util.Optional;
 public class CollectionTypeAnalyzer {
 
 
-    public static VariableType detectNestedType(List<TypedSymbol> symbols) {
-        boolean collection = symbols.stream().map(TypedSymbol::getVariableType).anyMatch(VariableType::isCollection);
+    public static Type detectNestedType(List<Type> symbols) {
+        boolean collection = symbols.stream().allMatch(Type::isCollection);
 
         if (collection) {
             return detectCollectionType(symbols);
@@ -22,7 +25,7 @@ public class CollectionTypeAnalyzer {
         return findTheMostAccurateType(symbols);
     }
 
-    private static VariableType findTheMostAccurateType(List<TypedSymbol> symbols) {
+    private static Type findTheMostAccurateType(List<Type> symbols) {
         if (allSymbolsAreNumeric(symbols)) {
             return findTheMostAccurateNumericType(symbols);
         }
@@ -34,35 +37,43 @@ public class CollectionTypeAnalyzer {
         throw new CollectionTypesMissmatchException();
     }
 
-    private static boolean allSymbolsAreString(List<TypedSymbol> symbols) {
-        return symbols.stream().map(TypedSymbol::getVariableType).allMatch(CppVariableType.STRING::equals);
+    private static boolean allSymbolsAreString(List<Type> symbols) {
+        return symbols.stream().allMatch(CppVariableType.STRING::equals);
     }
 
-    private static VariableType findTheMostAccurateNumericType(List<TypedSymbol> symbols) {
-        VariableType currentType = symbols.stream().findFirst().map(TypedSymbol::getVariableType).orElse(CppVariableType.BOOLEAN);
+    private static Type findTheMostAccurateNumericType(List<Type> symbols) {
+        Type currentType = symbols.stream().findFirst().orElse(CppVariableType.BOOLEAN);
 
-        for (TypedSymbol typedSymbol : symbols) {
-            currentType = TypeTransitionCollectionInitialization.of(currentType, typedSymbol.getVariableType()).getAccurateType();
+        for (Type typedSymbol : symbols) {
+            currentType = TypeTransitionCollectionInitialization.of(currentType, typedSymbol).getAccurateType();
         }
 
         return currentType;
     }
 
-    private static boolean allSymbolsAreNumeric(List<TypedSymbol> symbols) {
-        return symbols.stream().map(TypedSymbol::getVariableType).allMatch(VariableType::isNumeric);
+    private static boolean allSymbolsAreNumeric(List<Type> symbols) {
+        return symbols.stream().allMatch(Type::isNumeric);
     }
 
-    private static VariableType detectCollectionType(List<TypedSymbol> symbols) {
-        Optional<TypedSymbol> first = symbols.stream().findFirst();
-        return first.map(it -> detectCollectionType(it, symbols)).orElseThrow(CollectionTypesMissmatchException::new);
+    private static Type detectCollectionType(List<Type> symbols) {
+        List<GenericType> types = symbols.stream().map(it -> (GenericType)it).collect(Collectors.toList());
+        Optional<GenericType> first = types.stream().findFirst();
+        return first.map(it -> detectCollectionType(it, types)).orElseThrow(CollectionTypesMissmatchException::new);
     }
 
-    private static VariableType detectCollectionType(TypedSymbol first, List<TypedSymbol> symbols) {
-        boolean collectionTypeMatch = symbols.stream().map(TypedSymbol::getVariableType).allMatch(it -> it.equals(first.getVariableType()));
+    private static Type detectCollectionType(GenericType first, List<GenericType> symbols) {
+        boolean collectionTypeMatch = symbols.stream().allMatch(it -> it.getGenericType().equals(first.getGenericType()));
         if (!collectionTypeMatch) {
-            throw new CollectionTypesMissmatchException("Collection types not parametersMatch to " + first.getVariableType().getPythonType());
+            throw new CollectionTypesMissmatchException("Collection elements types not match to " + first.getPythonType());
         }
 
-        return first.getVariableType();
+        Type templateType = detectNestedType(getTemplateTypes(symbols));
+        first.setTemplateNameType(ListSymbol.GENERIC_TEMPLATE_NAME, templateType);
+
+        return first;
+    }
+
+    private static List<Type> getTemplateTypes(List<GenericType> symbols) {
+        return symbols.stream().map(it -> it.getTemplateType(ListSymbol.GENERIC_TEMPLATE_NAME)).collect(Collectors.toList());
     }
 }

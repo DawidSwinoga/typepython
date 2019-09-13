@@ -2,20 +2,22 @@ package com.dawid.typepython.symtab.symbol;
 
 import com.dawid.typepython.symtab.matching.MatchType;
 import com.dawid.typepython.symtab.type.SymbolType;
-import com.dawid.typepython.symtab.type.TypeMatcher;
-import com.dawid.typepython.symtab.type.VariableType;
-import lombok.Data;
+import com.dawid.typepython.symtab.type.Type;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Created by Dawid on 07.07.2019 at 21:47.
  */
 
-@Data
-public class TypedSymbol extends Symbol implements TypeMatcher {
-    protected VariableType variableType;
+@Setter
+public class TypedSymbol extends Symbol {
+    @Getter
+    protected Type variableType;
+    @Getter
     private boolean collectionElement = false;
 
-    public TypedSymbol(VariableType variableType) {
+    public TypedSymbol(Type variableType) {
         this.variableType = variableType;
     }
 
@@ -23,7 +25,7 @@ public class TypedSymbol extends Symbol implements TypeMatcher {
         super(name);
     }
 
-    public TypedSymbol(String name, VariableType variableType) {
+    public TypedSymbol(String name, Type variableType) {
         super(name);
         this.variableType = variableType;
     }
@@ -32,7 +34,7 @@ public class TypedSymbol extends Symbol implements TypeMatcher {
         super(symbolType, text);
     }
 
-    public String getTypeName() {
+    public String getCppNameType() {
         return variableType.getCppNameType();
     }
 
@@ -41,8 +43,11 @@ public class TypedSymbol extends Symbol implements TypeMatcher {
         return collectionElement || super.isDeclaredInScope();
     }
 
-    @Override
     public MatchType match(TypedSymbol t) {
-        return variableType.match(t);
+        return variableType.match(t.getVariableType());
+    }
+
+    public boolean isCollection() {
+        return variableType.isCollection();
     }
 }

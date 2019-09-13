@@ -1,8 +1,8 @@
 package type;
 
-import com.dawid.typepython.symtab.symbol.TypedSymbol;
 import com.dawid.typepython.symtab.matching.MatchType;
-import com.dawid.typepython.symtab.type.VariableType;
+import com.dawid.typepython.symtab.type.Type;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import static java.util.Arrays.stream;
@@ -12,7 +12,7 @@ import static java.util.Arrays.stream;
  */
 
 @Getter
-public enum CppVariableType implements VariableType {
+public enum CppVariableType implements Type {
     INT("int", "int", true),
     LONG("long", "long long", true),
     DOUBLE("double", "double", true),
@@ -47,7 +47,7 @@ public enum CppVariableType implements VariableType {
         return pythonName;
     }
 
-    public static VariableType translate(String pythonName) {
+    public static Type translate(String pythonName) {
         return stream(values())
                 .filter(it -> it.getPythonName().equals(pythonName))
                 .findFirst()
@@ -55,8 +55,7 @@ public enum CppVariableType implements VariableType {
     }
 
     @Override
-    public MatchType match(TypedSymbol typedSymbol) {
-        VariableType variableType = typedSymbol.getVariableType();
+    public MatchType match(Type variableType) {
         if (this == variableType) {
             return MatchType.FULL;
         }

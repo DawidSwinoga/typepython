@@ -1,6 +1,6 @@
 package com.dawid.typepython.symtab.type.collection;
 
-import com.dawid.typepython.symtab.type.VariableType;
+import com.dawid.typepython.symtab.type.Type;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import type.CppVariableType;
@@ -14,10 +14,10 @@ import java.util.Map;
 @EqualsAndHashCode
 @AllArgsConstructor
 class TypeTransitionCollectionInitialization {
-    private VariableType currentType;
-    private VariableType nextType;
+    private Type currentType;
+    private Type nextType;
 
-    private static Map<TypeTransitionCollectionInitialization, VariableType> typeAccurateTransition = new HashMap<>();
+    private static Map<TypeTransitionCollectionInitialization, Type> typeAccurateTransition = new HashMap<>();
     static {
         typeAccurateTransition.put(of(CppVariableType.BOOLEAN, CppVariableType.INT), CppVariableType.INT);
         typeAccurateTransition.put(of(CppVariableType.BOOLEAN, CppVariableType.LONG), CppVariableType.LONG);
@@ -31,11 +31,11 @@ class TypeTransitionCollectionInitialization {
         typeAccurateTransition.put(of(CppVariableType.FLOAT, CppVariableType.DOUBLE), CppVariableType.DOUBLE);
     }
 
-    public static TypeTransitionCollectionInitialization of(VariableType currentType, VariableType nextType) {
+    public static TypeTransitionCollectionInitialization of(Type currentType, Type nextType) {
         return new TypeTransitionCollectionInitialization(currentType, nextType);
     }
 
-    public VariableType getAccurateType() {
+    public Type getAccurateType() {
         return typeAccurateTransition.getOrDefault(this, currentType);
     }
 }

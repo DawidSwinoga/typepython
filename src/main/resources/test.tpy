@@ -1,4 +1,1 @@
-def test(aa: list<int>): list<list<int>>:
-    return [aa]
-
-print(len(1))
+test = [["1","2"],["3","4","5.1"], ["d"]]

@@ -1,8 +1,8 @@
 package com.dawid.typepython.symtab.embeded.function;
 
+import com.dawid.typepython.symtab.matching.MatchType;
 import com.dawid.typepython.symtab.symbol.Symbol;
 import com.dawid.typepython.symtab.symbol.TypedSymbol;
-import com.dawid.typepython.symtab.matching.MatchType;
 import type.CppVariableType;
 
 import java.util.ArrayList;
@@ -30,8 +30,8 @@ public class PrintFunction extends EmbeddedFunction {
     }
 
     @Override
-    public MatchType match(TypedSymbol symbol) {
-        if (!symbol.getVariableType().isCollection()) {
+    public MatchType match(TypedSymbol variableType) {
+        if (!variableType.isCollection()) {
             return MatchType.FULL;
         } else {
             return MatchType.NONE;

@@ -7,6 +7,7 @@ import com.dawid.typepython.symtab.symbol.VariableSymbol;
 import com.dawid.typepython.symtab.matching.AmbiguousFunctionCallException;
 import com.dawid.typepython.symtab.matching.MatchType;
 import com.dawid.typepython.symtab.matching.MatchingResult;
+import com.dawid.typepython.symtab.type.Type;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -94,14 +95,14 @@ public abstract class Scope implements Serializable {
         return null;
     }
 
-    public MatchingResult findFunction(String text, List<Symbol> symbols) {
+    public MatchingResult findFunction(String text, List<Type> parameterTypes) {
         List<FunctionSymbol> functions = new ArrayList<>();
-        findFunction(text, symbols, functions);
+        findFunction(text, parameterTypes, functions);
 
         List<FunctionSymbol> partialMatchingFunction = new ArrayList<>();
 
         for (FunctionSymbol functionSymbol : functions) {
-            MatchType matchType = functionSymbol.parametersMatch(symbols);
+            MatchType matchType = functionSymbol.parametersMatch(parameterTypes);
             if (matchType == MatchType.FULL) {
                 return new MatchingResult(functionSymbol, matchType);
             }
@@ -122,7 +123,7 @@ public abstract class Scope implements Serializable {
         return new MatchingResult(partialMatchingFunction.get(0), MatchType.PARTIAL);
     }
 
-    private void findFunction(String text, List<Symbol> parameters, List<FunctionSymbol> functions) {
+    private void findFunction(String text, List<Type> parameters, List<FunctionSymbol> functions) {
         functionSymbols.stream()
                 .filter(it -> it.getText().equals(text))
                 .filter(it -> it.getParametersCount() == parameters.size())

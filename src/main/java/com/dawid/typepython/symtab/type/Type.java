@@ -1,6 +1,6 @@
 package com.dawid.typepython.symtab.type;
 
-public interface VariableType extends TypeMatcher {
+public interface Type extends TypeMatcher {
     String getCppNameType();
 
     boolean isCollection();
