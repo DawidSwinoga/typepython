@@ -1,5 +1,10 @@
 package com.dawid.typepython.symtab.type;
 
+import com.dawid.typepython.symtab.symbol.MethodSymbol;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public interface Type extends TypeMatcher {
     String getCppNameType();
 
@@ -12,4 +17,8 @@ public interface Type extends TypeMatcher {
     boolean isNumeric();
 
     String getPythonType();
+
+    default List<MethodSymbol> getMethodSymbol() {
+        return new ArrayList<>();
+    }
 }

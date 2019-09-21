@@ -29,4 +29,8 @@ public class ClassSymbol extends VariableSymbol {
     public ClassSymbol(SymbolType symbolType, String text) {
         super(symbolType, text);
     }
+
+    public void addMethod(MethodSymbol methodSymbol) {
+        methods.add(methodSymbol);
+    }
 }

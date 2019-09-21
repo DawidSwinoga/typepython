@@ -57,10 +57,10 @@ public class CompoundTypedSymbol extends VariableSymbol {
     }
 
     @Override
-    public String getText() {
-        String text = super.getText();
+    public String getDisplayText() {
+        String text = super.getDisplayText();
         if (text == null) {
-            return symbols.stream().filter(Objects::nonNull).map(Symbol::getText).collect(Collectors.joining(" "));
+            return symbols.stream().filter(Objects::nonNull).map(Symbol::getDisplayText).collect(Collectors.joining(" "));
         } else {
             return text;
         }

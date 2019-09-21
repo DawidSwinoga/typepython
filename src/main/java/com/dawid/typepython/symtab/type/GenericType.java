@@ -1,10 +1,13 @@
 package com.dawid.typepython.symtab.type;
 
 import com.dawid.typepython.symtab.matching.MatchType;
+import com.dawid.typepython.symtab.symbol.MethodSymbol;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -17,14 +20,14 @@ public class GenericType implements Type {
     @Getter
     private final Type genericType;
     private final Map<String, Type> templateNameType = new LinkedHashMap<>();
+    private final List<MethodSymbol> methodSymbols;
 
-    public GenericType(Type genericType) {
-        this.genericType = genericType;
-    }
 
-    public GenericType(Type genericType, String templateName, Type templateType) {
+    public GenericType(Type genericType, String templateName, Type templateType, List<MethodSymbol> methodSymbols) {
         this.genericType = genericType;
+        this.methodSymbols = methodSymbols;
         templateNameType.put(templateName, templateType);
+
     }
 
     public Type getTemplateType(String name) {
@@ -47,9 +50,9 @@ public class GenericType implements Type {
         if (!templateNameType.isEmpty()) {
             type.append("<");
             String nestedType = templateNameType
-                    .entrySet()
+                    .values()
                     .stream()
-                    .map(it -> it.getValue().getCppNameType())
+                    .map(Type::getCppNameType)
                     .collect(Collectors.joining(","));
             type.append(nestedType);
             type.append(">");
@@ -76,6 +79,11 @@ public class GenericType implements Type {
     @Override
     public String getPythonType() {
         return genericType.getPythonType();
+    }
+
+    @Override
+    public List<MethodSymbol> getMethodSymbol() {
+        return methodSymbols;
     }
 
     @Override

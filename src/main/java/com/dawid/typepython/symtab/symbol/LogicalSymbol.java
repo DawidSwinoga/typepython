@@ -15,7 +15,7 @@ public class LogicalSymbol extends Symbol {
         return SymbolType.LOGICAL_OPERATOR;
     }
 
-//    public static LogicalSymbol of(String text) {
+//    public static LogicalSymbol of(String displayText) {
 //        return new LogicalSymbol()
 //    }
 }

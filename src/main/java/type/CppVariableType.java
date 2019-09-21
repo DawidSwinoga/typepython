@@ -1,9 +1,13 @@
 package type;
 
 import com.dawid.typepython.symtab.matching.MatchType;
+import com.dawid.typepython.symtab.symbol.MethodSymbol;
 import com.dawid.typepython.symtab.type.Type;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.util.Arrays.stream;
 
@@ -45,6 +49,11 @@ public enum CppVariableType implements Type {
     @Override
     public String getPythonType() {
         return pythonName;
+    }
+
+    @Override
+    public List<MethodSymbol> getMethodSymbol() {
+        return new ArrayList<>();
     }
 
     public static Type translate(String pythonName) {

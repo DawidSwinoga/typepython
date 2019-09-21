@@ -4,7 +4,6 @@ import com.dawid.typepython.symtab.symbol.Symbol;
 import com.dawid.typepython.symtab.symbol.TypedSymbol;
 import com.dawid.typepython.symtab.matching.MatchType;
 import com.dawid.typepython.symtab.matching.NoMatchingFunctionExeption;
-import com.dawid.typepython.symtab.type.Type;
 import type.CppVariableType;
 
 import java.util.ArrayList;
@@ -25,7 +24,7 @@ public class LenFunction extends EmbeddedFunction {
             throw new NoMatchingFunctionExeption();
         }
 
-        stringBuilder.append(parameters.get(0).getText() + ".size()");
+        stringBuilder.append(parameters.get(0).getDisplayText() + ".size()");
 
         return stringBuilder.toString();
     }
