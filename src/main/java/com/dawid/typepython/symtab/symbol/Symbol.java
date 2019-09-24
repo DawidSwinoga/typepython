@@ -19,6 +19,7 @@ public class Symbol implements Serializable {
     protected SymbolType symbolType = SymbolType.TEXT;
 
     public Symbol(String text) {
+        this.name = text;
         this.displayText = text;
     }
 

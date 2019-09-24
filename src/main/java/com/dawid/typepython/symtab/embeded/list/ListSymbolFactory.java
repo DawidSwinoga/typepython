@@ -20,11 +20,12 @@ public class ListSymbolFactory {
 
         MethodSymbol iteratorSymbol = new MethodSymbol("iterator", templateType, new ArrayList<>());
         MethodSymbol getSymbol = new MethodSymbol("[]", templateType, Collections.singletonList(new TypedSymbol(CppVariableType.INT)));
-        MethodSymbol append = new MethodSymbol("append", templateType, Collections.singletonList(new TypedSymbol(templateType)));
+        MethodSymbol append = new MethodSymbol("append", CppVariableType.VOID, Collections.singletonList(new TypedSymbol(templateType)));
         append.setDisplayText("push_back");
+        MethodSymbol pop = new MethodSymbol("pop", CppVariableType.VOID,  Collections.singletonList(new TypedSymbol(CppVariableType.INT)));
+        pop.setDisplayText("erase");
 
         List<MethodSymbol> methods = new ArrayList<>();
-
         methods.add(iteratorSymbol);
         methods.add(getSymbol);
         methods.add(append);

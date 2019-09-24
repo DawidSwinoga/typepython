@@ -42,6 +42,7 @@ import type.CppVariableType;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -367,7 +368,9 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
         TypedSymbol resultSymbol = (TypedSymbol) atom;
 
-        for (Symbol trailerSymbol : trailerSymbols) {
+        ListIterator<Symbol> trailerSymbolIterator = trailerSymbols.listIterator();
+        while (trailerSymbolIterator.hasNext()) {
+            Symbol trailerSymbol = trailerSymbolIterator.next();
             if (trailerSymbol.getSymbolType() == SymbolType.FUNCTION_CALL) {
 
                 CompoundTypedSymbol compoundTypedSymbol = (CompoundTypedSymbol) trailerSymbol;
@@ -396,11 +399,34 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
                 element.setCollectionElement(true);
                 resultSymbol = element;
             }
+
+            if (trailerSymbol.getSymbolType() == SymbolType.FILED_IDENTIFIER && trailerSymbolIterator.hasNext()) {
+                Symbol next = trailerSymbolIterator.next();
+                if (next.getSymbolType() != SymbolType.FUNCTION_CALL) {
+                    trailerSymbolIterator.previous();
+                    break;
+                }
+
+                List<Symbol> parameters = ((CompoundTypedSymbol) next).getSymbols();
+                TypedSymbol element = SerializationUtils.clone(resultSymbol)
+                        .findMethod(trailerSymbol.getName(), parameters.stream()
+                                .map(it -> (TypedSymbol) it)
+                                .map(TypedSymbol::getVariableType)
+                                .collect(Collectors.toList()))
+                        .minPartial();
+                element.setDisplayText(resultSymbol.getDisplayText() + "." + element.getDisplayText() + next.getDisplayText());
+                element.setCollectionElement(true);
+                resultSymbol = element;
+            }
         }
 
         return resultSymbol;
     }
 
+    @Override
+    public Symbol visitTrailerIdentifier(TypePythonParser.TrailerIdentifierContext ctx) {
+        return new Symbol(SymbolType.FILED_IDENTIFIER, ctx.IDENTIFIER().getText());
+    }
 
     @Override
     public Symbol visitTrailerParenthesis(TypePythonParser.TrailerParenthesisContext ctx) {
@@ -414,7 +440,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
                     .collect(Collectors.joining(","));
             return CompoundTypedSymbol.of(arguments, SymbolType.FUNCTION_CALL, "(" + text + ")");
         }
-        return null;
+        return CompoundTypedSymbol.of(new ArrayList<>(), SymbolType.FUNCTION_CALL, "()");
     }
 
     @Override
