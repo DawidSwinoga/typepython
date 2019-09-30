@@ -22,13 +22,14 @@ public class ListSymbolFactory {
         MethodSymbol getSymbol = new MethodSymbol("[]", templateType, Collections.singletonList(new TypedSymbol(CppVariableType.INT)));
         MethodSymbol append = new MethodSymbol("append", CppVariableType.VOID, Collections.singletonList(new TypedSymbol(templateType)));
         append.setDisplayText("push_back");
-        MethodSymbol pop = new MethodSymbol("pop", CppVariableType.VOID,  Collections.singletonList(new TypedSymbol(CppVariableType.INT)));
+        MethodSymbol pop = new EraseMethodSymbol("delete", CppVariableType.VOID,  Collections.singletonList(new TypedSymbol(CppVariableType.INT)));
         pop.setDisplayText("erase");
 
         List<MethodSymbol> methods = new ArrayList<>();
         methods.add(iteratorSymbol);
         methods.add(getSymbol);
         methods.add(append);
+        methods.add(pop);
         GenericType variableType = new GenericType(SupportedGenericType.LIST, ListSymbol.GENERIC_TEMPLATE_NAME, templateType, methods);
         ListSymbol listSymbol = new ListSymbol(name, variableType);
         return listSymbol;

@@ -46,4 +46,8 @@ public class FunctionSymbol extends VariableSymbol {
 
         return matchType;
     }
+
+    public String invoke(Symbol invoker, List<Symbol> parameters) {
+        return "";
+    }
 }

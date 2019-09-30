@@ -19,15 +19,7 @@ import com.dawid.typepython.symtab.scope.GlobalScope;
 import com.dawid.typepython.symtab.scope.LocalScope;
 import com.dawid.typepython.symtab.scope.Scope;
 import com.dawid.typepython.symtab.scope.ScopeType;
-import com.dawid.typepython.symtab.symbol.CollectionClassSymbol;
-import com.dawid.typepython.symtab.symbol.CompoundTypedSymbol;
-import com.dawid.typepython.symtab.symbol.FunctionAlreadyExistException;
-import com.dawid.typepython.symtab.symbol.FunctionSymbol;
-import com.dawid.typepython.symtab.symbol.Symbol;
-import com.dawid.typepython.symtab.symbol.TypedSymbol;
-import com.dawid.typepython.symtab.symbol.UndefinedVariableException;
-import com.dawid.typepython.symtab.symbol.VariableSymbol;
-import com.dawid.typepython.symtab.symbol.VariableTypeMissmatchException;
+import com.dawid.typepython.symtab.symbol.*;
 import com.dawid.typepython.symtab.type.GenericType;
 import com.dawid.typepython.symtab.type.SupportedGenericType;
 import com.dawid.typepython.symtab.type.SymbolType;
@@ -408,13 +400,13 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
                 }
 
                 List<Symbol> parameters = ((CompoundTypedSymbol) next).getSymbols();
-                TypedSymbol element = SerializationUtils.clone(resultSymbol)
-                        .findMethod(trailerSymbol.getName(), parameters.stream()
+                FunctionSymbol element = SerializationUtils.clone(resultSymbol)
+                                                         .findMethod(trailerSymbol.getName(), parameters.stream()
                                 .map(it -> (TypedSymbol) it)
                                 .map(TypedSymbol::getVariableType)
                                 .collect(Collectors.toList()))
-                        .minPartial();
-                element.setDisplayText(resultSymbol.getDisplayText() + "." + element.getDisplayText() + next.getDisplayText());
+                                                         .minPartial();
+                element.setDisplayText(resultSymbol.getDisplayText() + "." + element.invoke(resultSymbol, parameters));
                 element.setCollectionElement(true);
                 resultSymbol = element;
             }

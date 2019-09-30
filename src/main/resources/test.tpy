@@ -3,9 +3,11 @@ def aa(): list<list<string>>:
 
 aa()[1].append("test")
 
-[1,2,3].append(1)
+dd = [1,2,3]
+dd.append(1)
 
-aa()[1].erase(1)
+test = aa()[1]
+test.delete(1)
 
 #for a in test:
 #    print("\n")
