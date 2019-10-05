@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  * Created by Dawid on 13.09.2019 at 16:55.
  */
 
-@EqualsAndHashCode
+@EqualsAndHashCode(exclude = "methodSymbols")
 public class GenericType implements Type {
     @Getter
     private final Type genericType;

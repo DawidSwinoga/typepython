@@ -48,10 +48,11 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     private List<TypedSymbol> parameters;
 
 
-    public TypePythonVisitor(CodeWriter codeWriter) {
+    public TypePythonVisitor(CodeWriter codeWriter, GlobalScope scope) {
         super();
         this.codeWriter = codeWriter;
         this.parameters = new ArrayList<>();
+        pushScope(scope);
     }
 
     @Override
@@ -469,7 +470,6 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
     @Override
     public Symbol visitFileInput(TypePythonParser.FileInputContext ctx) {
-        pushScope(new GlobalScope());
         currentScope.addFunctionSymbol(new PrintFunction());
         currentScope.addFunctionSymbol(new LenFunction());
         codeWriter.writeStartMain();
@@ -605,4 +605,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         parameters = new ArrayList<>();
     }
 
+    public Scope getCurrentScope() {
+        return currentScope;
+    }
 }

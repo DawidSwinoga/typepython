@@ -80,7 +80,7 @@ public class CompoundTypedSymbol extends VariableSymbol {
                 .stream()
                 .filter(it -> it instanceof TypedSymbol)
                 .map(it -> (TypedSymbol)it)
-                .map(it -> getVariableType())
+                .map(TypedSymbol::getVariableType)
                 .collect(Collectors.toList());
     }
 }
