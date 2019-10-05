@@ -15,11 +15,8 @@ public class FunctionScope extends Scope {
     public FunctionScope(ScopeType scopeType, List<TypedSymbol> parameters, Type returnType) {
         super(scopeType, parameters);
         this.parameters = parameters;
+        parameters.forEach(it -> it.setScope(this));
         this.returnType = returnType;
-    }
-
-    public void addParameters(List<VariableSymbol> parameters) {
-        this.parameters.addAll(parameters);
     }
 
     @Override

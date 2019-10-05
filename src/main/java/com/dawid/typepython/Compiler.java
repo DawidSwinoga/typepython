@@ -3,12 +3,12 @@ package com.dawid.typepython;
 import java.io.IOException;
 import java.io.InputStream;
 
-import com.dawid.typepython.cpp.code.CodeWriter;
 import com.dawid.typepython.cpp.code.ConsoleCodeWriter;
 import com.dawid.typepython.generated.TypePythonLexer;
 import com.dawid.typepython.generated.TypePythonParser;
 import com.dawid.typepython.generated.TypePythonParser.FileInputContext;
 import com.dawid.typepython.symtab.scope.GlobalScope;
+import com.dawid.typepython.symtab.scope.Scope;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -16,9 +16,14 @@ import org.antlr.v4.runtime.DiagnosticErrorListener;
 import org.antlr.v4.runtime.atn.PredictionMode;
 
 public class Compiler {
-    static void compile(String filePath, ConsoleCodeWriter codeWriter) throws IOException {
+    static Scope compile(String filePath, ConsoleCodeWriter codeWriter, GlobalScope scope) {
         InputStream inputFile = Main.class.getResourceAsStream(filePath);
-        CharStream inputStream = CharStreams.fromStream(inputFile);
+        CharStream inputStream = null;
+        try {
+            inputStream = CharStreams.fromStream(inputFile);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         TypePythonLexer typePythonLexer = new TokenTypePythonLexer(inputStream);
         CommonTokenStream commonTokenStream = new CommonTokenStream(typePythonLexer);
 
@@ -32,8 +37,9 @@ public class Compiler {
         codeWriter.writeInclude("#include <cmath>");
         codeWriter.writeInclude("#include <vector>");
         codeWriter.writeNamespace("using namespace std;");
-        TypePythonVisitor visitor = new TypePythonVisitor(codeWriter, new GlobalScope());
+        TypePythonVisitor visitor = new TypePythonVisitor(codeWriter, scope);
         visitor.visit(fileInputContext);
         codeWriter.finish();
+        return visitor.getCurrentScope();
     }
 }

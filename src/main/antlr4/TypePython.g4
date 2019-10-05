@@ -13,7 +13,7 @@ tokens { INDENT, DEDENT }
 }
 
 fileInput
-    : (NEWLINE | statement)* EOF
+    : (NEWLINE | importStatement | funcDefinition | statement)* EOF
     ;
 
 funcDefinition
@@ -73,7 +73,6 @@ smallStatement
     | executeStatement
     | passStatement
     | flowStatement
-    | importStatement
     ;
 
 executeStatement
@@ -103,7 +102,11 @@ returnStatement
     ;
 
 importStatement
-    : 'import' IDENTIFIER
+    : 'import' dottedIdentifier NEWLINE
+    ;
+
+dottedIdentifier
+    : IDENTIFIER (DOT IDENTIFIER)*
     ;
 
 assignable
@@ -120,7 +123,6 @@ compoundStatement
     : ifStatement
     | whileStatement
     | forStatement
-    | funcDefinition
     ;
 
 ifStatement: 'if' test ':' suite elifStatement* elseStatement?;

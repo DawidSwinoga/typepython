@@ -8,4 +8,8 @@ public class GlobalScope extends Scope {
     public GlobalScope(ScopeType type ) {
         super(type);
     }
+
+    public GlobalScope(ScopeType scopeType, String namespace) {
+        super(scopeType, namespace);
+    }
 }

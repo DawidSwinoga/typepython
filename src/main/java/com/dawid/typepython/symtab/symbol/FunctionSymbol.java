@@ -1,6 +1,7 @@
 package com.dawid.typepython.symtab.symbol;
 
 import com.dawid.typepython.symtab.matching.MatchType;
+import com.dawid.typepython.symtab.scope.Scope;
 import com.dawid.typepython.symtab.type.Type;
 import lombok.Getter;
 

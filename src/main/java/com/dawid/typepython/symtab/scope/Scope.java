@@ -7,6 +7,7 @@ import com.dawid.typepython.symtab.matching.AmbiguousFunctionCallException;
 import com.dawid.typepython.symtab.matching.MatchType;
 import com.dawid.typepython.symtab.matching.MatchingResult;
 import com.dawid.typepython.symtab.type.Type;
+import lombok.Getter;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -14,10 +15,11 @@ import java.util.List;
 import java.util.Optional;
 
 public abstract class Scope implements Serializable {
+    private String namespace;
     private Scope parentScope;
     private ScopeType scopeType;
-    private List<TypedSymbol> variables;
-    private List<FunctionSymbol> functionSymbols;
+    private List<TypedSymbol> variables = new ArrayList<>();
+    private List<FunctionSymbol> functionSymbols = new ArrayList<>();
 
     public Scope(ScopeType scopeType, List<TypedSymbol> symbols) {
         this.scopeType = scopeType;
@@ -25,10 +27,19 @@ public abstract class Scope implements Serializable {
         this.variables = symbols;
     }
 
+    public Scope(ScopeType scopeType, String namespace) {
+        this.scopeType = scopeType;
+        this.namespace = namespace;
+    }
+
     public Scope(ScopeType main) {
         scopeType = main;
         variables = new ArrayList<>();
         functionSymbols = new ArrayList<>();
+    }
+
+    public Optional<String> getNamespace() {
+        return Optional.ofNullable(namespace);
     }
 
     public boolean isLocalScope() {
@@ -44,7 +55,7 @@ public abstract class Scope implements Serializable {
     }
 
     public Optional<TypedSymbol> findAtom(String name) {
-        Optional<TypedSymbol> variable = variables.stream().filter(it -> it.getDisplayText().equals(name)).findFirst();
+        Optional<TypedSymbol> variable = variables.stream().filter(it -> it.getName().equals(name)).findFirst();
 
         if (!variable.isPresent()) {
             variable = Optional.of(findFunction(name)).filter(Optional::isPresent).map(Optional::get);
@@ -58,7 +69,7 @@ public abstract class Scope implements Serializable {
     }
 
     private Optional<FunctionSymbol> findFunction(String name) {
-        return functionSymbols.stream().filter(it -> it.getDisplayText().equals(name)).findFirst();
+        return functionSymbols.stream().filter(it -> it.getName().equals(name)).findFirst();
     }
 
     protected Optional<Scope> getParentScope() {
@@ -124,7 +135,7 @@ public abstract class Scope implements Serializable {
 
     private void findFunction(String text, List<Type> parameters, List<FunctionSymbol> functions) {
         functionSymbols.stream()
-                .filter(it -> it.getDisplayText().equals(text))
+                .filter(it -> it.getName().equals(text))
                 .filter(it -> it.getParametersCount() == parameters.size())
                 .forEach(functions::add);
 

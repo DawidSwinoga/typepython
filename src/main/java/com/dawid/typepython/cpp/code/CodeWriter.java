@@ -27,4 +27,10 @@ public interface CodeWriter {
     void startFunction();
 
     void endFunction();
+
+    void writeFunctionParameters(String functionParameters);
+
+    void writeFunctionDeclaration(String functionReturnType, String functionIdentifier);
+
+    void writeGlobalVariableDeclaration(TypedSymbol assignable, TypedSymbol symbol);
 }

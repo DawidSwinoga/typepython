@@ -1,6 +1,7 @@
 package com.dawid.typepython;
 
 import com.dawid.typepython.cpp.code.CodeWriter;
+import com.dawid.typepython.cpp.code.LibraryConsoleCodeWriter;
 import com.dawid.typepython.generated.TypePythonParser;
 import com.dawid.typepython.symtab.embeded.function.EmbeddedFunction;
 import com.dawid.typepython.symtab.embeded.function.LenFunction;
@@ -16,6 +17,7 @@ import com.dawid.typepython.symtab.operator.LogicalOperator;
 import com.dawid.typepython.symtab.operator.MathOperator;
 import com.dawid.typepython.symtab.scope.FunctionScope;
 import com.dawid.typepython.symtab.scope.GlobalScope;
+import com.dawid.typepython.symtab.scope.ImportScope;
 import com.dawid.typepython.symtab.scope.LocalScope;
 import com.dawid.typepython.symtab.scope.Scope;
 import com.dawid.typepython.symtab.scope.ScopeType;
@@ -27,6 +29,7 @@ import com.dawid.typepython.symtab.type.Type;
 import com.dawid.typepython.symtab.type.UnsupportedGenericTypeException;
 import com.dawid.typepython.symtab.type.collection.CollectionTypeAnalyzer;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import type.CppVariableType;
@@ -72,9 +75,10 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
                 .map(it -> (TypedSymbol) it)
                 .orElseGet(() -> new TypedSymbol("void", CppVariableType.VOID));
         codeWriter.startFunction();
-        codeWriter.write(returnType.getCppNameType() + " " + ctx.IDENTIFIER());
+        codeWriter.writeFunctionDeclaration(returnType.getCppNameType(), ctx.IDENTIFIER().getText());
         visit(ctx.parameters());
         FunctionSymbol functionSymbol = new FunctionSymbol(ctx.IDENTIFIER().getText(), returnType.getVariableType(), parameters);
+        functionSymbol.setScope(currentScope);
         validateFunctionUniqueness(functionSymbol);
         currentScope.addFunctionSymbol(functionSymbol);
         FunctionScope functionScope = new FunctionScope(ScopeType.LOCAL, parameters, returnType.getVariableType());
@@ -122,14 +126,12 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
     @Override
     public Symbol visitParameters(TypePythonParser.ParametersContext ctx) {
-        codeWriter.write("(");
         ofNullable(ctx.typeDeclarationArgsList()).ifPresent(this::visit);
         String parametersString = parameters
                 .stream()
                 .map(it -> it.getCppNameType() + " " + it.getDisplayText())
                 .collect(Collectors.joining(","));
-        codeWriter.write(parametersString);
-        codeWriter.write(")");
+        codeWriter.writeFunctionParameters("(" + parametersString + ")");
         return null;
     }
 
@@ -139,7 +141,6 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
                 .stream()
                 .map(this::visit)
                 .map(it -> (TypedSymbol) it)
-                .peek(it -> it.setScope(currentScope))
                 .collect(Collectors.toList());
         this.parameters.addAll(parameters);
         return null;
@@ -208,8 +209,9 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         }
 
 
-        TypedSymbol nested = collection.findMethod("iterator", new ArrayList<>()).fullMatch();
+        TypedSymbol nested =  SerializationUtils.clone(collection.findMethod("iterator", new ArrayList<>()).fullMatch());
         nested.setDisplayText(ctx.variable.getText());
+        nested.setName(ctx.variable.getText());
 
         pushScope(new LocalScope());
         currentScope.addVariable(nested);
@@ -269,6 +271,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     public Symbol visitVariableDeclaration(TypePythonParser.VariableDeclarationContext ctx) {
         TypedSymbol symbol = (TypedSymbol) visit(ctx.type());
         symbol.setDisplayText(ctx.IDENTIFIER().getText());
+        symbol.setName(ctx.IDENTIFIER().getText());
         return symbol;
     }
 
@@ -373,7 +376,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
                     return new TypedSymbol(embeddedFunction.invoke(compoundTypedSymbol.getSymbols()), embeddedFunction.getVariableType());
                 }
 
-                MatchingResult resultFunctionMatching = currentScope.findFunction(atom.getDisplayText(), compoundTypedSymbol.getVariableTypes());
+                MatchingResult resultFunctionMatching = currentScope.findFunction(atom.getName(), compoundTypedSymbol.getVariableTypes());
                 if (resultFunctionMatching.getMatchType() == MatchType.NONE) {
                     throw new NoMatchingFunctionExeption();
                 }
@@ -479,6 +482,23 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     }
 
     @Override
+    public Symbol visitImportStatement(TypePythonParser.ImportStatementContext ctx) {
+        Symbol visit = visit(ctx.dottedIdentifier());
+        String filePath = visit.getDisplayText();
+        String namespace = filePath.replaceAll("/", "_");
+        Compiler.compile("/" + filePath + ".tpy", new LibraryConsoleCodeWriter(filePath, namespace), new ImportScope(filePath, namespace));
+        codeWriter.writeMain(namespace + "::" + namespace + "();");
+        return null;
+    }
+
+    @Override
+    public Symbol visitDottedIdentifier(TypePythonParser.DottedIdentifierContext ctx) {
+        String path = ctx.IDENTIFIER().stream().map(ParseTree::getText).collect(Collectors.joining("/"));
+        codeWriter.writeInclude("#include \"" + path + ".h\"");
+        return new Symbol(path);
+    }
+
+    @Override
     public Symbol visitExecuteStatement(TypePythonParser.ExecuteStatementContext ctx) {
         Symbol atom = visit(ctx.atom());
         Symbol symbol = handleTrailerSymbols(ctx.trailer(), atom);
@@ -500,6 +520,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
             if (symbol instanceof ListSymbol) {
                 String text = assignable.getDisplayText();
                 assignable = new ListSymbol(symbol.getVariableType());
+                assignable.setName(text);
                 assignable.setDisplayText(text);
             } else {
                 assignable.setVariableType(symbol.getVariableType());

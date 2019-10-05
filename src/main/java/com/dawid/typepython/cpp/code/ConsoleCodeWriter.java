@@ -2,17 +2,21 @@ package com.dawid.typepython.cpp.code;
 
 import com.dawid.typepython.symtab.scope.Scope;
 import com.dawid.typepython.symtab.symbol.TypedSymbol;
+import lombok.Getter;
 
+@Getter
 public class ConsoleCodeWriter implements CodeWriter {
-    private StringBuilder global;
-    private StringBuilder main;
+    protected StringBuilder global;
+    protected StringBuilder main;
     private StringBuilder namespace;
     private StringBuilder include;
     private StringBuilder functionDeclaration;
     private Scope scope;
-    private StringBuilder cursor;
+    protected StringBuilder cursor;
+    private String fileName;
 
-    public ConsoleCodeWriter() {
+    public ConsoleCodeWriter(String fileName) {
+        this.fileName = fileName +".cpp";
         this.namespace = new StringBuilder();
         this.include = new StringBuilder();
         this.global = new StringBuilder();
@@ -56,6 +60,7 @@ public class ConsoleCodeWriter implements CodeWriter {
         all.append("\n");
         all.append(main);
         String code = all.toString();
+        System.out.println(fileName);
         System.out.println(code.replaceAll(";", ";\n"));
     }
 
@@ -90,6 +95,17 @@ public class ConsoleCodeWriter implements CodeWriter {
     }
 
     @Override
+    public void writeFunctionParameters(String functionParameters) {
+        cursor.append(functionParameters);
+    }
+
+    @Override
+    public void writeFunctionDeclaration(String functionReturnType, String functionIdentifier) {
+        String namespacePrefix = scope.getNamespace().map(it -> it + "::").orElse("");
+        cursor.append(functionReturnType).append(" ").append(namespacePrefix).append(functionIdentifier);
+    }
+
+    @Override
     public void startFunction() {
         cursor = functionDeclaration;
     }
@@ -102,8 +118,7 @@ public class ConsoleCodeWriter implements CodeWriter {
     @Override
     public void writeAssignment(TypedSymbol assignable, TypedSymbol symbol) {
         if (!assignable.isDeclaredInScope() && !scope.isLocalScope()) {
-            global.append(assignable.getCppNameType()).append(" ").append(assignable.getDisplayText()).append(";");
-            cursor.append(assignable.getDisplayText()).append(" = ").append(symbol.getDisplayText()).append(";");
+            writeGlobalVariableDeclaration(assignable, symbol);
         }
 
         if (assignable.isDeclaredInScope()) {
@@ -111,5 +126,11 @@ public class ConsoleCodeWriter implements CodeWriter {
         } else if (scope.isLocalScope()) {
             cursor.append(assignable.getCppNameType()).append(" ").append(assignable.getDisplayText()).append(" = ").append(symbol.getDisplayText()).append(";");
         }
+    }
+
+    @Override
+    public void writeGlobalVariableDeclaration(TypedSymbol assignable, TypedSymbol symbol) {
+        global.append(assignable.getCppNameType()).append(" ").append(assignable.getDisplayText()).append(";");
+        cursor.append(assignable.getDisplayText()).append(" = ").append(symbol.getDisplayText()).append(";");
     }
 }
