@@ -3,6 +3,7 @@ package com.dawid.typepython.symtab.symbol;
 import com.dawid.typepython.symtab.matching.AmbiguousFunctionCallException;
 import com.dawid.typepython.symtab.matching.MatchType;
 import com.dawid.typepython.symtab.matching.MatchingResult;
+import com.dawid.typepython.symtab.scope.Scope;
 import com.dawid.typepython.symtab.type.SymbolType;
 import com.dawid.typepython.symtab.type.Type;
 import lombok.Getter;
@@ -38,6 +39,10 @@ public class TypedSymbol extends Symbol {
 
     public TypedSymbol(SymbolType symbolType, String text) {
         super(symbolType, text);
+    }
+
+    public TypedSymbol(SymbolType symbolType, Scope scope) {
+        super(symbolType, scope);
     }
 
     public String getCppNameType() {

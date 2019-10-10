@@ -1,13 +1,14 @@
 package com.dawid.typepython.symtab.scope;
 
-import com.dawid.typepython.symtab.symbol.FunctionSymbol;
-import com.dawid.typepython.symtab.symbol.TypedSymbol;
-import com.dawid.typepython.symtab.symbol.VariableSymbol;
 import com.dawid.typepython.symtab.matching.AmbiguousFunctionCallException;
 import com.dawid.typepython.symtab.matching.MatchType;
 import com.dawid.typepython.symtab.matching.MatchingResult;
+import com.dawid.typepython.symtab.symbol.FunctionSymbol;
+import com.dawid.typepython.symtab.symbol.ImportSymbol;
+import com.dawid.typepython.symtab.symbol.TypedSymbol;
+import com.dawid.typepython.symtab.symbol.VariableSymbol;
+import com.dawid.typepython.symtab.type.SymbolType;
 import com.dawid.typepython.symtab.type.Type;
-import lombok.Getter;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ public abstract class Scope implements Serializable {
     private ScopeType scopeType;
     private List<TypedSymbol> variables = new ArrayList<>();
     private List<FunctionSymbol> functionSymbols = new ArrayList<>();
+    private List<ImportScope> importScopes = new ArrayList<>();
 
     public Scope(ScopeType scopeType, List<TypedSymbol> symbols) {
         this.scopeType = scopeType;
@@ -62,10 +64,23 @@ public abstract class Scope implements Serializable {
         }
 
         if (!variable.isPresent()) {
+            variable = findImport(name).map(it -> new ImportSymbol(SymbolType.IMPORT, it));
+        }
+
+        if (!variable.isPresent()) {
             variable = getParentScope().flatMap(it -> it.findAtom(name));
         }
 
         return variable;
+    }
+
+    private Optional<ImportScope> findImport(String name) {
+        return importScopes
+                .stream()
+                .filter(it -> it.getNamespace()
+                        .filter(namespace -> namespace.equals(name))
+                        .isPresent())
+                .findFirst();
     }
 
     private Optional<FunctionSymbol> findFunction(String name) {
@@ -142,5 +157,9 @@ public abstract class Scope implements Serializable {
         if (parentScope != null) {
             parentScope.findFunction(text, parameters, functions);
         }
+    }
+
+    public void addImportScope(ImportScope importScope) {
+        this.importScopes.add(importScope);
     }
 }

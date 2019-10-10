@@ -10,4 +10,5 @@ public enum SymbolType {
     FUNCTION_CALL,
     GET_COLLECTION_ELEMENT,
     FILED_IDENTIFIER,
+    IMPORT
 }

@@ -21,7 +21,15 @@ import com.dawid.typepython.symtab.scope.ImportScope;
 import com.dawid.typepython.symtab.scope.LocalScope;
 import com.dawid.typepython.symtab.scope.Scope;
 import com.dawid.typepython.symtab.scope.ScopeType;
-import com.dawid.typepython.symtab.symbol.*;
+import com.dawid.typepython.symtab.symbol.CollectionClassSymbol;
+import com.dawid.typepython.symtab.symbol.CompoundTypedSymbol;
+import com.dawid.typepython.symtab.symbol.FunctionAlreadyExistException;
+import com.dawid.typepython.symtab.symbol.FunctionSymbol;
+import com.dawid.typepython.symtab.symbol.Symbol;
+import com.dawid.typepython.symtab.symbol.TypedSymbol;
+import com.dawid.typepython.symtab.symbol.UndefinedVariableException;
+import com.dawid.typepython.symtab.symbol.VariableSymbol;
+import com.dawid.typepython.symtab.symbol.VariableTypeMissmatchException;
 import com.dawid.typepython.symtab.type.GenericType;
 import com.dawid.typepython.symtab.type.SupportedGenericType;
 import com.dawid.typepython.symtab.type.SymbolType;
@@ -209,7 +217,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         }
 
 
-        TypedSymbol nested =  SerializationUtils.clone(collection.findMethod("iterator", new ArrayList<>()).fullMatch());
+        TypedSymbol nested = SerializationUtils.clone(collection.findMethod("iterator", new ArrayList<>()).fullMatch());
         nested.setDisplayText(ctx.variable.getText());
         nested.setName(ctx.variable.getText());
 
@@ -405,13 +413,16 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
                 List<Symbol> parameters = ((CompoundTypedSymbol) next).getSymbols();
                 FunctionSymbol element = SerializationUtils.clone(resultSymbol)
-                                                         .findMethod(trailerSymbol.getName(), parameters.stream()
+                        .findMethod(trailerSymbol.getName(), parameters.stream()
                                 .map(it -> (TypedSymbol) it)
                                 .map(TypedSymbol::getVariableType)
                                 .collect(Collectors.toList()))
-                                                         .minPartial();
-                element.setDisplayText(resultSymbol.getDisplayText() + "." + element.invoke(resultSymbol, parameters));
-                element.setCollectionElement(true);
+                        .minPartial();
+                if (resultSymbol.getSymbolType() == SymbolType.IMPORT) {
+                    element.setDisplayText(resultSymbol.getDisplayText() + element.getDisplayText() + next.getDisplayText());
+                } else {
+                    element.setDisplayText(resultSymbol.getDisplayText() + "." + element.invoke(resultSymbol, parameters));
+                }
                 resultSymbol = element;
             }
         }
@@ -486,7 +497,8 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         Symbol visit = visit(ctx.dottedIdentifier());
         String filePath = visit.getDisplayText();
         String namespace = filePath.replaceAll("/", "_");
-        Compiler.compile("/" + filePath + ".tpy", new LibraryConsoleCodeWriter(filePath, namespace), new ImportScope(filePath, namespace));
+        Scope compile = Compiler.compile("/" + filePath + ".tpy", new LibraryConsoleCodeWriter(filePath, namespace), new ImportScope(filePath, namespace));
+        currentScope.addImportScope((ImportScope) compile);
         codeWriter.writeMain(namespace + "::" + namespace + "();");
         return null;
     }
@@ -542,7 +554,13 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
     @Override
     public Symbol visitIdentifierAtom(TypePythonParser.IdentifierAtomContext ctx) {
-        return currentScope.findAtom(ctx.getText()).orElseThrow(() -> new UndefinedVariableException(ctx.getText()));
+        TypedSymbol typedSymbol = currentScope.findAtom(ctx.getText()).orElseThrow(() -> new UndefinedVariableException(ctx.getText()));
+
+        if (typedSymbol.getSymbolType() == SymbolType.IMPORT) {
+            typedSymbol.getScope().ifPresent(this::pushScope);
+        }
+
+        return typedSymbol;
     }
 
     @Override

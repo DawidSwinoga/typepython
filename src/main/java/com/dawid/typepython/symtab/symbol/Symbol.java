@@ -4,7 +4,6 @@ import com.dawid.typepython.symtab.scope.Scope;
 import com.dawid.typepython.symtab.type.SymbolType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
@@ -31,8 +30,16 @@ public class Symbol implements Serializable {
         this.name = text;
     }
 
+    public Symbol(SymbolType symbolType, Scope scope) {
+        this.symbolType = symbolType;
+        this.scope = scope;
+    }
+
     public String getDisplayText() {
         if (StringUtils.isBlank(displayText)) {
+            if (StringUtils.isBlank(name)) {
+                return "";
+            }
             return name;
         }
 
