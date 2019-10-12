@@ -3,7 +3,6 @@ package com.dawid.typepython;
 import com.dawid.typepython.cpp.code.CodeWriter;
 import com.dawid.typepython.cpp.code.LibraryConsoleCodeWriter;
 import com.dawid.typepython.generated.TypePythonParser;
-import com.dawid.typepython.symtab.embeded.function.EmbeddedFunction;
 import com.dawid.typepython.symtab.embeded.function.LenFunction;
 import com.dawid.typepython.symtab.embeded.function.PrintFunction;
 import com.dawid.typepython.symtab.embeded.list.ListSymbol;
@@ -11,7 +10,7 @@ import com.dawid.typepython.symtab.embeded.list.ListSymbolFactory;
 import com.dawid.typepython.symtab.literal.BooleanLiteral;
 import com.dawid.typepython.symtab.matching.MatchType;
 import com.dawid.typepython.symtab.matching.MatchingResult;
-import com.dawid.typepython.symtab.matching.NoMatchingFunctionExeption;
+import com.dawid.typepython.symtab.matching.NoMatchingFunctionException;
 import com.dawid.typepython.symtab.operator.CompareOperator;
 import com.dawid.typepython.symtab.operator.LogicalOperator;
 import com.dawid.typepython.symtab.operator.MathOperator;
@@ -252,7 +251,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         Optional<Symbol> sign = ofNullable(ctx.sign).map(Token::getText).map(MathOperator::translate).map(Symbol::new);
         VariableSymbol visit = (VariableSymbol) visit(ctx.factor());
 
-        return sign.map(symbol -> (Symbol) CompoundTypedSymbol.of(visit.getVariableType(), symbol, visit)).orElse(visit);
+        return sign.map(symbol -> (Symbol) CompoundTypedSymbol.of(visit.getVariableType(), symbol.getDisplayText() + visit.getDisplayText(), symbol, visit)).orElse(visit);
     }
 
     @Override
@@ -378,15 +377,9 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
             if (trailerSymbol.getSymbolType() == SymbolType.FUNCTION_CALL) {
 
                 CompoundTypedSymbol compoundTypedSymbol = (CompoundTypedSymbol) trailerSymbol;
-
-                if (resultSymbol instanceof EmbeddedFunction) {
-                    EmbeddedFunction embeddedFunction = (EmbeddedFunction) resultSymbol;
-                    return new TypedSymbol(embeddedFunction.invoke(compoundTypedSymbol.getSymbols()), embeddedFunction.getVariableType());
-                }
-
                 MatchingResult resultFunctionMatching = currentScope.findFunction(atom.getName(), compoundTypedSymbol.getVariableTypes());
                 if (resultFunctionMatching.getMatchType() == MatchType.NONE) {
-                    throw new NoMatchingFunctionExeption();
+                    throw new NoMatchingFunctionException(atom.getName());
                 }
                 FunctionSymbol function = resultFunctionMatching.getFunctionSymbol();
                 //TODO add handling multiple trailers call

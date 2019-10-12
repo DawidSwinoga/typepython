@@ -3,6 +3,7 @@ package com.dawid.typepython.symtab.embeded.function;
 import com.dawid.typepython.symtab.matching.MatchType;
 import com.dawid.typepython.symtab.symbol.Symbol;
 import com.dawid.typepython.symtab.symbol.TypedSymbol;
+import com.dawid.typepython.symtab.type.Type;
 import type.CppVariableType;
 
 import java.util.ArrayList;
@@ -16,7 +17,8 @@ public class PrintFunction extends EmbeddedFunction {
         super("print", CppVariableType.VOID, new ArrayList<>());
     }
 
-    public String invoke(List<Symbol> parameters) {
+    @Override
+    public String invoke(Symbol invoker, List<Symbol> parameters) {
         StringBuilder stringBuilder = new StringBuilder();
 
         for (Symbol symbol : parameters) {
@@ -31,11 +33,17 @@ public class PrintFunction extends EmbeddedFunction {
     }
 
     @Override
-    public MatchType match(TypedSymbol variableType) {
-        if (!variableType.isCollection()) {
+    public MatchType parametersMatch(List<Type> parameterTypes) {
+        boolean basicType = parameterTypes.stream().noneMatch(Type::isCollection);
+        if (basicType) {
             return MatchType.FULL;
-        } else {
-            return MatchType.NONE;
         }
+
+        return MatchType.NONE;
+    }
+
+    @Override
+    public boolean parametersCountMatch(List<Type> parameters) {
+        return true;
     }
 }

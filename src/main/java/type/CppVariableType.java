@@ -3,7 +3,6 @@ package type;
 import com.dawid.typepython.symtab.matching.MatchType;
 import com.dawid.typepython.symtab.symbol.MethodSymbol;
 import com.dawid.typepython.symtab.type.Type;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -23,7 +22,7 @@ public enum CppVariableType implements Type {
     FLOAT("float", "float", true),
     BOOLEAN("bool", "bool", true),
     STRING("string", "string", false),
-    VOID(null, "void", false);
+    VOID("", "void", false);
 
 
     CppVariableType(String pythonName, String cppName, boolean numeric) {

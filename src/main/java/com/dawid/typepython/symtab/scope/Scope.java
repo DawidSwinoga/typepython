@@ -151,7 +151,7 @@ public abstract class Scope implements Serializable {
     private void findFunction(String text, List<Type> parameters, List<FunctionSymbol> functions) {
         functionSymbols.stream()
                 .filter(it -> it.getName().equals(text))
-                .filter(it -> it.getParametersCount() == parameters.size())
+                .filter(it -> it.parametersCountMatch(parameters))
                 .forEach(functions::add);
 
         if (parentScope != null) {

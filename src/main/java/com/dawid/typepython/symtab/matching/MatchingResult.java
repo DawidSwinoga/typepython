@@ -27,7 +27,7 @@ public class MatchingResult {
     }
 
     public FunctionSymbol get(MatchType minimumMatchType) {
-        return get(minimumMatchType, NoMatchingFunctionExeption::new);
+        return get(minimumMatchType, NoMatchingFunctionException::new);
     }
 
     public FunctionSymbol minPartial() {

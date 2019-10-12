@@ -1,7 +1,6 @@
 package com.dawid.typepython.symtab.symbol;
 
 import com.dawid.typepython.symtab.matching.MatchType;
-import com.dawid.typepython.symtab.scope.Scope;
 import com.dawid.typepython.symtab.type.Type;
 import lombok.Getter;
 
@@ -50,5 +49,9 @@ public class FunctionSymbol extends VariableSymbol {
 
     public String invoke(Symbol invoker, List<Symbol> parameters) {
         return "";
+    }
+
+    public boolean parametersCountMatch(List<Type> parameters) {
+        return getParametersCount() == parameters.size();
     }
 }

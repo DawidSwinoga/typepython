@@ -3,6 +3,7 @@ package com.dawid.typepython.symtab.symbol;
 import com.dawid.typepython.symtab.type.SymbolType;
 import com.dawid.typepython.symtab.type.Type;
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,6 +53,12 @@ public class CompoundTypedSymbol extends VariableSymbol {
         return new CompoundTypedSymbol(symbols, functionCall, text);
     }
 
+    public static Symbol of(Type variableType, String displayText, Symbol... symbols) {
+        CompoundTypedSymbol compoundTypedSymbol = new CompoundTypedSymbol(Arrays.asList(symbols), variableType);
+        compoundTypedSymbol.setDisplayText(displayText);
+        return compoundTypedSymbol;
+    }
+
     public long size() {
         return symbols.size();
     }
@@ -59,7 +66,7 @@ public class CompoundTypedSymbol extends VariableSymbol {
     @Override
     public String getDisplayText() {
         String text = super.getDisplayText();
-        if (text == null) {
+        if (StringUtils.isBlank(text)) {
             return symbols.stream().filter(Objects::nonNull).map(Symbol::getDisplayText).collect(Collectors.joining(" "));
         } else {
             return text;
