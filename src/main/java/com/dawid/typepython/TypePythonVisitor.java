@@ -420,6 +420,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
                         .minPartial();
                 if (resultSymbol.getSymbolType() == SymbolType.IMPORT) {
                     element.setDisplayText(resultSymbol.getDisplayText() + element.getDisplayText() + next.getDisplayText());
+                    popScope();
                 } else {
                     element.setDisplayText(resultSymbol.getDisplayText() + "." + element.invoke(resultSymbol, parameters));
                 }

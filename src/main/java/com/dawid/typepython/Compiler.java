@@ -1,8 +1,5 @@
 package com.dawid.typepython;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import com.dawid.typepython.cpp.code.ConsoleCodeWriter;
 import com.dawid.typepython.generated.TypePythonLexer;
 import com.dawid.typepython.generated.TypePythonParser;
@@ -15,10 +12,18 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.DiagnosticErrorListener;
 import org.antlr.v4.runtime.atn.PredictionMode;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 public class Compiler {
     static Scope compile(String filePath, ConsoleCodeWriter codeWriter, GlobalScope scope) {
         InputStream inputFile = Main.class.getResourceAsStream(filePath);
         CharStream inputStream = null;
+
+        if (inputFile == null) {
+            throw new FileNotFoundException(filePath);
+        }
+
         try {
             inputStream = CharStreams.fromStream(inputFile);
         } catch (IOException e) {

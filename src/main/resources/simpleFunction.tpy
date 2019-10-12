@@ -1,2 +1,4 @@
 def fun():
     print("Function invoked")
+
+print("Simple function file")

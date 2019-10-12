@@ -1,3 +1,10 @@
 import simpleFunction
 
+test = "test"
 simpleFunction.fun()
+print(test)
+
+def aaa():
+    print("aaaa")
+
+aaa()
