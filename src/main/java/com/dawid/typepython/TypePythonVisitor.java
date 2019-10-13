@@ -6,6 +6,7 @@ import com.dawid.typepython.generated.TypePythonParser;
 import com.dawid.typepython.symtab.FunctionResult;
 import com.dawid.typepython.symtab.embeded.function.FilterFunction;
 import com.dawid.typepython.symtab.embeded.function.LenFunction;
+import com.dawid.typepython.symtab.embeded.function.MapFunction;
 import com.dawid.typepython.symtab.embeded.function.PrintFunction;
 import com.dawid.typepython.symtab.embeded.list.ListSymbol;
 import com.dawid.typepython.symtab.embeded.list.ListSymbolFactory;
@@ -488,6 +489,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         currentScope.addFunctionSymbol(new PrintFunction());
         currentScope.addFunctionSymbol(new LenFunction());
         currentScope.addFunctionSymbol(new FilterFunction());
+        currentScope.addFunctionSymbol(new MapFunction());
         codeWriter.writeStartMain();
         ctx.children.forEach(this::visit);
         codeWriter.writeEndMain();
