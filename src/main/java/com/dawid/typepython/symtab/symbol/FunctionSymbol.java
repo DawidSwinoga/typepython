@@ -1,9 +1,12 @@
 package com.dawid.typepython.symtab.symbol;
 
+import com.dawid.typepython.symtab.FunctionResult;
 import com.dawid.typepython.symtab.matching.MatchType;
+import com.dawid.typepython.symtab.type.FunctionType;
 import com.dawid.typepython.symtab.type.Type;
 import lombok.Getter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -11,7 +14,12 @@ public class FunctionSymbol extends VariableSymbol {
     @Getter
     private final List<TypedSymbol> parameters;
 
-    public FunctionSymbol(String name, Type returnType, List<TypedSymbol> parameters) {
+    public FunctionSymbol(String name) {
+        super(name);
+        parameters = new ArrayList<>();
+    }
+
+    public FunctionSymbol(String name, FunctionType returnType, List<TypedSymbol> parameters) {
         super(name);
         this.parameters = parameters;
         this.variableType = returnType;
@@ -47,8 +55,9 @@ public class FunctionSymbol extends VariableSymbol {
         return matchType;
     }
 
-    public String invoke(Symbol invoker, List<Symbol> parameters) {
-        return "";
+    public FunctionResult invoke(Symbol invoker, List<Symbol> parameters) {
+        String text = getDisplayText() + "(" + parameters.stream().map(Symbol::getDisplayText).collect(Collectors.joining(", ")) + ")";
+        return new FunctionResult(text, null);
     }
 
     public boolean parametersCountMatch(List<Type> parameters) {

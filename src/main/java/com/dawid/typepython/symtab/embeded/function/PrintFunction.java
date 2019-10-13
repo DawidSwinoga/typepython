@@ -1,8 +1,10 @@
 package com.dawid.typepython.symtab.embeded.function;
 
+import com.dawid.typepython.symtab.FunctionResult;
 import com.dawid.typepython.symtab.matching.MatchType;
 import com.dawid.typepython.symtab.symbol.Symbol;
 import com.dawid.typepython.symtab.symbol.TypedSymbol;
+import com.dawid.typepython.symtab.type.FunctionType;
 import com.dawid.typepython.symtab.type.Type;
 import type.CppVariableType;
 
@@ -14,11 +16,11 @@ import java.util.List;
  */
 public class PrintFunction extends EmbeddedFunction {
     public PrintFunction() {
-        super("print", CppVariableType.VOID, new ArrayList<>());
+        super("print", new FunctionType(CppVariableType.VOID), new ArrayList<>());
     }
 
     @Override
-    public String invoke(Symbol invoker, List<Symbol> parameters) {
+    public FunctionResult invoke(Symbol invoker, List<Symbol> parameters) {
         StringBuilder stringBuilder = new StringBuilder();
 
         for (Symbol symbol : parameters) {
@@ -29,7 +31,7 @@ public class PrintFunction extends EmbeddedFunction {
             }
         }
 
-        return stringBuilder.toString();
+        return new FunctionResult(stringBuilder.toString(), getVariableType());
     }
 
     @Override

@@ -3,6 +3,8 @@ package com.dawid.typepython;
 import com.dawid.typepython.cpp.code.CodeWriter;
 import com.dawid.typepython.cpp.code.LibraryConsoleCodeWriter;
 import com.dawid.typepython.generated.TypePythonParser;
+import com.dawid.typepython.symtab.FunctionResult;
+import com.dawid.typepython.symtab.embeded.function.FilterFunction;
 import com.dawid.typepython.symtab.embeded.function.LenFunction;
 import com.dawid.typepython.symtab.embeded.function.PrintFunction;
 import com.dawid.typepython.symtab.embeded.list.ListSymbol;
@@ -29,6 +31,7 @@ import com.dawid.typepython.symtab.symbol.TypedSymbol;
 import com.dawid.typepython.symtab.symbol.UndefinedVariableException;
 import com.dawid.typepython.symtab.symbol.VariableSymbol;
 import com.dawid.typepython.symtab.symbol.VariableTypeMissmatchException;
+import com.dawid.typepython.symtab.type.FunctionType;
 import com.dawid.typepython.symtab.type.GenericType;
 import com.dawid.typepython.symtab.type.SupportedGenericType;
 import com.dawid.typepython.symtab.type.SymbolType;
@@ -84,7 +87,8 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         codeWriter.startFunction();
         codeWriter.writeFunctionDeclaration(returnType.getCppNameType(), ctx.IDENTIFIER().getText());
         visit(ctx.parameters());
-        FunctionSymbol functionSymbol = new FunctionSymbol(ctx.IDENTIFIER().getText(), returnType.getVariableType(), parameters);
+        List<Type> parametersTypes = parameters.stream().map(TypedSymbol::getVariableType).collect(Collectors.toList());
+        FunctionSymbol functionSymbol = new FunctionSymbol(ctx.IDENTIFIER().getText(), new FunctionType(returnType.getVariableType(), parametersTypes), parameters);
         functionSymbol.setScope(currentScope);
         validateFunctionUniqueness(functionSymbol);
         currentScope.addFunctionSymbol(functionSymbol);
@@ -382,9 +386,10 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
                     throw new NoMatchingFunctionException(atom.getName());
                 }
                 FunctionSymbol function = resultFunctionMatching.getFunctionSymbol();
-                //TODO add handling multiple trailers call
                 resultSymbol = SerializationUtils.clone(function);
-                resultSymbol.setDisplayText(function.getDisplayText() + trailerSymbol.getDisplayText());
+                FunctionResult invoke = function.invoke(resultSymbol, compoundTypedSymbol.getSymbols());
+                resultSymbol.setDisplayText(invoke.getDisplayText());
+                resultSymbol.setVariableType(invoke.getType());
             }
 
             if (trailerSymbol.getSymbolType() == SymbolType.GET_COLLECTION_ELEMENT) {
@@ -415,7 +420,9 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
                     element.setDisplayText(resultSymbol.getDisplayText() + element.getDisplayText() + next.getDisplayText());
                     popScope();
                 } else {
-                    element.setDisplayText(resultSymbol.getDisplayText() + "." + element.invoke(resultSymbol, parameters));
+                    FunctionResult functionResult = element.invoke(resultSymbol, parameters);
+                    element.setDisplayText(resultSymbol.getDisplayText() + "." + functionResult.getDisplayText());
+                    element.setVariableType(functionResult.getType());
                 }
                 resultSymbol = element;
             }
@@ -480,6 +487,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     public Symbol visitFileInput(TypePythonParser.FileInputContext ctx) {
         currentScope.addFunctionSymbol(new PrintFunction());
         currentScope.addFunctionSymbol(new LenFunction());
+        currentScope.addFunctionSymbol(new FilterFunction());
         codeWriter.writeStartMain();
         ctx.children.forEach(this::visit);
         codeWriter.writeEndMain();

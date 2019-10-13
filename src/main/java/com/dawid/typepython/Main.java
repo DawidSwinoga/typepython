@@ -10,9 +10,9 @@ import java.io.IOException;
  */
 public class Main {
     public static void main(String[] args) throws IOException {
-//        String fileName = "/bubble_sort";
+        String fileName = "/bubble_sort";
 //        String fileName = "/import";
-        String fileName = "/filter";
+//        String fileName = "/filter";
 //        String fileName = "/prime_numbers";
 //        String fileName = "/factorial";
         Compiler.compile(fileName + ".tpy", new ConsoleCodeWriter(fileName), new GlobalScope());
