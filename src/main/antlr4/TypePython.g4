@@ -165,7 +165,7 @@ atomExpression: atom trailer*;
 
 
 atom
-    : '(' (arguments)? ')'          #conditionalTupleAtom
+    : '(' (arguments) ')'           #conditionalTupleAtom
     | '[' (arguments)? ']'          #listAtom
     | '{' (dictorySetMakers)? '}'   #dictorySetMakersAtom
     | literal                       #literalAtom

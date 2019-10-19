@@ -10,6 +10,7 @@ import com.dawid.typepython.symtab.embeded.function.MapFunction;
 import com.dawid.typepython.symtab.embeded.function.PrintFunction;
 import com.dawid.typepython.symtab.embeded.list.ListSymbol;
 import com.dawid.typepython.symtab.embeded.list.ListSymbolFactory;
+import com.dawid.typepython.symtab.embeded.vector.TupleSymbolFactory;
 import com.dawid.typepython.symtab.literal.BooleanLiteral;
 import com.dawid.typepython.symtab.matching.MatchType;
 import com.dawid.typepython.symtab.matching.MatchingResult;
@@ -32,11 +33,13 @@ import com.dawid.typepython.symtab.symbol.TypedSymbol;
 import com.dawid.typepython.symtab.symbol.UndefinedVariableException;
 import com.dawid.typepython.symtab.symbol.VariableSymbol;
 import com.dawid.typepython.symtab.symbol.VariableTypeMissmatchException;
+import com.dawid.typepython.symtab.type.ElementDoesNotSupportAssignmentException;
 import com.dawid.typepython.symtab.type.FunctionType;
 import com.dawid.typepython.symtab.type.GenericType;
 import com.dawid.typepython.symtab.type.SupportedGenericType;
 import com.dawid.typepython.symtab.type.SymbolType;
 import com.dawid.typepython.symtab.type.Type;
+import com.dawid.typepython.symtab.type.TypeNotDefinedException;
 import com.dawid.typepython.symtab.type.UnsupportedGenericTypeException;
 import com.dawid.typepython.symtab.type.collection.CollectionTypeAnalyzer;
 import org.antlr.v4.runtime.Token;
@@ -272,7 +275,17 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
             if (visit.size() == 1) {
                 return CompoundTypedSymbol.of(visit.getVariableType(), new Symbol("("), visit, new Symbol(")"));
             } else {
-                throw new UnsupportedOperationException();
+                List<VariableSymbol> symbols = ctx.arguments().argument()
+                        .stream()
+                        .map(this::visit)
+                        .map(it -> (VariableSymbol) it)
+                        .collect(Collectors.toList());
+
+                String symbolText = symbols.stream().map(Symbol::getDisplayText).collect(Collectors.joining(","));
+                List<Type> types = symbols.stream().map(TypedSymbol::getVariableType).collect(Collectors.toList());
+                Type variableType = CollectionTypeAnalyzer.detectNestedType(types);
+
+                return TupleSymbolFactory.create("{" + symbolText + "}", variableType);
             }
         }
 
@@ -305,8 +318,10 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
     @Override
     public Symbol visitListAtom(TypePythonParser.ListAtomContext ctx) {
-        if (ctx.arguments().isEmpty()) {
-            return new ListSymbol(LIST);
+        if (ctx.arguments() == null) {
+            ListSymbol listSymbol = ListSymbolFactory.create("", null);
+            listSymbol.setDisplayText("{}");
+            return listSymbol;
         }
 
         List<VariableSymbol> symbols = ctx.arguments().argument()
@@ -391,6 +406,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
                 FunctionResult invoke = function.invoke(resultSymbol, compoundTypedSymbol.getSymbols());
                 resultSymbol.setDisplayText(invoke.getDisplayText());
                 resultSymbol.setVariableType(invoke.getType());
+                resultSymbol.setAssignable(invoke.isAssignable());
             }
 
             if (trailerSymbol.getSymbolType() == SymbolType.GET_COLLECTION_ELEMENT) {
@@ -422,6 +438,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
                     popScope();
                 } else {
                     FunctionResult functionResult = element.invoke(resultSymbol, parameters);
+                    element.setAssignable(functionResult.isAssignable());
                     element.setDisplayText(resultSymbol.getDisplayText() + "." + functionResult.getDisplayText());
                     element.setVariableType(functionResult.getType());
                 }
@@ -528,12 +545,19 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         TypedSymbol assignable = (TypedSymbol) visit(ctx.assignable());
         TypedSymbol symbol = (TypedSymbol) visit(ctx.test());
 
+        if (!assignable.isAssignable()) {
+            throw new ElementDoesNotSupportAssignmentException(assignable.getDisplayText());
+        }
+
         if (symbol.getVariableType() == null) {
             throw new RuntimeException();
         }
 
         if (assignable.getVariableType() == null) {
             if (symbol instanceof ListSymbol) {
+                if (((GenericType) symbol.getVariableType()).getTemplateType(ListSymbol.GENERIC_TEMPLATE_NAME) == null) {
+                    throw new TypeNotDefinedException(assignable.getDisplayText());
+                }
                 String text = assignable.getDisplayText();
                 assignable = new ListSymbol(symbol.getVariableType());
                 assignable.setName(text);

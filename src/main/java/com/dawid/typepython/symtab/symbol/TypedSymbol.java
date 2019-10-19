@@ -23,6 +23,7 @@ public class TypedSymbol extends Symbol {
     protected Type variableType;
     @Getter
     private boolean collectionElement = false;
+    private boolean assignable = true;
 
     public TypedSymbol(Type variableType) {
         this.variableType = variableType;
@@ -47,6 +48,10 @@ public class TypedSymbol extends Symbol {
 
     public String getCppNameType() {
         return variableType.getCppNameType();
+    }
+
+    public boolean isAssignable() {
+        return assignable;
     }
 
     @Override

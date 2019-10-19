@@ -19,9 +19,9 @@ import java.util.List;
 public class ListSymbolFactory {
     public static ListSymbol create(String name, Type templateType) {
 
-        MethodSymbol iteratorSymbol = new MethodSymbol("iterator", new FunctionType(templateType), new ArrayList<>());
-        MethodSymbol getSymbol = new MethodSymbol("[]", new FunctionType(templateType), Collections.singletonList(new TypedSymbol(CppVariableType.INT)));
-        MethodSymbol append = new MethodSymbol("append", new FunctionType(CppVariableType.VOID), Collections.singletonList(new TypedSymbol(templateType)));
+        MethodSymbol iteratorSymbol = new MethodSymbol("iterator", new FunctionType(templateType), new ArrayList<>(), false);
+        MethodSymbol getSymbol = new MethodSymbol("[]", new FunctionType(templateType), Collections.singletonList(new TypedSymbol(CppVariableType.INT)), false);
+        MethodSymbol append = new MethodSymbol("append", new FunctionType(CppVariableType.VOID), Collections.singletonList(new TypedSymbol(templateType)), false);
         append.setDisplayText("push_back");
         MethodSymbol pop = new EraseMethodSymbol("delete", new FunctionType(CppVariableType.VOID),  Collections.singletonList(new TypedSymbol(CppVariableType.INT)));
         pop.setDisplayText("erase");

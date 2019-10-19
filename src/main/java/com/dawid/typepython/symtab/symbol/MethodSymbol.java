@@ -7,6 +7,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class MethodSymbol extends FunctionSymbol {
+    private boolean returnTypeAssignable;
+
+    public MethodSymbol(String name, FunctionType returnType, List<TypedSymbol> parameters,  boolean returnTypeAssignable) {
+        super(name, returnType, parameters);
+        this.returnTypeAssignable = returnTypeAssignable;
+    }
+
     public MethodSymbol(String name, FunctionType returnType, List<TypedSymbol> parameters) {
         super(name, returnType, parameters);
     }
@@ -14,6 +21,6 @@ public class MethodSymbol extends FunctionSymbol {
     @Override
     public FunctionResult invoke(Symbol invoker, List<Symbol> parameters) {
         String text = getDisplayText() + "(" + parameters.stream().map(Symbol::getDisplayText).collect(Collectors.joining(",")) + ")";
-        return new FunctionResult(text, getVariableType());
+        return new FunctionResult(text, getVariableType(), returnTypeAssignable);
     }
 }
