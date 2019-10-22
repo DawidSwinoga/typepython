@@ -5,7 +5,6 @@ import com.dawid.typepython.symtab.type.GenericType;
 import com.dawid.typepython.symtab.type.Type;
 import type.CppVariableType;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -13,7 +12,7 @@ import java.util.stream.Collectors;
 /**
  * Created by Dawid on 21.07.2019 at 01:09.
  */
-public class CollectionTypeAnalyzer {
+public class TypeAnalyzer {
 
 
     public static Type detectNestedType(List<Type> symbols) {

@@ -16,7 +16,7 @@ public class Main {
 //        String fileName = "/prime_numbers";
 //        String fileName = "/factorial";
 //        String fileName = "/map";
-        String fileName = "/vector";
+        String fileName = "/tuple";
         Compiler.compile(fileName + ".tpy", new ConsoleCodeWriter(fileName), new GlobalScope());
     }
 

@@ -41,7 +41,7 @@ import com.dawid.typepython.symtab.type.SymbolType;
 import com.dawid.typepython.symtab.type.Type;
 import com.dawid.typepython.symtab.type.TypeNotDefinedException;
 import com.dawid.typepython.symtab.type.UnsupportedGenericTypeException;
-import com.dawid.typepython.symtab.type.collection.CollectionTypeAnalyzer;
+import com.dawid.typepython.symtab.type.collection.TypeAnalyzer;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.commons.collections4.CollectionUtils;
@@ -49,6 +49,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import type.CppVariableType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
@@ -242,16 +243,21 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     public Symbol visitAdditiveExpression(TypePythonParser.AdditiveExpressionContext ctx) {
         TypedSymbol left = (TypedSymbol) visit(ctx.expr());
         Symbol mathOperator = new Symbol(MathOperator.translate(ctx.operator.getText()));
-        Symbol right = visit(ctx.term());
-        return CompoundTypedSymbol.of(left.getVariableType(), left, mathOperator, right);
+        TypedSymbol right = (TypedSymbol)visit(ctx.term());
+        return CompoundTypedSymbol.of(detectAccurateType(left, right), left, mathOperator, right);
     }
 
     @Override
     public Symbol visitMultiplicativeExpression(TypePythonParser.MultiplicativeExpressionContext ctx) {
         TypedSymbol left = (TypedSymbol) visit(ctx.term());
         Symbol mathOperator = new Symbol(MathOperator.translate(ctx.operator.getText()));
-        Symbol right = visit(ctx.factor());
-        return CompoundTypedSymbol.of(left.getVariableType(), left, mathOperator, right);
+        TypedSymbol right = (TypedSymbol)visit(ctx.factor());
+        return CompoundTypedSymbol.of(detectAccurateType(left, right), left, mathOperator, right);
+    }
+
+    private Type detectAccurateType(TypedSymbol ... typedSymbols) {
+        List<Type> types = Arrays.stream(typedSymbols).map(TypedSymbol::getVariableType).collect(Collectors.toList());
+        return TypeAnalyzer.detectNestedType(types);
     }
 
     @Override
@@ -283,7 +289,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
                 String symbolText = symbols.stream().map(Symbol::getDisplayText).collect(Collectors.joining(","));
                 List<Type> types = symbols.stream().map(TypedSymbol::getVariableType).collect(Collectors.toList());
-                Type variableType = CollectionTypeAnalyzer.detectNestedType(types);
+                Type variableType = TypeAnalyzer.detectNestedType(types);
 
                 return TupleSymbolFactory.create("{" + symbolText + "}", variableType);
             }
@@ -332,7 +338,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
         String symbolText = symbols.stream().map(Symbol::getDisplayText).collect(Collectors.joining(","));
         List<Type> types = symbols.stream().map(TypedSymbol::getVariableType).collect(Collectors.toList());
-        Type variableType = CollectionTypeAnalyzer.detectNestedType(types);
+        Type variableType = TypeAnalyzer.detectNestedType(types);
 
         return ListSymbolFactory.create("{" + symbolText + "}", variableType);
     }
@@ -343,7 +349,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
                 .map(it -> ((GenericType) it).getTemplateType(ListSymbol.GENERIC_TEMPLATE_NAME))
                 .collect(Collectors.toList());
         GenericType nested = (GenericType) ((GenericType) variableSymbol).getTemplateType(ListSymbol.GENERIC_TEMPLATE_NAME);
-        nested.setTemplateNameType(ListSymbol.GENERIC_TEMPLATE_NAME, CollectionTypeAnalyzer.detectNestedType(nestedSymbols));
+        nested.setTemplateNameType(ListSymbol.GENERIC_TEMPLATE_NAME, TypeAnalyzer.detectNestedType(nestedSymbols));
         if (nested instanceof GenericType) {
             detectNested(nestedSymbols, nested);
         }
