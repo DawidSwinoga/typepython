@@ -41,6 +41,7 @@ public class Compiler {
         codeWriter.writeInclude("#include <iostream>");
         codeWriter.writeInclude("#include <cmath>");
         codeWriter.writeInclude("#include <vector>");
+        codeWriter.writeInclude("#include <set>");
         codeWriter.writeInclude("#include \"stdtpy/stdtpy.h\"");
         codeWriter.writeNamespace("using namespace std;");
         TypePythonVisitor visitor = new TypePythonVisitor(codeWriter, scope);

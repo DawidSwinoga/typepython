@@ -343,6 +343,11 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         return ListSymbolFactory.create("{" + symbolText + "}", variableType);
     }
 
+    @Override
+    public Symbol visitSetAtom(TypePythonParser.SetAtomContext ctx) {
+        return super.visitSetAtom(ctx);
+    }
+
     private void detectNested(List<Type> symbols, Type variableSymbol) {
         List<Type> nestedSymbols = symbols
                 .stream()
