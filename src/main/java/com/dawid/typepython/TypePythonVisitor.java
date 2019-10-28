@@ -8,8 +8,9 @@ import com.dawid.typepython.symtab.embeded.function.FilterFunction;
 import com.dawid.typepython.symtab.embeded.function.LenFunction;
 import com.dawid.typepython.symtab.embeded.function.MapFunction;
 import com.dawid.typepython.symtab.embeded.function.PrintFunction;
-import com.dawid.typepython.symtab.embeded.list.ListSymbol;
 import com.dawid.typepython.symtab.embeded.list.ListSymbolFactory;
+import com.dawid.typepython.symtab.embeded.list.StandardCollectionSymbol;
+import com.dawid.typepython.symtab.embeded.set.SetSymbolFactory;
 import com.dawid.typepython.symtab.embeded.vector.TupleSymbolFactory;
 import com.dawid.typepython.symtab.literal.BooleanLiteral;
 import com.dawid.typepython.symtab.matching.MatchType;
@@ -243,7 +244,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     public Symbol visitAdditiveExpression(TypePythonParser.AdditiveExpressionContext ctx) {
         TypedSymbol left = (TypedSymbol) visit(ctx.expr());
         Symbol mathOperator = new Symbol(MathOperator.translate(ctx.operator.getText()));
-        TypedSymbol right = (TypedSymbol)visit(ctx.term());
+        TypedSymbol right = (TypedSymbol) visit(ctx.term());
         return CompoundTypedSymbol.of(detectAccurateType(left, right), left, mathOperator, right);
     }
 
@@ -251,11 +252,11 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     public Symbol visitMultiplicativeExpression(TypePythonParser.MultiplicativeExpressionContext ctx) {
         TypedSymbol left = (TypedSymbol) visit(ctx.term());
         Symbol mathOperator = new Symbol(MathOperator.translate(ctx.operator.getText()));
-        TypedSymbol right = (TypedSymbol)visit(ctx.factor());
+        TypedSymbol right = (TypedSymbol) visit(ctx.factor());
         return CompoundTypedSymbol.of(detectAccurateType(left, right), left, mathOperator, right);
     }
 
-    private Type detectAccurateType(TypedSymbol ... typedSymbols) {
+    private Type detectAccurateType(TypedSymbol... typedSymbols) {
         List<Type> types = Arrays.stream(typedSymbols).map(TypedSymbol::getVariableType).collect(Collectors.toList());
         return TypeAnalyzer.detectNestedType(types);
     }
@@ -325,9 +326,9 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     @Override
     public Symbol visitListAtom(TypePythonParser.ListAtomContext ctx) {
         if (ctx.arguments() == null) {
-            ListSymbol listSymbol = ListSymbolFactory.create("", null);
-            listSymbol.setDisplayText("{}");
-            return listSymbol;
+            StandardCollectionSymbol standardCollectionSymbol = ListSymbolFactory.create("", null);
+            standardCollectionSymbol.setDisplayText("{}");
+            return standardCollectionSymbol;
         }
 
         List<VariableSymbol> symbols = ctx.arguments().argument()
@@ -345,19 +346,22 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
     @Override
     public Symbol visitSetAtom(TypePythonParser.SetAtomContext ctx) {
-        return super.visitSetAtom(ctx);
-    }
-
-    private void detectNested(List<Type> symbols, Type variableSymbol) {
-        List<Type> nestedSymbols = symbols
-                .stream()
-                .map(it -> ((GenericType) it).getTemplateType(ListSymbol.GENERIC_TEMPLATE_NAME))
-                .collect(Collectors.toList());
-        GenericType nested = (GenericType) ((GenericType) variableSymbol).getTemplateType(ListSymbol.GENERIC_TEMPLATE_NAME);
-        nested.setTemplateNameType(ListSymbol.GENERIC_TEMPLATE_NAME, TypeAnalyzer.detectNestedType(nestedSymbols));
-        if (nested instanceof GenericType) {
-            detectNested(nestedSymbols, nested);
+        if (ctx.arguments() == null) {
+            StandardCollectionSymbol standardCollectionSymbol = SetSymbolFactory.create("", null);
+            standardCollectionSymbol.setDisplayText("");
+            return standardCollectionSymbol;
         }
+
+        List<VariableSymbol> symbols = ctx.arguments().argument()
+                .stream()
+                .map(this::visit)
+                .map(it -> (VariableSymbol) it)
+                .collect(Collectors.toList());
+
+        List<Type> types = symbols.stream().map(TypedSymbol::getVariableType).collect(Collectors.toList());
+        Type variableType = TypeAnalyzer.detectNestedType(types);
+        String symbolText = symbols.stream().map(Symbol::getDisplayText).collect(Collectors.joining(","));
+        return SetSymbolFactory.create("{" + symbolText + "}", variableType);
     }
 
     @Override
@@ -565,12 +569,12 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         }
 
         if (assignable.getVariableType() == null) {
-            if (symbol instanceof ListSymbol) {
-                if (((GenericType) symbol.getVariableType()).getTemplateType(ListSymbol.GENERIC_TEMPLATE_NAME) == null) {
+            if (symbol instanceof StandardCollectionSymbol) {
+                if (((GenericType) symbol.getVariableType()).getTemplateType(StandardCollectionSymbol.GENERIC_TEMPLATE_NAME) == null) {
                     throw new TypeNotDefinedException(assignable.getDisplayText());
                 }
                 String text = assignable.getDisplayText();
-                assignable = new ListSymbol(symbol.getVariableType());
+                assignable = new StandardCollectionSymbol(symbol.getVariableType());
                 assignable.setName(text);
                 assignable.setDisplayText(text);
             } else {

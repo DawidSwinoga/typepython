@@ -13,7 +13,8 @@ import static java.util.Arrays.stream;
 @AllArgsConstructor
 public enum SupportedGenericType implements Type {
     TUPLE("tuple", "vector"),
-    LIST("list", "vector");
+    LIST("list", "vector"),
+    SET("set", "set");
 
     private final String genericType;
     private final String cppGenericType;

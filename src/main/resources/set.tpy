@@ -1,1 +1,8 @@
-a = {1:2,3:1,2:3}
+a = {2,31,23,2}
+
+for value in a:
+    print(value)
+
+a.clear()
+
+print(len(a))

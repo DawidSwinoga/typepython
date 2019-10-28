@@ -17,7 +17,7 @@ import java.util.List;
  * Created by Dawid on 13.09.2019 at 13:37.
  */
 public class ListSymbolFactory {
-    public static ListSymbol create(String name, Type templateType) {
+    public static StandardCollectionSymbol create(String name, Type templateType) {
 
         MethodSymbol iteratorSymbol = new MethodSymbol("iterator", new FunctionType(templateType), new ArrayList<>(), false);
         MethodSymbol getSymbol = new MethodSymbol("[]", new FunctionType(templateType), Collections.singletonList(new TypedSymbol(CppVariableType.INT)), false);
@@ -25,7 +25,7 @@ public class ListSymbolFactory {
         append.setDisplayText("push_back");
         MethodSymbol pop = new EraseMethodSymbol("delete", new FunctionType(CppVariableType.VOID),  Collections.singletonList(new TypedSymbol(CppVariableType.INT)));
         pop.setDisplayText("erase");
-        MethodSymbol clear = new MethodSymbol("clear", new FunctionType(CppVariableType.VOID), Collections.singletonList(new TypedSymbol(templateType)), false);
+        MethodSymbol clear = new MethodSymbol("clear", new FunctionType(CppVariableType.VOID), new ArrayList<>(), false);
 
         List<MethodSymbol> methods = new ArrayList<>();
         methods.add(iteratorSymbol);
@@ -33,9 +33,8 @@ public class ListSymbolFactory {
         methods.add(append);
         methods.add(pop);
         methods.add(clear);
-        GenericType variableType = new GenericType(SupportedGenericType.LIST, ListSymbol.GENERIC_TEMPLATE_NAME, templateType, methods);
-        ListSymbol listSymbol = new ListSymbol(name, variableType);
-        return listSymbol;
+        GenericType variableType = new GenericType(SupportedGenericType.LIST, StandardCollectionSymbol.GENERIC_TEMPLATE_NAME, templateType, methods);
+        return new StandardCollectionSymbol(name, variableType);
     }
 
 }

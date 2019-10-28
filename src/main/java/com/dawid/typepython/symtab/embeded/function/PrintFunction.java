@@ -25,7 +25,7 @@ public class PrintFunction extends EmbeddedFunction {
 
         for (Symbol symbol : parameters) {
             if (!((TypedSymbol) symbol).getVariableType().isCollection()) {
-                stringBuilder.append("cout << " + symbol.getDisplayText() + " << endl;");
+                stringBuilder.append("cout << ").append(symbol.getDisplayText()).append(" << endl;");
             } else {
                 throw new IllegalFunctionParameter();
             }

@@ -1,7 +1,7 @@
 package com.dawid.typepython.symtab.embeded.function;
 
 import com.dawid.typepython.symtab.FunctionResult;
-import com.dawid.typepython.symtab.embeded.list.ListSymbol;
+import com.dawid.typepython.symtab.embeded.list.StandardCollectionSymbol;
 import com.dawid.typepython.symtab.matching.MatchType;
 import com.dawid.typepython.symtab.symbol.Symbol;
 import com.dawid.typepython.symtab.symbol.TypedSymbol;
@@ -32,7 +32,7 @@ public class MapFunction extends EmbeddedFunction{
 
         FunctionType functionType = (FunctionType) parameterTypes.get(1);
         GenericType genericType = (GenericType) parameterTypes.get(0);
-        Type embeddedType = genericType.getTemplateType(ListSymbol.GENERIC_TEMPLATE_NAME);
+        Type embeddedType = genericType.getTemplateType(StandardCollectionSymbol.GENERIC_TEMPLATE_NAME);
 
         if (embeddedType.match(functionType.getParameters().get(0)) != MatchType.FULL) {
             return MatchType.NONE;

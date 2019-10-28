@@ -6,18 +6,18 @@ import com.dawid.typepython.symtab.type.Type;
 /**
  * Created by Dawid on 11.09.2019 at 21:23.
  */
-public class ListSymbol extends CollectionClassSymbol {
+public class StandardCollectionSymbol extends CollectionClassSymbol {
     public static final String GENERIC_TEMPLATE_NAME = "E";
 
-    public ListSymbol(Type variableType) {
+    public StandardCollectionSymbol(Type variableType) {
         super(variableType);
     }
 
-    public ListSymbol(String name) {
+    public StandardCollectionSymbol(String name) {
         super(name);
     }
 
-    public ListSymbol(String text, Type variableType) {
+    public StandardCollectionSymbol(String text, Type variableType) {
         super(text, variableType);
     }
 }

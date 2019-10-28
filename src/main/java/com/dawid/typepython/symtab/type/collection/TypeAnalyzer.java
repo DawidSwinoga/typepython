@@ -1,6 +1,6 @@
 package com.dawid.typepython.symtab.type.collection;
 
-import com.dawid.typepython.symtab.embeded.list.ListSymbol;
+import com.dawid.typepython.symtab.embeded.list.StandardCollectionSymbol;
 import com.dawid.typepython.symtab.type.GenericType;
 import com.dawid.typepython.symtab.type.Type;
 import type.CppVariableType;
@@ -67,12 +67,12 @@ public class TypeAnalyzer {
         }
 
         Type templateType = detectNestedType(getTemplateTypes(symbols));
-        first.setTemplateNameType(ListSymbol.GENERIC_TEMPLATE_NAME, templateType);
+        first.setTemplateNameType(StandardCollectionSymbol.GENERIC_TEMPLATE_NAME, templateType);
 
         return first;
     }
 
     private static List<Type> getTemplateTypes(List<GenericType> symbols) {
-        return symbols.stream().map(it -> it.getTemplateType(ListSymbol.GENERIC_TEMPLATE_NAME)).collect(Collectors.toList());
+        return symbols.stream().map(it -> it.getTemplateType(StandardCollectionSymbol.GENERIC_TEMPLATE_NAME)).collect(Collectors.toList());
     }
 }
