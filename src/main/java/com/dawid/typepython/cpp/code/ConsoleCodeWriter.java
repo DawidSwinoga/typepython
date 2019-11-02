@@ -16,7 +16,7 @@ public class ConsoleCodeWriter implements CodeWriter {
     private String fileName;
 
     public ConsoleCodeWriter(String fileName) {
-        this.fileName = fileName +".cpp";
+        this.fileName = fileName + ".cpp";
         this.namespace = new StringBuilder();
         this.include = new StringBuilder();
         this.global = new StringBuilder();
@@ -44,7 +44,6 @@ public class ConsoleCodeWriter implements CodeWriter {
     public void writeMain(String code) {
         main.append(code);
     }
-
 
 
     @Override
@@ -125,6 +124,17 @@ public class ConsoleCodeWriter implements CodeWriter {
             cursor.append(assignable.getDisplayText()).append(" = ").append(symbol.getDisplayText()).append(";");
         } else if (scope.isLocalScope()) {
             cursor.append(assignable.getCppNameType()).append(" ").append(assignable.getDisplayText()).append(" = ").append(symbol.getDisplayText()).append(";");
+        }
+    }
+
+    @Override
+    public void writeDeclaration(TypedSymbol assignable) {
+        if (!assignable.isDeclaredInScope() && !scope.isLocalScope()) {
+            global.append(assignable.getCppNameType()).append(" ").append(assignable.getDisplayText()).append(";");
+        }
+
+        if (scope.isLocalScope()) {
+            cursor.append(assignable.getCppNameType()).append(";");
         }
     }
 

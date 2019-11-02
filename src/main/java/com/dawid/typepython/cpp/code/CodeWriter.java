@@ -32,5 +32,7 @@ public interface CodeWriter {
 
     void writeFunctionDeclaration(String functionReturnType, String functionIdentifier);
 
+    void writeDeclaration(TypedSymbol assignable);
+
     void writeGlobalVariableDeclaration(TypedSymbol assignable, TypedSymbol symbol);
 }

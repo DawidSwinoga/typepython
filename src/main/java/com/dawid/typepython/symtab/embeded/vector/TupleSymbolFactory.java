@@ -17,13 +17,12 @@ import static java.util.Collections.singletonList;
  * Created by Dawid on 15.10.2019 at 20:40.
  */
 public class TupleSymbolFactory {
-    //TODO add unmodifiable tuple[0]=12
     public static TupleSymbol create(String name, Type templateType) {
 
         MethodSymbol iteratorSymbol = new MethodSymbol("iterator", new FunctionType(templateType), new ArrayList<>(), false);
         MethodSymbol getSymbol = new MethodSymbol(
                 "[]",
-                new FunctionType(templateType),
+                templateType,
                 singletonList(new TypedSymbol(CppVariableType.INT)),
                 false
         );

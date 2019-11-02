@@ -2,7 +2,6 @@ package com.dawid.typepython.symtab.symbol;
 
 import com.dawid.typepython.symtab.FunctionResult;
 import com.dawid.typepython.symtab.matching.MatchType;
-import com.dawid.typepython.symtab.type.FunctionType;
 import com.dawid.typepython.symtab.type.Type;
 import lombok.Getter;
 
@@ -19,7 +18,7 @@ public class FunctionSymbol extends VariableSymbol {
         parameters = new ArrayList<>();
     }
 
-    public FunctionSymbol(String name, FunctionType returnType, List<TypedSymbol> parameters) {
+    public FunctionSymbol(String name, Type returnType, List<TypedSymbol> parameters) {
         super(name);
         this.parameters = parameters;
         this.variableType = returnType;

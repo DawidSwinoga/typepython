@@ -14,7 +14,9 @@ import static java.util.Arrays.stream;
 public enum SupportedGenericType implements Type {
     TUPLE("tuple", "vector"),
     LIST("list", "vector"),
-    SET("set", "set");
+    SET("set", "set"),
+    MAP("map", "map"),
+    PAIR("pair", "pair");
 
     private final String genericType;
     private final String cppGenericType;

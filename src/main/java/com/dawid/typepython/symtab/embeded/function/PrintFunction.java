@@ -6,6 +6,7 @@ import com.dawid.typepython.symtab.symbol.Symbol;
 import com.dawid.typepython.symtab.symbol.TypedSymbol;
 import com.dawid.typepython.symtab.type.FunctionType;
 import com.dawid.typepython.symtab.type.Type;
+import org.apache.commons.collections4.CollectionUtils;
 import type.CppVariableType;
 
 import java.util.ArrayList;
@@ -23,14 +24,18 @@ public class PrintFunction extends EmbeddedFunction {
     public FunctionResult invoke(Symbol invoker, List<Symbol> parameters) {
         StringBuilder stringBuilder = new StringBuilder();
 
+        if (CollectionUtils.isNotEmpty(parameters)) {
+            stringBuilder.append("cout ");
+        }
+
         for (Symbol symbol : parameters) {
             if (!((TypedSymbol) symbol).getVariableType().isCollection()) {
-                stringBuilder.append("cout << ").append(symbol.getDisplayText()).append(" << endl;");
+                stringBuilder.append(" << ").append(symbol.getDisplayText()).append(" ");
             } else {
                 throw new IllegalFunctionParameter();
             }
         }
-
+        stringBuilder.append(" << endl;");
         return new FunctionResult(stringBuilder.toString(), getVariableType());
     }
 

@@ -40,7 +40,7 @@ type
     ;
 
 genericType
-    : IDENTIFIER '<' type '>'
+    : IDENTIFIER '<' type (',' type)* '>'
     ;
 
 simpleType
@@ -167,7 +167,7 @@ atomExpression: atom trailer*;
 atom
     : '(' (arguments) ')'           #conditionalTupleAtom
     | '[' (arguments)? ']'          #listAtom
-    | '{' (arguments)? '}'          #setAtom
+    | '{' (arguments) '}'          #setAtom
     | '{' (dictorySetMakers)? '}'   #dictorySetMakersAtom
     | literal                       #literalAtom
     | IDENTIFIER                    #identifierAtom
@@ -181,7 +181,7 @@ dictorySetMakers
     ;
 
 dictorySetMaker
-    : test ':' test
+    : key=test ':' value=test
     ;
 
 trailer

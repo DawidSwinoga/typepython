@@ -1,0 +1,5 @@
+test = [[1,2],[3,2]]
+test.append([2,3])
+
+for item in test:
+    item.append(1)
