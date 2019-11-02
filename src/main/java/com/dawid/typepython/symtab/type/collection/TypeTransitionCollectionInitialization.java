@@ -1,9 +1,9 @@
 package com.dawid.typepython.symtab.type.collection;
 
+import com.dawid.typepython.symtab.type.CppVariableType;
 import com.dawid.typepython.symtab.type.Type;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
-import type.CppVariableType;
 
 import java.util.HashMap;
 import java.util.Map;

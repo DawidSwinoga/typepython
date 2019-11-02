@@ -1,8 +1,7 @@
-package type;
+package com.dawid.typepython.symtab.type;
 
 import com.dawid.typepython.symtab.matching.MatchType;
 import com.dawid.typepython.symtab.symbol.MethodSymbol;
-import com.dawid.typepython.symtab.type.Type;
 import lombok.Getter;
 
 import java.util.ArrayList;

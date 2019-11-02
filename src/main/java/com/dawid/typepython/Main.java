@@ -19,7 +19,8 @@ public class Main {
 //        String fileName = "/tuple";
 //        String fileName = "/set";
 //        String fileName = "/map_collection";
-        String fileName = "/list";
+//        String fileName = "/list";
+        String fileName = "/exception";
         Compiler.compile(fileName + ".tpy", new ConsoleCodeWriter(fileName), new GlobalScope());
     }
 

@@ -30,12 +30,17 @@ public class Compiler {
             throw new RuntimeException(e);
         }
         TypePythonLexer typePythonLexer = new TokenTypePythonLexer(inputStream);
+        typePythonLexer.removeErrorListeners();
+        typePythonLexer.addErrorListener(new ErrorListener());
+        typePythonLexer.addErrorListener(new DiagnosticErrorListener());
         CommonTokenStream commonTokenStream = new CommonTokenStream(typePythonLexer);
 
         TypePythonParser typePythonParser = new TypePythonParser(commonTokenStream);
 
+        typePythonParser.removeErrorListeners();
+        typePythonParser.addErrorListener(new ErrorListener());
         typePythonParser.addErrorListener(new DiagnosticErrorListener());
-        typePythonParser.getInterpreter().setPredictionMode(PredictionMode.LL_EXACT_AMBIG_DETECTION);
+        typePythonParser.getInterpreter().setPredictionMode(PredictionMode.SLL);
         FileInputContext fileInputContext = typePythonParser.fileInput();
 
         codeWriter.writeInclude("#include <iostream>");

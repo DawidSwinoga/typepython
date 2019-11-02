@@ -3,11 +3,11 @@ package com.dawid.typepython.symtab.embeded.set;
 import com.dawid.typepython.symtab.embeded.list.StandardCollectionSymbol;
 import com.dawid.typepython.symtab.symbol.MethodSymbol;
 import com.dawid.typepython.symtab.symbol.TypedSymbol;
+import com.dawid.typepython.symtab.type.CppVariableType;
 import com.dawid.typepython.symtab.type.FunctionType;
 import com.dawid.typepython.symtab.type.GenericType;
 import com.dawid.typepython.symtab.type.SupportedGenericType;
 import com.dawid.typepython.symtab.type.Type;
-import type.CppVariableType;
 
 import java.util.ArrayList;
 import java.util.Collections;

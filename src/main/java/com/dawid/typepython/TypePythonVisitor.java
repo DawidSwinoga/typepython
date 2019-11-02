@@ -37,6 +37,7 @@ import com.dawid.typepython.symtab.symbol.TypedSymbol;
 import com.dawid.typepython.symtab.symbol.UndefinedVariableException;
 import com.dawid.typepython.symtab.symbol.VariableSymbol;
 import com.dawid.typepython.symtab.symbol.VariableTypeMissmatchException;
+import com.dawid.typepython.symtab.type.CppVariableType;
 import com.dawid.typepython.symtab.type.ElementDoesNotSupportAssignmentException;
 import com.dawid.typepython.symtab.type.FunctionType;
 import com.dawid.typepython.symtab.type.GenericType;
@@ -50,7 +51,6 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.SerializationUtils;
-import type.CppVariableType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
