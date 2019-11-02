@@ -56,7 +56,7 @@ public class FunctionSymbol extends VariableSymbol {
 
     public FunctionResult invoke(Symbol invoker, List<Symbol> parameters) {
         String text = getDisplayText() + "(" + parameters.stream().map(Symbol::getDisplayText).collect(Collectors.joining(", ")) + ")";
-        return new FunctionResult(text, null);
+        return new FunctionResult(text, getVariableType());
     }
 
     public boolean parametersCountMatch(List<Type> parameters) {

@@ -18,8 +18,8 @@ public class Main {
 //        String fileName = "/map";
 //        String fileName = "/tuple";
 //        String fileName = "/set";
-        String fileName = "/map_collection";
-//        String fileName = "/list";
+//        String fileName = "/map_collection";
+        String fileName = "/list";
         Compiler.compile(fileName + ".tpy", new ConsoleCodeWriter(fileName), new GlobalScope());
     }
 
