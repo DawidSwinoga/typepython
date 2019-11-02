@@ -1,5 +1,6 @@
 package com.dawid.typepython.symtab.embeded.list;
 
+import com.dawid.typepython.TokenSymbolInfo;
 import com.dawid.typepython.symtab.symbol.CollectionClassSymbol;
 import com.dawid.typepython.symtab.type.Type;
 
@@ -9,15 +10,15 @@ import com.dawid.typepython.symtab.type.Type;
 public class StandardCollectionSymbol extends CollectionClassSymbol {
     public static final String GENERIC_TEMPLATE_NAME = "E";
 
-    public StandardCollectionSymbol(Type variableType) {
-        super(variableType);
+    public StandardCollectionSymbol(Type variableType, TokenSymbolInfo tokenSymbolInfo) {
+        super(variableType, tokenSymbolInfo);
     }
 
-    public StandardCollectionSymbol(String name) {
-        super(name);
+    public StandardCollectionSymbol(String name, TokenSymbolInfo tokenSymbolInfo) {
+        super(name, tokenSymbolInfo);
     }
 
-    public StandardCollectionSymbol(String text, Type variableType) {
-        super(text, variableType);
+    public StandardCollectionSymbol(String text, Type variableType, TokenSymbolInfo tokenSymbolInfo) {
+        super(text, variableType, tokenSymbolInfo);
     }
 }

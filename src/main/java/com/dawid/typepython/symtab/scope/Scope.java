@@ -1,5 +1,6 @@
 package com.dawid.typepython.symtab.scope;
 
+import com.dawid.typepython.TokenSymbolInfo;
 import com.dawid.typepython.symtab.matching.AmbiguousFunctionCallException;
 import com.dawid.typepython.symtab.matching.MatchType;
 import com.dawid.typepython.symtab.matching.MatchingResult;
@@ -120,16 +121,16 @@ public abstract class Scope implements Serializable {
         return null;
     }
 
-    public MatchingResult findFunction(String text, List<Type> parameterTypes) {
+    public MatchingResult findFunction(String functionName, List<Type> parameterTypes, TokenSymbolInfo tokenSymbolInfo) {
         List<FunctionSymbol> functions = new ArrayList<>();
-        findFunction(text, parameterTypes, functions);
+        findFunction(functionName, parameterTypes, functions);
 
         List<FunctionSymbol> partialMatchingFunction = new ArrayList<>();
 
         for (FunctionSymbol functionSymbol : functions) {
             MatchType matchType = functionSymbol.parametersMatch(parameterTypes);
             if (matchType == MatchType.FULL) {
-                return new MatchingResult(functionSymbol, matchType);
+                return new MatchingResult(functionName, parameterTypes, functionSymbol, matchType);
             }
 
             if (matchType == MatchType.PARTIAL) {
@@ -138,14 +139,14 @@ public abstract class Scope implements Serializable {
         }
 
         if (partialMatchingFunction.size() > 1) {
-            throw new AmbiguousFunctionCallException(partialMatchingFunction);
+            throw new AmbiguousFunctionCallException(functionName, parameterTypes, tokenSymbolInfo, partialMatchingFunction);
         }
 
         if (partialMatchingFunction.isEmpty()) {
-            return new MatchingResult(null, MatchType.NONE);
+            return new MatchingResult(functionName, parameterTypes, null, MatchType.NONE);
         }
 
-        return new MatchingResult(partialMatchingFunction.get(0), MatchType.PARTIAL);
+        return new MatchingResult(functionName, parameterTypes, partialMatchingFunction.get(0), MatchType.PARTIAL);
     }
 
     private void findFunction(String text, List<Type> parameters, List<FunctionSymbol> functions) {

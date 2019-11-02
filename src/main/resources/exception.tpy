@@ -1,0 +1,49 @@
+#aa : int = "fda"
+#test : int = aa
+
+#for a in 1:
+#    print(a)
+
+#aa: int = "a" + "df"
+#test = ["df", "fd", 1]
+#test = [[1,2], [1,2], (1,2)]
+#test = [[1,2], [1,2], ["1",2]]
+
+
+/*def fun(a: int):
+    pass
+
+def fun(a: double):
+    pass
+
+fun(True)
+*/
+
+#test(12)
+
+#test : tuple<int> = (1,2,3)
+#test[0] = 3
+
+#import test2
+
+/*
+def fun():
+  pass
+
+def fun():
+  pass
+*/
+
+#test = 0
+#test[0]
+
+/*
+def a():
+  pass
+
+a(1)
+*/
+
+#list = []
+
+#test: df<int>

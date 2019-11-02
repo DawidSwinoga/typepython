@@ -1,13 +1,14 @@
 package com.dawid.typepython.symtab.embeded.map;
 
+import com.dawid.typepython.TokenSymbolInfo;
 import com.dawid.typepython.symtab.embeded.pair.PairSymbol;
 import com.dawid.typepython.symtab.symbol.MethodSymbol;
 import com.dawid.typepython.symtab.symbol.PropertySymbol;
 import com.dawid.typepython.symtab.symbol.TypedSymbol;
+import com.dawid.typepython.symtab.type.CppVariableType;
 import com.dawid.typepython.symtab.type.GenericType;
 import com.dawid.typepython.symtab.type.SupportedGenericType;
 import com.dawid.typepython.symtab.type.Type;
-import type.CppVariableType;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,14 +18,14 @@ import java.util.List;
  * Created by Dawid on 02.11.2019 at 11:04.
  */
 public class MapSymbolFactory {
-    public static MapSymbol create(String name, Type keyType, Type valueType) {
-        MethodSymbol getSymbol = new MethodSymbol("[]", valueType, Collections.singletonList(new TypedSymbol(keyType)));
-        MethodSymbol clear = new MethodSymbol("clear", CppVariableType.VOID, new ArrayList<>(), false);
-        MethodSymbol pop = new MethodSymbol("delete", CppVariableType.VOID, Collections.singletonList(new TypedSymbol(keyType)));
+    public static MapSymbol create(String name, Type keyType, Type valueType, TokenSymbolInfo tokenSymbolInfo) {
+        MethodSymbol getSymbol = new MethodSymbol("[]", valueType, Collections.singletonList(new TypedSymbol(keyType, null)), null);
+        MethodSymbol clear = new MethodSymbol("clear", CppVariableType.VOID, new ArrayList<>(), false, null);
+        MethodSymbol pop = new MethodSymbol("delete", CppVariableType.VOID, Collections.singletonList(new TypedSymbol(keyType, null)), null);
         pop.setDisplayText("erase");
 
         GenericType pair = createPairGeneric(keyType, valueType);
-        MethodSymbol iteratorSymbol = new MethodSymbol("iterator", pair, new ArrayList<>(), false);
+        MethodSymbol iteratorSymbol = new MethodSymbol("iterator", pair, new ArrayList<>(), false, null);
 
         List<MethodSymbol> methods = new ArrayList<>();
         methods.add(getSymbol);
@@ -33,7 +34,7 @@ public class MapSymbolFactory {
         methods.add(iteratorSymbol);
         GenericType variableType = new GenericType(SupportedGenericType.MAP, MapSymbol.KEY_TEMPLATE, keyType, methods);
         variableType.setTemplateNameType(MapSymbol.VALUE_TEMPLATE, valueType);
-        return new MapSymbol(name, variableType);
+        return new MapSymbol(name, variableType, tokenSymbolInfo);
     }
 
     private static GenericType createPairGeneric(Type keyType, Type valueType) {

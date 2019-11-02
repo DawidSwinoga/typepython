@@ -1,5 +1,6 @@
 package com.dawid.typepython.symtab.type;
 
+import com.dawid.typepython.TokenSymbolInfo;
 import com.dawid.typepython.symtab.matching.MatchType;
 import lombok.AllArgsConstructor;
 
@@ -53,11 +54,11 @@ public enum SupportedGenericType implements Type {
     }
 
 
-    public static Type translate(String pythonName) {
+    public static Type translate(String pythonName, TokenSymbolInfo tokenSymbolInfo) {
         return stream(values())
                 .filter(it -> it.genericType.equals(pythonName))
                 .findFirst()
-                .orElseThrow(() -> new UnsupportedGenericTypeException(pythonName));
+                .orElseThrow(() -> new UnsupportedGenericTypeException(pythonName, tokenSymbolInfo));
     }
 
 

@@ -10,15 +10,15 @@ import java.util.List;
  */
 public class PropertySymbol extends MethodSymbol {
     public PropertySymbol(String name, Type returnType, List<TypedSymbol> parameters, boolean returnTypeAssignable) {
-        super(name, returnType, parameters, returnTypeAssignable);
+        super(name, returnType, parameters, returnTypeAssignable, null);
     }
 
     public PropertySymbol(String name, Type returnType, List<TypedSymbol> parameters) {
-        super(name, returnType, parameters);
+        super(name, returnType, parameters, null);
     }
 
     @Override
-    public FunctionResult invoke(Symbol invoker, List<Symbol> parameters) {
+    public FunctionResult invoke(Symbol invoker, List<TypedSymbol> parameters) {
         String text = getDisplayText();
         return new FunctionResult(text, getVariableType(), returnTypeAssignable);
     }

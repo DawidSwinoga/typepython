@@ -9,6 +9,8 @@ import java.io.IOException;
  * Created by Dawid on 18.05.2019 at 15:41.
  */
 public class Main {
+    public static final boolean DEBUG = true;
+
     public static void main(String[] args) throws IOException {
 //        String fileName = "/bubble_sort";
 //        String fileName = "/import";
@@ -19,8 +21,10 @@ public class Main {
 //        String fileName = "/tuple";
 //        String fileName = "/set";
 //        String fileName = "/map_collection";
-        String fileName = "/list";
-        Compiler.compile(fileName + ".tpy", new ConsoleCodeWriter(fileName), new GlobalScope());
+//        String fileName = "/list";
+        String fileName = "/exception";
+
+        Compiler.compile(fileName + ".tpy", new ConsoleCodeWriter(fileName), new GlobalScope(), null);
     }
 
 }

@@ -1,5 +1,6 @@
 package com.dawid.typepython.symtab.embeded.vector;
 
+import com.dawid.typepython.TokenSymbolInfo;
 import com.dawid.typepython.symtab.symbol.CollectionClassSymbol;
 import com.dawid.typepython.symtab.type.Type;
 
@@ -9,15 +10,15 @@ import com.dawid.typepython.symtab.type.Type;
 public class TupleSymbol extends CollectionClassSymbol {
     public static final String GENERIC_TEMPLATE_NAME = "E";
 
-    public TupleSymbol(Type variableType) {
-        super(variableType);
+    public TupleSymbol(Type variableType, TokenSymbolInfo tokenSymbolInfo) {
+        super(variableType, tokenSymbolInfo);
     }
 
-    public TupleSymbol(String name) {
-        super(name);
+    public TupleSymbol(String name, TokenSymbolInfo tokenSymbolInfo) {
+        super(name, tokenSymbolInfo);
     }
 
-    public TupleSymbol(String text, Type VariableType) {
-        super(text, VariableType);
+    public TupleSymbol(String text, Type VariableType, TokenSymbolInfo tokenSymbolInfo) {
+        super(text, VariableType, tokenSymbolInfo);
     }
 }

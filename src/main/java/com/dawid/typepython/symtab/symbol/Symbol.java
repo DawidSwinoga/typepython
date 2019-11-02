@@ -1,5 +1,6 @@
 package com.dawid.typepython.symtab.symbol;
 
+import com.dawid.typepython.TokenSymbolInfo;
 import com.dawid.typepython.symtab.scope.Scope;
 import com.dawid.typepython.symtab.type.SymbolType;
 import lombok.AllArgsConstructor;
@@ -17,22 +18,29 @@ public class Symbol implements Serializable {
     private String displayText;
     private String name;
     private Scope scope;
+    private transient TokenSymbolInfo tokenSymbolInfo;
     protected SymbolType symbolType = SymbolType.TEXT;
 
-    public Symbol(String text) {
-        this.name = text;
-        this.displayText = text;
-    }
-
-    public Symbol(SymbolType symbolType, String text) {
+    public Symbol(SymbolType symbolType, String text, TokenSymbolInfo tokenSymbolInfo) {
         this.symbolType = symbolType;
         this.displayText = text;
         this.name = text;
+        this.tokenSymbolInfo = tokenSymbolInfo;
     }
 
-    public Symbol(SymbolType symbolType, Scope scope) {
+    public Symbol(SymbolType symbolType, Scope scope, TokenSymbolInfo tokenSymbolInfo) {
         this.symbolType = symbolType;
         this.scope = scope;
+        this.tokenSymbolInfo = tokenSymbolInfo;
+    }
+
+    public Symbol(String name, TokenSymbolInfo tokenSymbolInfo) {
+        this.name = name;
+        this.tokenSymbolInfo = tokenSymbolInfo;
+    }
+
+    public TokenSymbolInfo getTokenSymbolInfo() {
+        return tokenSymbolInfo;
     }
 
     public String getDisplayText() {

@@ -7,20 +7,4 @@ package com.dawid.typepython.symtab.operator;
 public class UnsupportedCompareOperationException extends RuntimeException {
     public UnsupportedCompareOperationException() {
     }
-
-    public UnsupportedCompareOperationException(String message) {
-        super(message);
-    }
-
-    public UnsupportedCompareOperationException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public UnsupportedCompareOperationException(Throwable cause) {
-        super(cause);
-    }
-
-    public UnsupportedCompareOperationException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

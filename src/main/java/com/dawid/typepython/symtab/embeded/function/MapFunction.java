@@ -42,7 +42,7 @@ public class MapFunction extends EmbeddedFunction{
     }
 
     @Override
-    public FunctionResult invoke(Symbol invoker, List<Symbol> parameters) {
+    public FunctionResult invoke(Symbol invoker, List<TypedSymbol> parameters) {
         TypedSymbol collection = (TypedSymbol) parameters.get(0);
         Symbol function = parameters.get(1);
 

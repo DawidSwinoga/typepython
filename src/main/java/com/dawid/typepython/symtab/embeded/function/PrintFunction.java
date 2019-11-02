@@ -4,10 +4,10 @@ import com.dawid.typepython.symtab.FunctionResult;
 import com.dawid.typepython.symtab.matching.MatchType;
 import com.dawid.typepython.symtab.symbol.Symbol;
 import com.dawid.typepython.symtab.symbol.TypedSymbol;
+import com.dawid.typepython.symtab.type.CppVariableType;
 import com.dawid.typepython.symtab.type.FunctionType;
 import com.dawid.typepython.symtab.type.Type;
 import org.apache.commons.collections4.CollectionUtils;
-import type.CppVariableType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +21,7 @@ public class PrintFunction extends EmbeddedFunction {
     }
 
     @Override
-    public FunctionResult invoke(Symbol invoker, List<Symbol> parameters) {
+    public FunctionResult invoke(Symbol invoker, List<TypedSymbol> parameters) {
         StringBuilder stringBuilder = new StringBuilder();
 
         if (CollectionUtils.isNotEmpty(parameters)) {
