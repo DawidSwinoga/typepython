@@ -10,11 +10,11 @@ import java.util.List;
  */
 public class PropertySymbol extends MethodSymbol {
     public PropertySymbol(String name, Type returnType, List<TypedSymbol> parameters, boolean returnTypeAssignable) {
-        super(name, returnType, parameters, returnTypeAssignable);
+        super(name, returnType, parameters, returnTypeAssignable, null);
     }
 
     public PropertySymbol(String name, Type returnType, List<TypedSymbol> parameters) {
-        super(name, returnType, parameters);
+        super(name, returnType, parameters, null);
     }
 
     @Override

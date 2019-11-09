@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 public class EraseMethodSymbol extends MethodSymbol {
     public EraseMethodSymbol(String name, FunctionType returnType, List<TypedSymbol> parameters) {
-        super(name, returnType, parameters, false);
+        super(name, returnType, parameters, false, null);
     }
 
     @Override

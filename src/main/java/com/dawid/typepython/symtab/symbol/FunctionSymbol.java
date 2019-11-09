@@ -1,9 +1,11 @@
 package com.dawid.typepython.symtab.symbol;
 
+import com.dawid.typepython.TokenSymbolInfo;
 import com.dawid.typepython.symtab.FunctionResult;
 import com.dawid.typepython.symtab.matching.MatchType;
 import com.dawid.typepython.symtab.type.Type;
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,13 +15,13 @@ public class FunctionSymbol extends VariableSymbol {
     @Getter
     private final List<TypedSymbol> parameters;
 
-    public FunctionSymbol(String name) {
-        super(name);
+    public FunctionSymbol(String name, TokenSymbolInfo tokenSymbolInfo) {
+        super(name, tokenSymbolInfo);
         parameters = new ArrayList<>();
     }
 
-    public FunctionSymbol(String name, Type returnType, List<TypedSymbol> parameters) {
-        super(name);
+    public FunctionSymbol(String name, Type returnType, List<TypedSymbol> parameters, TokenSymbolInfo tokenSymbolInfo) {
+        super(name, tokenSymbolInfo);
         this.parameters = parameters;
         this.variableType = returnType;
     }
@@ -61,5 +63,20 @@ public class FunctionSymbol extends VariableSymbol {
 
     public boolean parametersCountMatch(List<Type> parameters) {
         return getParametersCount() == parameters.size();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append(getName())
+                .append(" (")
+                .append(parameters.stream().map(TypedSymbol::getPythonNameType).collect(Collectors.joining(",")))
+                .append(")");
+        if (StringUtils.isNotBlank(getPythonNameType())) {
+            builder
+                    .append(": ")
+                    .append(getPythonNameType());
+        }
+        return builder.toString();
     }
 }

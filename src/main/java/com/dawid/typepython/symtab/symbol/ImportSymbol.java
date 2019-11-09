@@ -1,5 +1,6 @@
 package com.dawid.typepython.symtab.symbol;
 
+import com.dawid.typepython.TokenSymbolInfo;
 import com.dawid.typepython.symtab.matching.MatchType;
 import com.dawid.typepython.symtab.matching.MatchingResult;
 import com.dawid.typepython.symtab.scope.Scope;
@@ -13,11 +14,11 @@ import java.util.List;
  */
 public class ImportSymbol extends TypedSymbol {
     public ImportSymbol(SymbolType symbolType, Scope scope) {
-        super(symbolType, scope);
+        super(symbolType, scope, null);
     }
 
     @Override
-    public MatchingResult findMethod(String methodName, List<Type> parameters) {
-        return getScope().map(it -> it.findFunction(methodName, parameters)).orElse(new MatchingResult(null, MatchType.NONE));
+    public MatchingResult findMethod(String methodName, List<Type> parameters, TokenSymbolInfo tokenSymbolInfo) {
+        return getScope().map(it -> it.findFunction(methodName, parameters, tokenSymbolInfo)).orElse(new MatchingResult(null, MatchType.NONE));
     }
 }

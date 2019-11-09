@@ -17,8 +17,23 @@ import java.io.InputStream;
 
 public class Compiler {
     static Scope compile(String filePath, ConsoleCodeWriter codeWriter, GlobalScope scope) {
+        try {
+            return tryCompile(filePath, codeWriter, scope);
+        } catch (CompilerException exception) {
+            if (Main.DEBUG) {
+                System.err.println(filePath + ":" + exception.getCompilerError());
+                exception.printStackTrace();
+                System.exit(1);
+            }
+        }
+
+        System.exit(1);
+        return null;
+    }
+
+    private static Scope tryCompile(String filePath, ConsoleCodeWriter codeWriter, GlobalScope scope) {
         InputStream inputFile = Main.class.getResourceAsStream(filePath);
-        CharStream inputStream = null;
+        CharStream inputStream;
 
         if (inputFile == null) {
             throw new FileNotFoundException(filePath);

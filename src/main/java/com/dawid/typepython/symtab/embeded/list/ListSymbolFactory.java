@@ -1,6 +1,7 @@
 package com.dawid.typepython.symtab.embeded.list;
 
 
+import com.dawid.typepython.TokenSymbolInfo;
 import com.dawid.typepython.symtab.symbol.MethodSymbol;
 import com.dawid.typepython.symtab.symbol.TypedSymbol;
 import com.dawid.typepython.symtab.type.CppVariableType;
@@ -17,15 +18,15 @@ import java.util.List;
  * Created by Dawid on 13.09.2019 at 13:37.
  */
 public class ListSymbolFactory {
-    public static StandardCollectionSymbol create(String name, Type templateType) {
+    public static StandardCollectionSymbol create(String name, Type templateType, TokenSymbolInfo tokenSymbolInfo) {
 
-        MethodSymbol iteratorSymbol = new MethodSymbol("iterator", templateType, new ArrayList<>());
-        MethodSymbol getSymbol = new MethodSymbol("[]", templateType, Collections.singletonList(new TypedSymbol(CppVariableType.INT)), false);
-        MethodSymbol append = new MethodSymbol("append", CppVariableType.VOID, Collections.singletonList(new TypedSymbol(templateType)), false);
+        MethodSymbol iteratorSymbol = new MethodSymbol("iterator", templateType, new ArrayList<>(), null);
+        MethodSymbol getSymbol = new MethodSymbol("[]", templateType, Collections.singletonList(new TypedSymbol(CppVariableType.INT, null)), false, null);
+        MethodSymbol append = new MethodSymbol("append", CppVariableType.VOID, Collections.singletonList(new TypedSymbol(templateType, null)), false, null);
         append.setDisplayText("push_back");
-        MethodSymbol pop = new EraseMethodSymbol("delete", new FunctionType(CppVariableType.VOID),  Collections.singletonList(new TypedSymbol(CppVariableType.INT)));
+        MethodSymbol pop = new EraseMethodSymbol("delete", new FunctionType(CppVariableType.VOID),  Collections.singletonList(new TypedSymbol(CppVariableType.INT, null)));
         pop.setDisplayText("erase");
-        MethodSymbol clear = new MethodSymbol("clear", CppVariableType.VOID, new ArrayList<>(), false);
+        MethodSymbol clear = new MethodSymbol("clear", CppVariableType.VOID, new ArrayList<>(), false, null);
 
         List<MethodSymbol> methods = new ArrayList<>();
         methods.add(iteratorSymbol);
@@ -34,7 +35,7 @@ public class ListSymbolFactory {
         methods.add(pop);
         methods.add(clear);
         GenericType variableType = new GenericType(SupportedGenericType.LIST, StandardCollectionSymbol.GENERIC_TEMPLATE_NAME, templateType, methods);
-        return new StandardCollectionSymbol(name, variableType);
+        return new StandardCollectionSymbol(name, variableType, tokenSymbolInfo);
     }
 
 }

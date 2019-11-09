@@ -1,5 +1,6 @@
 package com.dawid.typepython.symtab.symbol;
 
+import com.dawid.typepython.TokenSymbolInfo;
 import com.dawid.typepython.symtab.type.SymbolType;
 import com.dawid.typepython.symtab.type.Type;
 import lombok.Getter;
@@ -16,45 +17,44 @@ import java.util.stream.Collectors;
  */
 public class CompoundTypedSymbol extends VariableSymbol {
     @Getter
-    //Should be TypedSymbol
     private List<Symbol> symbols;
 
-    public CompoundTypedSymbol(List<Symbol> symbols, Type variableType) {
-        super(variableType);
+    public CompoundTypedSymbol(List<Symbol> symbols, Type variableType, TokenSymbolInfo tokenSymbolInfo) {
+        super(variableType, tokenSymbolInfo);
         this.symbols = symbols;
     }
 
-    public CompoundTypedSymbol(List<Symbol> symbols, String name) {
-        super(name);
+    public CompoundTypedSymbol(List<Symbol> symbols, String name, TokenSymbolInfo tokenSymbolInfo) {
+        super(name, tokenSymbolInfo);
         this.symbols = symbols;
     }
 
-    public CompoundTypedSymbol(List<Symbol> symbols, SymbolType functionCall, String text) {
-        super(functionCall, text);
+    public CompoundTypedSymbol(List<Symbol> symbols, SymbolType functionCall, String text, TokenSymbolInfo tokenSymbolInfo) {
+        super(functionCall, text, tokenSymbolInfo);
         this.symbols = symbols;
     }
 
-    public static CompoundTypedSymbol of(Type variableType, VariableSymbol first, List<Symbol> symbols) {
+    public static CompoundTypedSymbol of(Type variableType, VariableSymbol first, List<Symbol> symbols, TokenSymbolInfo tokenSymbolInfo) {
         List<Symbol> allSymbols = new ArrayList<>();
         allSymbols.add(first);
         allSymbols.addAll(symbols);
-        return new CompoundTypedSymbol(allSymbols, variableType);
+        return new CompoundTypedSymbol(allSymbols, variableType, tokenSymbolInfo);
     }
 
-    public static CompoundTypedSymbol of(Type variableType, List<Symbol> symbols) {
-        return new CompoundTypedSymbol(symbols, variableType);
+    public static CompoundTypedSymbol of(Type variableType, List<Symbol> symbols, TokenSymbolInfo tokenSymbolInfo) {
+        return new CompoundTypedSymbol(symbols, variableType, tokenSymbolInfo);
     }
 
-    public static Symbol of(List<Symbol> symbols, String name) {
-        return new CompoundTypedSymbol(symbols, name);
+    public static Symbol of(List<Symbol> symbols, String name, TokenSymbolInfo tokenSymbolInfo) {
+        return new CompoundTypedSymbol(symbols, name, tokenSymbolInfo);
     }
 
-    public static Symbol of(List<Symbol> symbols, SymbolType functionCall, String text) {
-        return new CompoundTypedSymbol(symbols, functionCall, text);
+    public static Symbol of(List<Symbol> symbols, SymbolType functionCall, String text, TokenSymbolInfo tokenSymbolInfo) {
+        return new CompoundTypedSymbol(symbols, functionCall, text, tokenSymbolInfo);
     }
 
-    public static Symbol of(Type variableType, String displayText, Symbol... symbols) {
-        CompoundTypedSymbol compoundTypedSymbol = new CompoundTypedSymbol(Arrays.asList(symbols), variableType);
+    public static Symbol of(TokenSymbolInfo tokenSymbolInfo, Type variableType, String displayText, Symbol... symbols) {
+        CompoundTypedSymbol compoundTypedSymbol = new CompoundTypedSymbol(Arrays.asList(symbols), variableType, tokenSymbolInfo);
         compoundTypedSymbol.setDisplayText(displayText);
         return compoundTypedSymbol;
     }
@@ -77,9 +77,8 @@ public class CompoundTypedSymbol extends VariableSymbol {
         this.symbols.addAll(symbols);
     }
 
-    //TODO remove variableType. Compute variableType from passed symbols
-    public static CompoundTypedSymbol of(Type variableType, Symbol... symbols) {
-        return new CompoundTypedSymbol(Arrays.asList(symbols), variableType);
+    public static CompoundTypedSymbol of(TokenSymbolInfo tokenSymbolInfo, Type variableType, Symbol... symbols) {
+        return new CompoundTypedSymbol(Arrays.asList(symbols), variableType, tokenSymbolInfo);
     }
 
     public List<Type> getVariableTypes() {

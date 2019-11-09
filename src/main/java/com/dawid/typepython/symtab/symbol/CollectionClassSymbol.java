@@ -1,5 +1,6 @@
 package com.dawid.typepython.symtab.symbol;
 
+import com.dawid.typepython.TokenSymbolInfo;
 import com.dawid.typepython.symtab.type.Type;
 
 /**
@@ -7,15 +8,15 @@ import com.dawid.typepython.symtab.type.Type;
  */
 public class CollectionClassSymbol extends ClassSymbol {
 
-    public CollectionClassSymbol(Type variableType) {
-        super(variableType);
+    public CollectionClassSymbol(Type variableType, TokenSymbolInfo tokenSymbolInfo) {
+        super(variableType, tokenSymbolInfo);
     }
 
-    public CollectionClassSymbol(String name) {
-        super(name);
+    public CollectionClassSymbol(String name, TokenSymbolInfo tokenSymbolInfo) {
+        super(name, tokenSymbolInfo);
     }
 
-    public CollectionClassSymbol(String text, Type VariableType) {
-        super(text, VariableType);
+    public CollectionClassSymbol(String text, Type VariableType, TokenSymbolInfo tokenSymbolInfo) {
+        super(text, VariableType, tokenSymbolInfo);
     }
 }

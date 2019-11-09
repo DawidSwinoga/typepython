@@ -1,5 +1,6 @@
 package com.dawid.typepython.symtab.symbol;
 
+import com.dawid.typepython.TokenSymbolInfo;
 import com.dawid.typepython.symtab.matching.AmbiguousFunctionCallException;
 import com.dawid.typepython.symtab.matching.MatchType;
 import com.dawid.typepython.symtab.matching.MatchingResult;
@@ -25,29 +26,35 @@ public class TypedSymbol extends Symbol {
     private boolean collectionElement = false;
     private boolean assignable = true;
 
-    public TypedSymbol(Type variableType) {
+    public TypedSymbol(Type variableType, TokenSymbolInfo tokenSymbolInfo) {
+        super("", tokenSymbolInfo);
         this.variableType = variableType;
     }
 
-    public TypedSymbol(String name) {
-        super(name);
+    public TypedSymbol(String name, TokenSymbolInfo tokenSymbolInfo) {
+        super(name, tokenSymbolInfo);
     }
 
-    public TypedSymbol(String name, Type variableType) {
-        super(name);
+
+    public TypedSymbol(SymbolType symbolType, String text, TokenSymbolInfo tokenSymbolInfo) {
+        super(symbolType, text, tokenSymbolInfo);
+    }
+
+    public TypedSymbol(SymbolType symbolType, Scope scope, TokenSymbolInfo tokenSymbolInfo) {
+        super(symbolType, scope, tokenSymbolInfo);
+    }
+
+    public TypedSymbol(String name, Type variableType, TokenSymbolInfo tokenSymbolInfo) {
+        super(name, tokenSymbolInfo);
         this.variableType = variableType;
-    }
-
-    public TypedSymbol(SymbolType symbolType, String text) {
-        super(symbolType, text);
-    }
-
-    public TypedSymbol(SymbolType symbolType, Scope scope) {
-        super(symbolType, scope);
     }
 
     public String getCppNameType() {
         return variableType.getCppNameType();
+    }
+
+    public String getPythonNameType() {
+        return variableType.getPythonType();
     }
 
     public boolean isAssignable() {
@@ -67,7 +74,7 @@ public class TypedSymbol extends Symbol {
         return variableType.isCollection();
     }
 
-    public MatchingResult findMethod(String methodName, List<Type> parameters) {
+    public MatchingResult findMethod(String methodName, List<Type> parameters, TokenSymbolInfo tokenSymbolInfo) {
         List<MethodSymbol> methods = variableType.getMethodSymbol()
                 .stream()
                 .filter(it -> it.getName().equals(methodName))
@@ -87,7 +94,7 @@ public class TypedSymbol extends Symbol {
         }
 
         if (partialMatchingMethods.size() > 1) {
-            throw new AmbiguousFunctionCallException(partialMatchingMethods);
+            throw new AmbiguousFunctionCallException(methodName, parameters, tokenSymbolInfo, partialMatchingMethods);
         }
 
         if (partialMatchingMethods.isEmpty()) {

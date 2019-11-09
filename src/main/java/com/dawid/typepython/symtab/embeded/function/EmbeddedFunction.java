@@ -11,10 +11,10 @@ import java.util.List;
  */
 public abstract class EmbeddedFunction extends FunctionSymbol {
     public EmbeddedFunction(String name) {
-        super(name);
+        super(name, null);
     }
 
     public EmbeddedFunction(String name, FunctionType returnType, List<TypedSymbol> parameters) {
-        super(name, returnType, parameters);
+        super(name, returnType, parameters, null);
     }
 }

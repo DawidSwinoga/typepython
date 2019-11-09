@@ -1,5 +1,6 @@
 package com.dawid.typepython.symtab.scope;
 
+import com.dawid.typepython.TokenSymbolInfo;
 import com.dawid.typepython.symtab.matching.AmbiguousFunctionCallException;
 import com.dawid.typepython.symtab.matching.MatchType;
 import com.dawid.typepython.symtab.matching.MatchingResult;
@@ -120,9 +121,9 @@ public abstract class Scope implements Serializable {
         return null;
     }
 
-    public MatchingResult findFunction(String text, List<Type> parameterTypes) {
+    public MatchingResult findFunction(String functionName, List<Type> parameterTypes, TokenSymbolInfo tokenSymbolInfo) {
         List<FunctionSymbol> functions = new ArrayList<>();
-        findFunction(text, parameterTypes, functions);
+        findFunction(functionName, parameterTypes, functions);
 
         List<FunctionSymbol> partialMatchingFunction = new ArrayList<>();
 
@@ -138,7 +139,7 @@ public abstract class Scope implements Serializable {
         }
 
         if (partialMatchingFunction.size() > 1) {
-            throw new AmbiguousFunctionCallException(partialMatchingFunction);
+            throw new AmbiguousFunctionCallException(functionName, parameterTypes, tokenSymbolInfo, partialMatchingFunction);
         }
 
         if (partialMatchingFunction.isEmpty()) {
