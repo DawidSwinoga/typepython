@@ -22,7 +22,8 @@ public class Main {
 //        String fileName = "/set";
 //        String fileName = "/map_collection";
 //        String fileName = "/list";
-        String fileName = "/exception";
+//        String fileName = "/exception";
+        String fileName = "/reference";
 
         Compiler.compile(fileName + ".tpy", new ConsoleCodeWriter(fileName), new GlobalScope(), null);
     }

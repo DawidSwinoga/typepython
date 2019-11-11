@@ -1,0 +1,4 @@
+def fun(a : list<int>):
+  pass
+
+fun([1,2,3,4])

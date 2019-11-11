@@ -143,10 +143,14 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         ofNullable(ctx.typeDeclarationArgsList()).ifPresent(this::visit);
         String parametersString = parameters
                 .stream()
-                .map(it -> it.getCppNameType() + " " + it.getDisplayText())
+                .map(this::generateParameterDisplayText)
                 .collect(joining(","));
         codeWriter.writeFunctionParameters("(" + parametersString + ")");
         return null;
+    }
+
+    private String generateParameterDisplayText(TypedSymbol parameter) {
+        return parameter.getCppNameType() + (parameter.isCollection() ? " &" : " ") + parameter.getDisplayText();
     }
 
     @Override

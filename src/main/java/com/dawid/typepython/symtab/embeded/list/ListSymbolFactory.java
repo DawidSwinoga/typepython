@@ -21,12 +21,12 @@ public class ListSymbolFactory {
     public static StandardCollectionSymbol create(String name, Type templateType, TokenSymbolInfo tokenSymbolInfo) {
 
         MethodSymbol iteratorSymbol = new MethodSymbol("iterator", templateType, new ArrayList<>(), null);
-        MethodSymbol getSymbol = new MethodSymbol("[]", templateType, Collections.singletonList(new TypedSymbol(CppVariableType.INT, null)), false, null);
-        MethodSymbol append = new MethodSymbol("append", CppVariableType.VOID, Collections.singletonList(new TypedSymbol(templateType, null)), false, null);
+        MethodSymbol getSymbol = new MethodSymbol("[]", templateType, Collections.singletonList(new TypedSymbol(CppVariableType.INT, null)),  null);
+        MethodSymbol append = new MethodSymbol("append", CppVariableType.VOID, Collections.singletonList(new TypedSymbol(templateType, null)),  null);
         append.setDisplayText("push_back");
         MethodSymbol pop = new EraseMethodSymbol("delete", new FunctionType(CppVariableType.VOID),  Collections.singletonList(new TypedSymbol(CppVariableType.INT, null)));
         pop.setDisplayText("erase");
-        MethodSymbol clear = new MethodSymbol("clear", CppVariableType.VOID, new ArrayList<>(), false, null);
+        MethodSymbol clear = new MethodSymbol("clear", CppVariableType.VOID, new ArrayList<>(),  null);
 
         List<MethodSymbol> methods = new ArrayList<>();
         methods.add(iteratorSymbol);
