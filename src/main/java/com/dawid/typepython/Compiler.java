@@ -46,14 +46,14 @@ public class Compiler {
         }
         TypePythonLexer typePythonLexer = new TokenTypePythonLexer(inputStream);
         typePythonLexer.removeErrorListeners();
-        typePythonLexer.addErrorListener(new ErrorListener());
+        typePythonLexer.addErrorListener(new ErrorListener(filePath));
         typePythonLexer.addErrorListener(new DiagnosticErrorListener());
         CommonTokenStream commonTokenStream = new CommonTokenStream(typePythonLexer);
 
         TypePythonParser typePythonParser = new TypePythonParser(commonTokenStream);
 
         typePythonParser.removeErrorListeners();
-        typePythonParser.addErrorListener(new ErrorListener());
+        typePythonParser.addErrorListener(new ErrorListener(filePath));
         typePythonParser.addErrorListener(new DiagnosticErrorListener());
         typePythonParser.getInterpreter().setPredictionMode(PredictionMode.SLL);
         FileInputContext fileInputContext = typePythonParser.fileInput();
