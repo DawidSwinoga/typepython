@@ -2,6 +2,7 @@ package com.dawid.typepython;
 
 import com.dawid.typepython.cpp.code.CodeWriter;
 import com.dawid.typepython.cpp.code.LibraryConsoleCodeWriter;
+import com.dawid.typepython.cpp.code.generator.TemporaryVariableNameGenerator;
 import com.dawid.typepython.generated.TypePythonParser;
 import com.dawid.typepython.symtab.FunctionResult;
 import com.dawid.typepython.symtab.embeded.function.FilterFunction;
@@ -153,10 +154,14 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         ofNullable(ctx.typeDeclarationArgsList()).ifPresent(this::visit);
         String parametersString = parameters
                 .stream()
-                .map(it -> it.getCppNameType() + " " + it.getDisplayText())
+                .map(this::createTypeParameterDeclaration)
                 .collect(joining(","));
         codeWriter.writeFunctionParameters("(" + parametersString + ")");
         return null;
+    }
+
+    private String createTypeParameterDeclaration(TypedSymbol typedSymbol) {
+        return typedSymbol.getCppNameType() + " " + (typedSymbol.isCollection() ? "&" : "") + typedSymbol.getDisplayText();
     }
 
     @Override
@@ -239,7 +244,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
         pushScope(new LocalScope());
         currentScope.addVariable(nested);
-        codeWriter.write("for (" + nested.getCppNameType() + " " + nested.getDisplayText() +
+        codeWriter.write("for (" + nested.getCppNameType() + " " + (nested.isCollection() ? "&" : "") + nested.getDisplayText() +
                 " : " + collection.getDisplayText() + ")");
         visit(ctx.suite());
 
@@ -467,16 +472,16 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
                 }
                 FunctionSymbol function = resultFunctionMatching.getFunctionSymbol();
                 resultSymbol = SerializationUtils.clone(function);
-                FunctionResult invoke = function.invoke(resultSymbol, compoundTypedSymbol.getSymbols());
+                FunctionResult invoke = function.invoke(resultSymbol, createTmpVariableForInlineInitilizerCollection(compoundTypedSymbol));
                 resultSymbol.setDisplayText(invoke.getDisplayText());
                 resultSymbol.setVariableType(invoke.getType());
                 resultSymbol.setAssignable(invoke.isAssignable());
             }
 
             if (trailerSymbol.getSymbolType() == SymbolType.GET_COLLECTION_ELEMENT) {
-                TypedSymbol index = (TypedSymbol) ((CompoundTypedSymbol) trailerSymbol).getSymbols().get(0);
+                TypedSymbol index = (TypedSymbol) createTmpVariableForInlineInitilizerCollection((CompoundTypedSymbol) trailerSymbol).get(0);
                 TypedSymbol element = SerializationUtils.clone(resultSymbol)
-                        .findMethod("[]", Collections.singletonList(index.getVariableType()),trailerSymbol.getTokenSymbolInfo())
+                        .findMethod("[]", Collections.singletonList(index.getVariableType()), trailerSymbol.getTokenSymbolInfo())
                         .minPartial();
                 element.setDisplayText(resultSymbol.getDisplayText() + trailerSymbol.getDisplayText());
                 element.setCollectionElement(true);
@@ -490,7 +495,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
                     break;
                 }
 
-                List<Symbol> parameters = ((CompoundTypedSymbol) next).getSymbols();
+                List<Symbol> parameters = createTmpVariableForInlineInitilizerCollection((CompoundTypedSymbol) next);
                 FunctionSymbol element = SerializationUtils.clone(resultSymbol)
                         .findMethod(trailerSymbol.getName(), parameters.stream()
                                 .map(it -> (TypedSymbol) it)
@@ -511,6 +516,28 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         }
 
         return resultSymbol;
+    }
+
+    private List<Symbol> createTmpVariableForInlineInitilizerCollection(CompoundTypedSymbol compoundTypedSymbol) {
+        compoundTypedSymbol.getSymbols()
+                .stream()
+                .filter(it -> it instanceof TypedSymbol)
+                .map(it -> ((TypedSymbol)it))
+                .filter(TypedSymbol::isCollection)
+                .filter(it -> !it.isDeclaredInScope())
+                .forEach(this::createTmpVariableForInlineInitilizerCollection);
+        return compoundTypedSymbol.getSymbols();
+    }
+
+    private void createTmpVariableForInlineInitilizerCollection(TypedSymbol typedSymbol) {
+        String name = TemporaryVariableNameGenerator.INSTANCE.generateVariableName();
+        TypedSymbol clone = SerializationUtils.clone(typedSymbol);
+        typedSymbol.setDisplayText(name);
+        typedSymbol.setName(name);
+        typedSymbol.setTemporary(true);
+        codeWriter.writeAssignment(typedSymbol, clone);
+        currentScope.addVariable(typedSymbol);
+
     }
 
     @Override

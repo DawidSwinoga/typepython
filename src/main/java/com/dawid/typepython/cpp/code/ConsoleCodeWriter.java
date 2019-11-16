@@ -116,13 +116,13 @@ public class ConsoleCodeWriter implements CodeWriter {
 
     @Override
     public void writeAssignment(TypedSymbol assignable, TypedSymbol symbol) {
-        if (!assignable.isDeclaredInScope() && !scope.isLocalScope()) {
+        if (!assignable.isDeclaredInScope() && !scope.isLocalScope() && !assignable.isTemporary()) {
             writeGlobalVariableDeclaration(assignable, symbol);
         }
 
         if (assignable.isDeclaredInScope()) {
             cursor.append(assignable.getDisplayText()).append(" = ").append(symbol.getDisplayText()).append(";");
-        } else if (scope.isLocalScope()) {
+        } else if (scope.isLocalScope() || assignable.isTemporary()) {
             cursor.append(assignable.getCppNameType()).append(" ").append(assignable.getDisplayText()).append(" = ").append(symbol.getDisplayText()).append(";");
         }
     }

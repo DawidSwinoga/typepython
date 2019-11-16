@@ -1,0 +1,8 @@
+def test(a: map<int, int>):
+    pass
+
+test({1 : 2})
+
+for a in [1,2,3]:
+    pass
+
