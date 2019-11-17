@@ -32,9 +32,10 @@ import com.dawid.typepython.symtab.symbol.CompoundTypedSymbol;
 import com.dawid.typepython.symtab.symbol.FunctionAlreadyExistException;
 import com.dawid.typepython.symtab.symbol.FunctionSymbol;
 import com.dawid.typepython.symtab.symbol.KeyValueSymbol;
+import com.dawid.typepython.symtab.symbol.MethodSymbol;
 import com.dawid.typepython.symtab.symbol.Symbol;
 import com.dawid.typepython.symtab.symbol.TypedSymbol;
-import com.dawid.typepython.symtab.symbol.UndefinedVariableException;
+import com.dawid.typepython.symtab.symbol.UndefinedSymbolException;
 import com.dawid.typepython.symtab.symbol.VariableSymbol;
 import com.dawid.typepython.symtab.symbol.VariableTypeMissMatchException;
 import com.dawid.typepython.symtab.type.CppVariableType;
@@ -243,12 +244,16 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
         pushScope(new LocalScope());
         currentScope.addVariable(nested);
-        codeWriter.write("for (" + nested.getCppNameType() + " " + (nested.isCollection() ? "&" : "") + nested.getDisplayText() +
+        codeWriter.write("for (" + nested.getCppNameType() + " " + detectValueType(nested) + nested.getDisplayText() +
                 " : " + collection.getDisplayText() + ")");
         visit(ctx.suite());
 
         popScope();
         return null;
+    }
+
+    private String detectValueType(TypedSymbol nested) {
+        return nested.isCollection() && (nested.getVariableType().equals(SupportedGenericType.PAIR)) ? "&" : "";
     }
 
     @Override
@@ -423,7 +428,8 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
         if (ctx.exponent != null) {
             Symbol factor = visit(ctx.factor());
-            return CompoundTypedSymbol.of(new TokenSymbolInfo(ctx), CppVariableType.DOUBLE, new Symbol("pow(", null), atom,
+            Symbol symbol = new Symbol("std::pow(", null);
+            return CompoundTypedSymbol.of(new TokenSymbolInfo(ctx), CppVariableType.DOUBLE, symbol, atom,
                     new Symbol(",", null), factor, new Symbol(")", null));
         }
 
@@ -492,7 +498,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
                     break;
                 }
 
-                List<Symbol> parameters = createTmpVariableForInlineInitilizerCollection((CompoundTypedSymbol) next);
+                List<TypedSymbol> parameters = createTmpVariableForInlineInitilizerCollection((CompoundTypedSymbol) next);
                 FunctionSymbol element = SerializationUtils.clone(resultSymbol)
                         .findMethod(trailerSymbol.getName(), parameters.stream()
                                 .map(it -> (TypedSymbol) it)
@@ -515,7 +521,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         return resultSymbol;
     }
 
-    private List<Symbol> createTmpVariableForInlineInitilizerCollection(CompoundTypedSymbol compoundTypedSymbol) {
+    private List<TypedSymbol> createTmpVariableForInlineInitilizerCollection(CompoundTypedSymbol compoundTypedSymbol) {
         compoundTypedSymbol.getSymbols()
                 .stream()
                 .filter(it -> it instanceof TypedSymbol)
@@ -523,7 +529,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
                 .filter(TypedSymbol::isCollection)
                 .filter(it -> !it.isDeclaredInScope())
                 .forEach(this::createTmpVariableForInlineInitilizerCollection);
-        return compoundTypedSymbol.getSymbols();
+        return compoundTypedSymbol.getSymbols().stream().map(it -> (TypedSymbol) it).collect(Collectors.toList());
     }
 
     private void createTmpVariableForInlineInitilizerCollection(TypedSymbol typedSymbol) {

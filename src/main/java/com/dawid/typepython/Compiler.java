@@ -1,8 +1,5 @@
 package com.dawid.typepython;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import com.dawid.typepython.cpp.code.ConsoleCodeWriter;
 import com.dawid.typepython.generated.TypePythonLexer;
 import com.dawid.typepython.generated.TypePythonParser;
@@ -15,14 +12,18 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.DiagnosticErrorListener;
 import org.antlr.v4.runtime.atn.PredictionMode;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 public class Compiler {
     static Scope compile(String filePath, ConsoleCodeWriter codeWriter, GlobalScope scope, TokenSymbolInfo tokenSymbolInfo) {
-        InputStream inputFile = Main.class.getResourceAsStream(filePath);
-        if (inputFile == null) {
+        if (!(new File(FileContext.getRootPath() + filePath).exists())) {
             throw new FileNotFoundException(filePath, tokenSymbolInfo);
         }
         try {
-            return tryCompile(filePath, codeWriter, scope, tokenSymbolInfo);
+            return tryCompile(filePath, codeWriter, scope);
         } catch (CompilerException exception) {
             if (Main.DEBUG) {
                 System.err.println(filePath + ":" + exception.getCompilerError());
@@ -35,9 +36,15 @@ public class Compiler {
         return null;
     }
 
-    private static Scope tryCompile(String filePath, ConsoleCodeWriter codeWriter, GlobalScope scope, TokenSymbolInfo tokenSymbolInfo) {
-        InputStream inputFile = Main.class.getResourceAsStream(filePath);
+    private static Scope tryCompile(String filePath, ConsoleCodeWriter codeWriter, GlobalScope scope) {
+        InputStream inputFile;
+        try {
+            inputFile = new FileInputStream(FileContext.getRootPath() + filePath);
+        } catch (java.io.FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         CharStream inputStream;
+
 
         try {
             inputStream = CharStreams.fromStream(inputFile);
@@ -58,13 +65,7 @@ public class Compiler {
         typePythonParser.getInterpreter().setPredictionMode(PredictionMode.SLL);
         FileInputContext fileInputContext = typePythonParser.fileInput();
 
-        codeWriter.writeInclude("#include <iostream>");
-        codeWriter.writeInclude("#include <cmath>");
-        codeWriter.writeInclude("#include <vector>");
-        codeWriter.writeInclude("#include <set>");
-        codeWriter.writeInclude("#include <map>");
         codeWriter.writeInclude("#include \"stdtpy/stdtpy.h\"");
-        codeWriter.writeNamespace("using namespace std;");
         TypePythonVisitor visitor = new TypePythonVisitor(codeWriter, scope);
         visitor.visit(fileInputContext);
         codeWriter.finish();

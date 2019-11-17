@@ -25,7 +25,7 @@ public class PrintFunction extends EmbeddedFunction {
         StringBuilder stringBuilder = new StringBuilder();
 
         if (CollectionUtils.isNotEmpty(parameters)) {
-            stringBuilder.append("cout ");
+            stringBuilder.append("std::cout ");
         }
 
         for (Symbol symbol : parameters) {
@@ -35,7 +35,7 @@ public class PrintFunction extends EmbeddedFunction {
                 throw new IllegalFunctionParameter();
             }
         }
-        stringBuilder.append(" << endl;");
+        stringBuilder.append(" << std::endl");
         return new FunctionResult(stringBuilder.toString(), getVariableType());
     }
 

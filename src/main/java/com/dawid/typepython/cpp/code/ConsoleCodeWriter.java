@@ -1,5 +1,6 @@
 package com.dawid.typepython.cpp.code;
 
+import com.dawid.typepython.WriterFactory;
 import com.dawid.typepython.symtab.scope.Scope;
 import com.dawid.typepython.symtab.symbol.TypedSymbol;
 import lombok.Getter;
@@ -14,15 +15,25 @@ public class ConsoleCodeWriter implements CodeWriter {
     private Scope scope;
     protected StringBuilder cursor;
     private String fileName;
+    protected final Writer writer;
 
     public ConsoleCodeWriter(String fileName) {
-        this.fileName = fileName + ".cpp";
+        this.fileName = generateFileName(fileName);
+        this.writer = WriterFactory.create(this.fileName);
         this.namespace = new StringBuilder();
         this.include = new StringBuilder();
         this.global = new StringBuilder();
         this.main = new StringBuilder();
         this.functionDeclaration = new StringBuilder();
         this.cursor = main;
+    }
+
+    private String generateFileName(String fileName) {
+        if (fileName.endsWith(".tpy")) {
+            return fileName.replace(".tpy", ".cpp");
+        } else {
+            return fileName + ".cpp";
+        }
     }
 
     @Override
@@ -59,8 +70,8 @@ public class ConsoleCodeWriter implements CodeWriter {
         all.append("\n");
         all.append(main);
         String code = all.toString();
-        System.out.println(fileName);
-        System.out.println(code.replaceAll(";", ";\n"));
+        writer.write(fileName);
+        writer.write(code.replaceAll(";", ";\n"));
     }
 
     @Override

@@ -13,11 +13,11 @@ import static java.util.Arrays.stream;
  */
 @AllArgsConstructor
 public enum SupportedGenericType implements Type {
-    TUPLE("tuple", "vector"),
-    LIST("list", "vector"),
-    SET("set", "set"),
-    MAP("map", "map"),
-    PAIR("pair", "pair");
+    TUPLE("tuple", "std::vector"),
+    LIST("list", "std::vector"),
+    SET("set", "std::set"),
+    MAP("map", "std::map"),
+    PAIR("pair", "std::pair");
 
     private final String genericType;
     private final String cppGenericType;

@@ -20,7 +20,7 @@ public enum CppVariableType implements Type {
     DOUBLE("double", "double", true),
     FLOAT("float", "float", true),
     BOOLEAN("bool", "bool", true),
-    STRING("string", "string", false),
+    STRING("string", "std::string", false),
     VOID("", "void", false);
 
 

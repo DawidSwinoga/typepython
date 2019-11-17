@@ -1,5 +1,6 @@
 package com.dawid.typepython.cpp.code;
 
+import com.dawid.typepython.WriterFactory;
 import com.dawid.typepython.symtab.symbol.TypedSymbol;
 
 /**
@@ -10,6 +11,7 @@ public class LibraryConsoleCodeWriter extends ConsoleCodeWriter {
     private StringBuilder headerFileIncludeSection;
     private String headerFileName;
     private String namespace;
+    private final Writer writer;
 
     public LibraryConsoleCodeWriter(String fileName, String namespace) {
         super(fileName);
@@ -20,6 +22,7 @@ public class LibraryConsoleCodeWriter extends ConsoleCodeWriter {
         headerFile.append("using namespace std;\n");
         headerFile.append("namespace ").append(namespace).append(" {\n");
         headerFileName = fileName + ".h";
+        this.writer = WriterFactory.create(headerFileName);
         super.writeInclude("#include " + "\"" + headerFileName + "\"\n");
     }
 
@@ -61,8 +64,8 @@ public class LibraryConsoleCodeWriter extends ConsoleCodeWriter {
         StringBuilder all = new StringBuilder();
         all.append(headerFileIncludeSection);
         headerFile.append("}");
-        System.out.println(headerFileName);
+        writer.writeFileHeader(headerFileName);
         all.append(headerFile);
-        System.out.println(all.toString());
+        writer.write(all.toString());
     }
 }
