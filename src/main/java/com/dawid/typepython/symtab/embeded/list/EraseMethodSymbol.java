@@ -15,7 +15,7 @@ public class EraseMethodSymbol extends MethodSymbol {
     }
 
     @Override
-    public FunctionResult invoke(Symbol invoker, List<Symbol> parameters) {
+    public FunctionResult invoke(Symbol invoker, List<TypedSymbol> parameters) {
         String displayText = getDisplayText() + "(" + invoker.getDisplayText() + ".begin() + " + parameters.stream().map(Symbol::getDisplayText).collect(Collectors.joining(",")) + ")";
         return new FunctionResult(displayText, getVariableType());
     }

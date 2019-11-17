@@ -18,7 +18,7 @@ public class PropertySymbol extends MethodSymbol {
     }
 
     @Override
-    public FunctionResult invoke(Symbol invoker, List<Symbol> parameters) {
+    public FunctionResult invoke(Symbol invoker, List<TypedSymbol> parameters) {
         String text = getDisplayText();
         return new FunctionResult(text, getVariableType(), returnTypeAssignable);
     }

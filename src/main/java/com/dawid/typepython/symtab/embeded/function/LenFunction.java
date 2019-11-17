@@ -11,6 +11,7 @@ import com.dawid.typepython.symtab.type.Type;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by Dawid on 12.09.2019 at 01:28.
@@ -21,11 +22,11 @@ public class LenFunction extends EmbeddedFunction {
     }
 
     @Override
-    public FunctionResult invoke(Symbol invoker, List<Symbol> parameters) {
+    public FunctionResult invoke(Symbol invoker, List<TypedSymbol> parameters) {
         StringBuilder stringBuilder = new StringBuilder();
 
-        if (parameters.size() > 1 || parameters.isEmpty() || !((TypedSymbol) parameters.get(0)).getVariableType().isCollection()) {
-            throw new NoMatchingFunctionException();
+        if (parameters.size() != 1 || !parameters.get(0).getVariableType().isCollection()) {
+            throw new NoMatchingFunctionException("len", parameters.stream().map(TypedSymbol::getVariableType).collect(Collectors.toList()), invoker.getTokenSymbolInfo());
         }
 
         stringBuilder.append(parameters.get(0).getDisplayText()).append(".size()");
@@ -35,7 +36,7 @@ public class LenFunction extends EmbeddedFunction {
 
     @Override
     public MatchType parametersMatch(List<Type> parameterTypes) {
-        boolean noneMatch = parameterTypes.size() > 1 || parameterTypes.isEmpty() || ! parameterTypes.get(0).isCollection();
+        boolean noneMatch = parameterTypes.size() != 1 || !parameterTypes.get(0).isCollection();
 
         if (noneMatch) {
             return MatchType.NONE;

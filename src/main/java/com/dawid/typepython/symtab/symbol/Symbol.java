@@ -18,8 +18,8 @@ public class Symbol implements Serializable {
     private String displayText;
     private String name;
     private Scope scope;
-    private boolean temporary = false;
     private transient TokenSymbolInfo tokenSymbolInfo;
+    private boolean temporary = false;
     protected SymbolType symbolType = SymbolType.TEXT;
 
     public Symbol(SymbolType symbolType, String text, TokenSymbolInfo tokenSymbolInfo) {

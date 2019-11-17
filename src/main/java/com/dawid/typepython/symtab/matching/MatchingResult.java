@@ -1,9 +1,13 @@
 package com.dawid.typepython.symtab.matching;
 
+import com.dawid.typepython.TokenSymbolInfo;
 import com.dawid.typepython.symtab.symbol.FunctionSymbol;
+import com.dawid.typepython.symtab.symbol.Symbol;
 import com.dawid.typepython.symtab.symbol.TypedSymbol;
+import com.dawid.typepython.symtab.type.Type;
 import lombok.Value;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 /**
@@ -11,6 +15,8 @@ import java.util.function.Supplier;
  */
 @Value
 public class MatchingResult {
+    private String name;
+    private List<Type> parameters;
     private FunctionSymbol functionSymbol;
     private MatchType matchType;
 
@@ -26,15 +32,15 @@ public class MatchingResult {
         return functionSymbol;
     }
 
-    public FunctionSymbol get(MatchType minimumMatchType) {
-        return get(minimumMatchType, NoMatchingFunctionException::new);
+    public FunctionSymbol get(MatchType minimumMatchType, TokenSymbolInfo tokenSymbolInfo) {
+        return get(minimumMatchType, () -> new NoMatchingFunctionException(name, parameters, tokenSymbolInfo));
     }
 
-    public FunctionSymbol minPartial() {
-        return get(MatchType.PARTIAL);
+    public FunctionSymbol minPartial(TokenSymbolInfo tokenSymbolInfo) {
+        return get(MatchType.PARTIAL, tokenSymbolInfo);
     }
 
-    public TypedSymbol fullMatch() {
-        return get(MatchType.FULL);
+    public TypedSymbol fullMatch(TokenSymbolInfo tokenSymbolInfo) {
+        return get(MatchType.FULL, tokenSymbolInfo);
     }
 }

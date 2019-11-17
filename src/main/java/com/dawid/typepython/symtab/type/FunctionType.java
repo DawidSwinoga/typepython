@@ -1,6 +1,7 @@
 package com.dawid.typepython.symtab.type;
 
 import com.dawid.typepython.symtab.matching.MatchType;
+import com.dawid.typepython.symtab.symbol.MethodSymbol;
 import lombok.EqualsAndHashCode;
 
 import java.util.ArrayList;
@@ -27,6 +28,11 @@ public class FunctionType implements Type {
     @Override
     public String getCppNameType() {
         return returnType.getCppNameType();
+    }
+
+    @Override
+    public List<MethodSymbol> getMethodSymbol() {
+        return returnType.getMethodSymbol();
     }
 
     @Override

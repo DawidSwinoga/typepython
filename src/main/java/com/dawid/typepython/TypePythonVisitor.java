@@ -18,7 +18,6 @@ import com.dawid.typepython.symtab.embeded.vector.TupleSymbolFactory;
 import com.dawid.typepython.symtab.literal.BooleanLiteral;
 import com.dawid.typepython.symtab.matching.MatchType;
 import com.dawid.typepython.symtab.matching.MatchingResult;
-import com.dawid.typepython.symtab.matching.NoMatchingFunctionException;
 import com.dawid.typepython.symtab.operator.CompareOperator;
 import com.dawid.typepython.symtab.operator.LogicalOperator;
 import com.dawid.typepython.symtab.operator.MathOperator;
@@ -120,7 +119,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     private void validateFunctionUniqueness(FunctionSymbol functionSymbol, TokenSymbolInfo tokenSymbolInfo) {
         MatchingResult result = currentScope.findFunction(functionSymbol.getDisplayText(), functionSymbol.getParameterTypes(), tokenSymbolInfo);
         if (result.getMatchType() == MatchType.FULL) {
-            throw new FunctionAlreadyExistException("Function: " + functionSymbol.getDisplayText() + " already exist");
+            throw new FunctionAlreadyExistException("Function: " + functionSymbol.getDisplayText() + " already exist", tokenSymbolInfo);
         }
     }
 
@@ -227,7 +226,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         TypedSymbol collection;
         if (variableSymbol.isDeclaredInScope()) {
             collection = currentScope.findAtom(collectionVariableName)
-                    .orElseThrow(() -> new UndefinedVariableException(collectionVariableName));
+                    .orElseThrow(() -> new UndefinedSymbolException(collectionVariableName, variableSymbol.getTokenSymbolInfo()));
         } else {
             collection = variableSymbol;
             collection.setDisplayText(collection.getCppNameType() + collection.getDisplayText());
@@ -238,7 +237,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         }
 
 
-        TypedSymbol nested = SerializationUtils.clone(collection.findMethod("iterator", new ArrayList<>(), collection.getTokenSymbolInfo()).fullMatch());
+        TypedSymbol nested = SerializationUtils.clone(collection.findMethod("iterator", new ArrayList<>(), collection.getTokenSymbolInfo()).fullMatch(collection.getTokenSymbolInfo()));
         nested.setDisplayText(ctx.variable.getText());
         nested.setName(ctx.variable.getText());
 
@@ -467,10 +466,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
                 CompoundTypedSymbol compoundTypedSymbol = (CompoundTypedSymbol) trailerSymbol;
                 MatchingResult resultFunctionMatching = currentScope.findFunction(atom.getName(), compoundTypedSymbol.getVariableTypes(), atom.getTokenSymbolInfo());
-                if (resultFunctionMatching.getMatchType() == MatchType.NONE) {
-                    throw new NoMatchingFunctionException(atom.getName());
-                }
-                FunctionSymbol function = resultFunctionMatching.getFunctionSymbol();
+                FunctionSymbol function = resultFunctionMatching.minPartial(atom.getTokenSymbolInfo());
                 resultSymbol = SerializationUtils.clone(function);
                 FunctionResult invoke = function.invoke(resultSymbol, createTmpVariableForInlineInitilizerCollection(compoundTypedSymbol));
                 resultSymbol.setDisplayText(invoke.getDisplayText());
@@ -482,9 +478,10 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
                 TypedSymbol index = (TypedSymbol) createTmpVariableForInlineInitilizerCollection((CompoundTypedSymbol) trailerSymbol).get(0);
                 TypedSymbol element = SerializationUtils.clone(resultSymbol)
                         .findMethod("[]", Collections.singletonList(index.getVariableType()), trailerSymbol.getTokenSymbolInfo())
-                        .minPartial();
+                        .minPartial(trailerSymbol.getTokenSymbolInfo());
                 element.setDisplayText(resultSymbol.getDisplayText() + trailerSymbol.getDisplayText());
                 element.setCollectionElement(true);
+                element.setAssignable((((MethodSymbol)element).isReturnTypeAssignable()));
                 resultSymbol = element;
             }
 
@@ -501,12 +498,12 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
                                 .map(it -> (TypedSymbol) it)
                                 .map(TypedSymbol::getVariableType)
                                 .collect(Collectors.toList()), trailerSymbol.getTokenSymbolInfo())
-                        .minPartial();
+                        .minPartial(trailerSymbol.getTokenSymbolInfo());
                 if (resultSymbol.getSymbolType() == SymbolType.IMPORT) {
                     element.setDisplayText(resultSymbol.getDisplayText() + element.getDisplayText() + next.getDisplayText());
                     popScope();
                 } else {
-                    FunctionResult functionResult = element.invoke(resultSymbol, parameters);
+                    FunctionResult functionResult = element.invoke(resultSymbol, parameters.stream().map(it -> (TypedSymbol) it).collect(Collectors.toList()));
                     element.setAssignable(functionResult.isAssignable());
                     element.setDisplayText(resultSymbol.getDisplayText() + "." + functionResult.getDisplayText());
                     element.setVariableType(functionResult.getType());
@@ -579,24 +576,25 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     @Override
     public Symbol visitGenericType(TypePythonParser.GenericTypeContext ctx) {
         String genericType = ctx.IDENTIFIER().getText();
+        TokenSymbolInfo tokenSymbolInfo = new TokenSymbolInfo(ctx);
         if (!SupportedGenericType.isSupported(genericType)) {
-            throw new UnsupportedGenericTypeException(genericType);
+            throw new UnsupportedGenericTypeException(genericType, tokenSymbolInfo);
         }
 
         List<TypedSymbol> types = ctx.type().stream().map(this::visit).map(it -> (TypedSymbol) it).collect(Collectors.toList());
 
-        Type variableType = SupportedGenericType.translate(genericType);
+        Type variableType = SupportedGenericType.translate(genericType, tokenSymbolInfo);
 
         if (types.size() == 1) {
             Type type = types.get(0).getVariableType();
             if (variableType == LIST) {
-                return ListSymbolFactory.create("", type, new TokenSymbolInfo(ctx));
+                return ListSymbolFactory.create("", type, tokenSymbolInfo);
             }
             if (variableType == SET) {
-                return SetSymbolFactory.create("", type, new TokenSymbolInfo(ctx));
+                return SetSymbolFactory.create("", type, tokenSymbolInfo);
             }
             if (variableType == TUPLE) {
-                return TupleSymbolFactory.create("", type, new TokenSymbolInfo(ctx));
+                return TupleSymbolFactory.create("", type, tokenSymbolInfo);
             }
         }
 
@@ -605,13 +603,10 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
                 TypedSymbol key = types.get(0);
                 TypedSymbol value = types.get(1);
 
-                return MapSymbolFactory.create("", key.getVariableType(), value.getVariableType(), new TokenSymbolInfo(ctx));
+                return MapSymbolFactory.create("", key.getVariableType(), value.getVariableType(), tokenSymbolInfo);
             }
         }
-        throw new UnsupportedGenericTypeException(genericType + "<" + types
-                .stream()
-                .map(Symbol::getDisplayText)
-                .collect(joining(",")) + ">");
+        throw new UnsupportedGenericTypeException(genericType, tokenSymbolInfo);
     }
 
     @Override
@@ -631,7 +626,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         Symbol visit = visit(ctx.dottedIdentifier());
         String filePath = visit.getDisplayText();
         String namespace = filePath.replaceAll("/", "_");
-        Scope compile = Compiler.compile("/" + filePath + ".tpy", new LibraryConsoleCodeWriter(filePath, namespace), new ImportScope(filePath, namespace));
+        Scope compile = Compiler.compile("/" + filePath + ".tpy", new LibraryConsoleCodeWriter(filePath, namespace), new ImportScope(filePath, namespace), new TokenSymbolInfo(ctx));
         currentScope.addImportScope((ImportScope) compile);
         codeWriter.writeMain(namespace + "::" + namespace + "();");
         return null;
@@ -659,7 +654,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         TypedSymbol symbol = (TypedSymbol) visit(ctx.test());
 
         if (!assignable.isAssignable()) {
-            throw new ElementDoesNotSupportAssignmentException(assignable.getDisplayText());
+            throw new ElementDoesNotSupportAssignmentException(assignable);
         }
 
         if (symbol.getVariableType() == null) {
@@ -669,7 +664,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         if (assignable.getVariableType() == null) {
             if (symbol instanceof StandardCollectionSymbol) {
                 if (((GenericType) symbol.getVariableType()).getTemplateType(StandardCollectionSymbol.GENERIC_TEMPLATE_NAME) == null) {
-                    throw new TypeNotDefinedException(assignable.getDisplayText());
+                    throw new TypeNotDefinedException(assignable.getDisplayText(), assignable.getTokenSymbolInfo());
                 }
                 String text = assignable.getDisplayText();
                 assignable = new StandardCollectionSymbol(symbol.getVariableType(), symbol.getTokenSymbolInfo());
@@ -678,7 +673,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
             } else if (symbol instanceof MapSymbol) {
                 GenericType genericType = (GenericType) symbol.getVariableType();
                 if (genericType.getTemplateType(MapSymbol.KEY_TEMPLATE) == null || genericType.getTemplateType(MapSymbol.VALUE_TEMPLATE) == null) {
-                    throw new TypeNotDefinedException(assignable.getDisplayText());
+                    throw new TypeNotDefinedException(assignable.getDisplayText(), assignable.getTokenSymbolInfo());
                 }
                 String text = assignable.getDisplayText();
                 assignable = new StandardCollectionSymbol(symbol.getVariableType(), symbol.getTokenSymbolInfo());
@@ -712,7 +707,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
     @Override
     public Symbol visitIdentifierAtom(TypePythonParser.IdentifierAtomContext ctx) {
-        TypedSymbol typedSymbol = currentScope.findAtom(ctx.getText()).orElseThrow(() -> new UndefinedVariableException(ctx.getText()));
+        TypedSymbol typedSymbol = currentScope.findAtom(ctx.getText()).orElseThrow(() -> new UndefinedSymbolException(ctx.getText(), new TokenSymbolInfo(ctx)));
         typedSymbol.setTokenSymbolInfo(new TokenSymbolInfo(ctx));
 
         if (typedSymbol.getSymbolType() == SymbolType.IMPORT) {

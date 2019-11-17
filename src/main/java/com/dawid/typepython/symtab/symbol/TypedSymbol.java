@@ -85,7 +85,7 @@ public class TypedSymbol extends Symbol {
         for (MethodSymbol methodSymbol : methods) {
             MatchType matchType = methodSymbol.parametersMatch(parameters);
             if (matchType == MatchType.FULL) {
-                return new MatchingResult(methodSymbol, matchType);
+                return new MatchingResult(methodName, parameters, methodSymbol, matchType);
             }
 
             if (matchType == MatchType.PARTIAL) {
@@ -98,9 +98,9 @@ public class TypedSymbol extends Symbol {
         }
 
         if (partialMatchingMethods.isEmpty()) {
-            return new MatchingResult(null, MatchType.NONE);
+            return new MatchingResult(methodName, parameters, null, MatchType.NONE);
         }
 
-        return new MatchingResult(partialMatchingMethods.get(0), MatchType.PARTIAL);
+        return new MatchingResult(methodName, parameters, partialMatchingMethods.get(0), MatchType.PARTIAL);
     }
 }

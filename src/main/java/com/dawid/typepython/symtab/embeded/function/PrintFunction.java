@@ -21,7 +21,7 @@ public class PrintFunction extends EmbeddedFunction {
     }
 
     @Override
-    public FunctionResult invoke(Symbol invoker, List<Symbol> parameters) {
+    public FunctionResult invoke(Symbol invoker, List<TypedSymbol> parameters) {
         StringBuilder stringBuilder = new StringBuilder();
 
         if (CollectionUtils.isNotEmpty(parameters)) {

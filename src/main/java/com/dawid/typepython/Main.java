@@ -25,7 +25,7 @@ public class Main {
 //        String fileName = "/exception";
         String fileName = "/reference";
 
-        Compiler.compile(fileName + ".tpy", new ConsoleCodeWriter(fileName), new GlobalScope());
+        Compiler.compile(fileName + ".tpy", new ConsoleCodeWriter(fileName), new GlobalScope(), null);
     }
 
 }

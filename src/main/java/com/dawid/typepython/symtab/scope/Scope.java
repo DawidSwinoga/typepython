@@ -130,7 +130,7 @@ public abstract class Scope implements Serializable {
         for (FunctionSymbol functionSymbol : functions) {
             MatchType matchType = functionSymbol.parametersMatch(parameterTypes);
             if (matchType == MatchType.FULL) {
-                return new MatchingResult(functionSymbol, matchType);
+                return new MatchingResult(functionName, parameterTypes, functionSymbol, matchType);
             }
 
             if (matchType == MatchType.PARTIAL) {
@@ -143,10 +143,10 @@ public abstract class Scope implements Serializable {
         }
 
         if (partialMatchingFunction.isEmpty()) {
-            return new MatchingResult(null, MatchType.NONE);
+            return new MatchingResult(functionName, parameterTypes, null, MatchType.NONE);
         }
 
-        return new MatchingResult(partialMatchingFunction.get(0), MatchType.PARTIAL);
+        return new MatchingResult(functionName, parameterTypes, partialMatchingFunction.get(0), MatchType.PARTIAL);
     }
 
     private void findFunction(String text, List<Type> parameters, List<FunctionSymbol> functions) {

@@ -56,7 +56,7 @@ public class FunctionSymbol extends VariableSymbol {
         return matchType;
     }
 
-    public FunctionResult invoke(Symbol invoker, List<Symbol> parameters) {
+    public FunctionResult invoke(Symbol invoker, List<TypedSymbol> parameters) {
         String text = getDisplayText() + "(" + parameters.stream().map(Symbol::getDisplayText).collect(Collectors.joining(", ")) + ")";
         return new FunctionResult(text, getVariableType());
     }
