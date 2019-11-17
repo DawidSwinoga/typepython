@@ -1,2 +1,2 @@
-Transpiler from python to cpp
-https://github.com/DawidSwinoga/typepython/workflows/pipeline/badge.svg
+![](https://github.com/DawidSwinoga/typepython/workflows/pipeline/badge.svg) </br>
+Transpiler from python to cpp.
