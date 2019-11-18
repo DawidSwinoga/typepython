@@ -75,6 +75,14 @@ public abstract class Scope implements Serializable {
         return variable;
     }
 
+    public Optional<TypedSymbol> findVariable(String name) {
+        Optional<TypedSymbol> variable = variables.stream().filter(it -> it.getName().equals(name)).findFirst();
+        if (!variable.isPresent()) {
+            variable = getParentScope().flatMap(it -> it.findVariable(name));
+        }
+        return variable;
+    }
+
     private Optional<ImportScope> findImport(String name) {
         return importScopes
                 .stream()

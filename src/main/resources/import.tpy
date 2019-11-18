@@ -1,4 +1,5 @@
 import simpleFunction
+import math
 
 test = "test"
 simpleFunction.fun()
@@ -8,3 +9,5 @@ def aaa():
     print("aaaa")
 
 aaa()
+print("PI = ", math.PI)
+print("Pow2: ", math.pow2(math.PI))

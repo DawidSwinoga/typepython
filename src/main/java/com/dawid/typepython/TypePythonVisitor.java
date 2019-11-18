@@ -31,6 +31,7 @@ import com.dawid.typepython.symtab.symbol.CollectionClassSymbol;
 import com.dawid.typepython.symtab.symbol.CompoundTypedSymbol;
 import com.dawid.typepython.symtab.symbol.FunctionAlreadyExistException;
 import com.dawid.typepython.symtab.symbol.FunctionSymbol;
+import com.dawid.typepython.symtab.symbol.ImportSymbol;
 import com.dawid.typepython.symtab.symbol.KeyValueSymbol;
 import com.dawid.typepython.symtab.symbol.MethodSymbol;
 import com.dawid.typepython.symtab.symbol.Symbol;
@@ -487,33 +488,42 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
                         .minPartial(trailerSymbol.getTokenSymbolInfo());
                 element.setDisplayText(resultSymbol.getDisplayText() + trailerSymbol.getDisplayText());
                 element.setCollectionElement(true);
-                element.setAssignable((((MethodSymbol)element).isReturnTypeAssignable()));
+                element.setAssignable((((MethodSymbol) element).isReturnTypeAssignable()));
                 resultSymbol = element;
             }
 
-            if (trailerSymbol.getSymbolType() == SymbolType.FILED_IDENTIFIER && trailerSymbolIterator.hasNext()) {
-                Symbol next = trailerSymbolIterator.next();
-                if (next.getSymbolType() != SymbolType.FUNCTION_CALL) {
+            if (trailerSymbol.getSymbolType() == SymbolType.FILED_IDENTIFIER) {
+                TypedSymbol element;
+
+
+                if (trailerSymbolIterator.hasNext() && trailerSymbolIterator.next().getSymbolType() == SymbolType.FUNCTION_CALL) {
                     trailerSymbolIterator.previous();
-                    break;
+                    Symbol next = trailerSymbolIterator.next();
+
+                    List<TypedSymbol> parameters = createTmpVariableForInlineInitilizerCollection((CompoundTypedSymbol) next);
+                    element = SerializationUtils.clone(resultSymbol)
+                            .findMethod(trailerSymbol.getName(), parameters.stream()
+                                    .map(it -> (TypedSymbol) it)
+                                    .map(TypedSymbol::getVariableType)
+                                    .collect(Collectors.toList()), trailerSymbol.getTokenSymbolInfo())
+                            .minPartial(trailerSymbol.getTokenSymbolInfo());
+
+                    if (resultSymbol.getSymbolType() == SymbolType.IMPORT) {
+                        element.setDisplayText(resultSymbol.getDisplayText() + element.getDisplayText() + next.getDisplayText());
+                    } else {
+                        FunctionResult functionResult = ((FunctionSymbol) element).invoke(resultSymbol, new ArrayList<>(parameters));
+                        element.setAssignable(functionResult.isAssignable());
+                        element.setDisplayText(resultSymbol.getDisplayText() + "." + functionResult.getDisplayText());
+                        element.setVariableType(functionResult.getType());
+                    }
+
+                } else {
+                    element = SerializationUtils.clone((ImportSymbol) resultSymbol)
+                            .findVariable(trailerSymbol.getName())
+                            .orElseThrow(() -> new UndefinedSymbolException(trailerSymbol.getName(), trailerSymbol.getTokenSymbolInfo()));
+                    element.setDisplayText(resultSymbol.getDisplayText() + element.getDisplayText());
                 }
 
-                List<TypedSymbol> parameters = createTmpVariableForInlineInitilizerCollection((CompoundTypedSymbol) next);
-                FunctionSymbol element = SerializationUtils.clone(resultSymbol)
-                        .findMethod(trailerSymbol.getName(), parameters.stream()
-                                .map(it -> (TypedSymbol) it)
-                                .map(TypedSymbol::getVariableType)
-                                .collect(Collectors.toList()), trailerSymbol.getTokenSymbolInfo())
-                        .minPartial(trailerSymbol.getTokenSymbolInfo());
-                if (resultSymbol.getSymbolType() == SymbolType.IMPORT) {
-                    element.setDisplayText(resultSymbol.getDisplayText() + element.getDisplayText() + next.getDisplayText());
-                    popScope();
-                } else {
-                    FunctionResult functionResult = element.invoke(resultSymbol, parameters.stream().map(it -> (TypedSymbol) it).collect(Collectors.toList()));
-                    element.setAssignable(functionResult.isAssignable());
-                    element.setDisplayText(resultSymbol.getDisplayText() + "." + functionResult.getDisplayText());
-                    element.setVariableType(functionResult.getType());
-                }
                 resultSymbol = element;
             }
         }
@@ -525,7 +535,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         compoundTypedSymbol.getSymbols()
                 .stream()
                 .filter(it -> it instanceof TypedSymbol)
-                .map(it -> ((TypedSymbol)it))
+                .map(it -> ((TypedSymbol) it))
                 .filter(TypedSymbol::isCollection)
                 .filter(it -> !it.isDeclaredInScope())
                 .forEach(this::createTmpVariableForInlineInitilizerCollection);
@@ -653,7 +663,6 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         return null;
     }
 
-    //TODO user reference vector<int> &test = ddd; ??
     @Override
     public Symbol visitAssignableExpressionStatement(TypePythonParser.AssignableExpressionStatementContext ctx) {
         TypedSymbol assignable = (TypedSymbol) visit(ctx.assignable());
@@ -716,9 +725,9 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         TypedSymbol typedSymbol = currentScope.findAtom(ctx.getText()).orElseThrow(() -> new UndefinedSymbolException(ctx.getText(), new TokenSymbolInfo(ctx)));
         typedSymbol.setTokenSymbolInfo(new TokenSymbolInfo(ctx));
 
-        if (typedSymbol.getSymbolType() == SymbolType.IMPORT) {
-            typedSymbol.getScope().ifPresent(this::pushScope);
-        }
+//        if (typedSymbol.getSymbolType() == SymbolType.IMPORT) {
+//            typedSymbol.getScope().ifPresent(this::pushScope);
+//        }
 
         return typedSymbol;
     }
