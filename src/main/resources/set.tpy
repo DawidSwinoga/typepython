@@ -1,8 +1,8 @@
-a = {2,31,23,2}
+a = {"2","31","23","2"}
 
 for value in a:
     print(value)
 
 a.clear()
-
+a.add("2")
 print(len(a))

@@ -11,3 +11,4 @@ def aaa():
 aaa()
 print("PI = ", math.PI)
 print("Pow2: ", math.pow2(math.PI))
+import simpleFunction
