@@ -5,10 +5,6 @@ test = "test"
 simpleFunction.fun()
 print(test)
 
-def aaa():
-    print("aaaa")
-
-aaa()
 print("PI = ", math.PI)
 print("Pow2: ", math.pow2(math.PI))
 import simpleFunction

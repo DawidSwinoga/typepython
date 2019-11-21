@@ -1,5 +1,5 @@
-#aa : int = "fda"
-#test : int = aa
+aa : int = "fda"
+test : int = aa
 
 #for a in 1:
 #    print(a)

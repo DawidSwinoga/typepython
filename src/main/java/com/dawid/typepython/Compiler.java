@@ -25,8 +25,8 @@ public class Compiler {
         try {
             return tryCompile(filePath, codeWriter, scope);
         } catch (CompilerException exception) {
+            System.err.println(filePath + ":" + exception.getCompilerError());
             if (Main.DEBUG) {
-                System.err.println(filePath + ":" + exception.getCompilerError());
                 exception.printStackTrace();
                 System.exit(1);
             }
