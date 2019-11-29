@@ -17,11 +17,20 @@ import java.util.List;
  */
 public class PrintFunction extends EmbeddedFunction {
     public PrintFunction() {
-        super("print", new FunctionType(CppVariableType.VOID), new ArrayList<>());
+        this("print");
+    }
+
+    public PrintFunction(String name) {
+        super(name, new FunctionType(CppVariableType.VOID), new ArrayList<>());
     }
 
     @Override
     public FunctionResult invoke(Symbol invoker, List<TypedSymbol> parameters) {
+        StringBuilder stringBuilder = print(parameters);
+        return new FunctionResult(stringBuilder.toString(), getVariableType());
+    }
+
+    protected StringBuilder print(List<TypedSymbol> parameters) {
         StringBuilder stringBuilder = new StringBuilder();
 
         if (CollectionUtils.isNotEmpty(parameters)) {
@@ -35,8 +44,7 @@ public class PrintFunction extends EmbeddedFunction {
                 throw new IllegalFunctionParameter();
             }
         }
-        stringBuilder.append(" << std::endl");
-        return new FunctionResult(stringBuilder.toString(), getVariableType());
+        return stringBuilder;
     }
 
     @Override

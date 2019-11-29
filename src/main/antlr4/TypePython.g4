@@ -98,7 +98,7 @@ breakStatement
     ;
 
 returnStatement
-    : 'return' test
+    : 'return' test?
     ;
 
 importStatement

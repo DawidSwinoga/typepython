@@ -17,6 +17,6 @@ public class ErrorListener extends BaseErrorListener {
 
     @Override
     public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
-       System.err.println(fileName + ": line " + line + ":" + charPositionInLine + 1 + " " + msg);
+       System.err.println(fileName + ": line " + line + ":" + (charPositionInLine) + " " + msg);
     }
 }

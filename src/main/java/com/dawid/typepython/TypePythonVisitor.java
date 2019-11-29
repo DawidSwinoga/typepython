@@ -9,6 +9,7 @@ import com.dawid.typepython.symtab.embeded.function.FilterFunction;
 import com.dawid.typepython.symtab.embeded.function.LenFunction;
 import com.dawid.typepython.symtab.embeded.function.MapFunction;
 import com.dawid.typepython.symtab.embeded.function.PrintFunction;
+import com.dawid.typepython.symtab.embeded.function.PrintLineFunction;
 import com.dawid.typepython.symtab.embeded.list.ListSymbolFactory;
 import com.dawid.typepython.symtab.embeded.list.StandardCollectionSymbol;
 import com.dawid.typepython.symtab.embeded.map.MapSymbol;
@@ -126,22 +127,12 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     }
 
     private void validReturnStatement(TypePythonParser.FuncDefinitionContext ctx, FunctionScope functionScope) {
-//        Optional<TypePythonParser.ReturnStatementContext> returnStatementContext = ofNullable(ctx.suite())
-//                .map(TypePythonParser.SuiteContext::statement)
-//                .map(it -> it.get(it.size() - 1))
-//                .map(TypePythonParser.StatementContext::simpleStatement)
-//                .map(TypePythonParser.SimpleStatementContext::smallStatement)
-//                .map(TypePythonParser.SmallStatementContext::flowStatement)
-//                .map(TypePythonParser.FlowStatementContext::returnStatement);
-//        TypedSymbol returnType = functionScope.getReturnType();
-//        if (!returnStatementContext.isPresent() && returnType.getVariableType() != CppVariableType.VOID) {
-//            throw new ReturnStatementMissingException();
-//        }
+
     }
 
     @Override
     public Symbol visitReturnStatement(TypePythonParser.ReturnStatementContext ctx) {
-        Symbol returnSymbol = visit(ctx.test());
+        Symbol returnSymbol = ofNullable(ctx.test()).map(this::visit).orElse(new Symbol("", new TokenSymbolInfo(ctx)));
         FunctionScope functionScope = currentScope.getFunctionScope();
         Type returnType = functionScope.getReturnType();
         if (returnType != null) {
@@ -628,6 +619,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     @Override
     public Symbol visitFileInput(TypePythonParser.FileInputContext ctx) {
         currentScope.addFunctionSymbol(new PrintFunction());
+        currentScope.addFunctionSymbol(new PrintLineFunction());
         currentScope.addFunctionSymbol(new LenFunction());
         currentScope.addFunctionSymbol(new FilterFunction());
         currentScope.addFunctionSymbol(new MapFunction());

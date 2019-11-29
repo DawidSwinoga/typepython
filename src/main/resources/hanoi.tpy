@@ -1,0 +1,16 @@
+numberOfDiscs = 20
+
+def hanoi(src: int, aux: int, dst: int, n: int):
+    if n == 1:
+        println(src, " => ", dst)
+        return
+    else:
+        hanoi(src, dst, aux, n-1)
+        println(src, " => ", dst)
+        hanoi(aux, src, dst, n-1)
+
+println("1 - src")
+println("2 - tmp")
+println("3 - src")
+
+hanoi(1, 2, 3, numberOfDiscs)
