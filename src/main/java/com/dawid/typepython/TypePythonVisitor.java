@@ -250,7 +250,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
     @Override
     public Symbol visitAdditiveExpression(TypePythonParser.AdditiveExpressionContext ctx) {
-        TypedSymbol left = (TypedSymbol) visit(ctx.expr());
+        TypedSymbol left = (TypedSymbol) visit(ctx.expression());
         TokenSymbolInfo tokenSymbolInfo = new TokenSymbolInfo(ctx);
         Symbol mathOperator = new Symbol(MathOperator.translate(ctx.operator.getText()), tokenSymbolInfo);
         TypedSymbol right = (TypedSymbol) visit(ctx.term());
@@ -384,13 +384,13 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     @Override
     public Symbol visitDictorySetMakersAtom(TypePythonParser.DictorySetMakersAtomContext ctx) {
         TokenSymbolInfo tokenSymbolInfo = new TokenSymbolInfo(ctx);
-        if (ctx.dictorySetMakers() == null) {
+        if (ctx.dictionarySetMakers() == null) {
             StandardCollectionSymbol standardCollectionSymbol = ListSymbolFactory.create("", null, tokenSymbolInfo);
             standardCollectionSymbol.setDisplayText("{}");
             return standardCollectionSymbol;
         }
 
-        List<KeyValueSymbol> symbols = ctx.dictorySetMakers().dictorySetMaker()
+        List<KeyValueSymbol> symbols = ctx.dictionarySetMakers().dictionarySetMaker()
                 .stream()
                 .map(this::visit)
                 .map(it -> (KeyValueSymbol) it)
@@ -410,7 +410,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     }
 
     @Override
-    public Symbol visitDictorySetMaker(TypePythonParser.DictorySetMakerContext ctx) {
+    public Symbol visitDictionarySetMaker(TypePythonParser.DictionarySetMakerContext ctx) {
         return new KeyValueSymbol((TypedSymbol) visit(ctx.key), (TypedSymbol) visit(ctx.value));
     }
 

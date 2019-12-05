@@ -145,12 +145,12 @@ notTest
     : 'not' notTest #negationTest
     | comparison   #comparisionNotTest
     ;
-comparison: expr (compareOperator expr)*;
+comparison: expression (compareOperator expression)*;
 
 compareOperator: '<'|'>'|'=='|'<='|'>='|'not'|'!=';
-expr
+expression
     : term      #termExpression
-    | expr operator=('+'|'-') term  #additiveExpression
+    | expression operator=('+'|'-') term  #additiveExpression
     ;
 term
     : factor #factorTerm
@@ -168,7 +168,7 @@ atom
     : '(' (arguments) ')'           #conditionalTupleAtom
     | '[' (arguments)? ']'          #listAtom
     | '{' (arguments) '}'          #setAtom
-    | '{' (dictorySetMakers)? '}'   #dictorySetMakersAtom
+    | '{' (dictionarySetMakers)? '}'   #dictorySetMakersAtom
     | literal                       #literalAtom
     | IDENTIFIER                    #identifierAtom
     ;
@@ -176,11 +176,11 @@ atom
 arguments: first=argument (',' argument)*;
 argument: test;
 
-dictorySetMakers
-    : dictorySetMaker (',' dictorySetMaker)*
+dictionarySetMakers
+    : dictionarySetMaker (',' dictionarySetMaker)*
     ;
 
-dictorySetMaker
+dictionarySetMaker
     : key=test ':' value=test
     ;
 
