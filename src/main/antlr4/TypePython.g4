@@ -17,21 +17,21 @@ fileInput
     ;
 
 funcDefinition
-    : DEF IDENTIFIER parameters (':' type)? ':' suite
+    : DEF IDENTIFIER parameters (COLON type)? COLON suite
     ;
 suite
     : NEWLINE INDENT statement+ DEDENT
     ;
 
 parameters
-    : '(' (typeDeclarationArgsList)? ')'
+    : LEFT_PAREN (typeDeclarationArgsList)? RIGHT_PAREN
     ;
 
 typeDeclarationArgsList
-    : variableDeclaration (',' variableDeclaration)*
+    : variableDeclaration (COMMA variableDeclaration)*
     ;
 variableDeclaration
-    : IDENTIFIER ':' type
+    : IDENTIFIER COLON type
     ;
 
 type
@@ -40,7 +40,7 @@ type
     ;
 
 genericType
-    : IDENTIFIER '<' type (',' type)* '>'
+    : IDENTIFIER LOWER_THEN type (COMMA type)* GREATER_THEN
     ;
 
 simpleType
@@ -80,12 +80,12 @@ executeStatement
     ;
 
 expressionStatement
-    : assignable '=' test       #assignableExpressionStatement
+    : assignable ASSIGN test       #assignableExpressionStatement
     | variableDeclaration       #variableDeclarationStatement
     ;
 
 passStatement
-    : 'pass'
+    : PASS
     ;
 
 flowStatement
@@ -98,11 +98,11 @@ breakStatement
     ;
 
 returnStatement
-    : 'return' test?
+    : RETURN test?
     ;
 
 importStatement
-    : 'import' dottedIdentifier NEWLINE
+    : IMPORT dottedIdentifier NEWLINE
     ;
 
 dottedIdentifier
@@ -125,69 +125,69 @@ compoundStatement
     | forStatement
     ;
 
-ifStatement: 'if' test ':' suite elifStatement* elseStatement?;
-elifStatement: 'elif' test ':' suite;
-elseStatement: 'else' ':' suite;
+ifStatement: IF test COLON suite elifStatement* elseStatement?;
+elifStatement: ELIF test COLON suite;
+elseStatement: ELSE COLON suite;
 
-whileStatement: 'while' test ':' suite;
-forStatement: 'for' variable=IDENTIFIER 'in' collection=atomExpression ':' suite;
+whileStatement: WHILE test COLON suite;
+forStatement: FOR variable=IDENTIFIER IN collection=atomExpression COLON suite;
 
 test: conditionalOrStatement;
 conditionalOrStatement
     : conditionalAndStatement      #notOrStatement
-    | left=conditionalOrStatement operator='or' right=conditionalAndStatement  #orStatement
+    | left=conditionalOrStatement operator=OR right=conditionalAndStatement  #orStatement
     ;
 conditionalAndStatement
     : notTest #notAndStatement
-    | left=conditionalAndStatement operator='and' right=notTest #andStatement
+    | left=conditionalAndStatement operator=AND right=notTest #andStatement
     ;
 notTest
-    : 'not' notTest #negationTest
+    : NOT notTest #negationTest
     | comparison   #comparisionNotTest
     ;
 comparison: expression (compareOperator expression)*;
 
-compareOperator: '<'|'>'|'=='|'<='|'>='|'not'|'!=';
+compareOperator: LOWER_THEN|GREATER_THEN|EQUAL|LOWER_THEN_OR_EQUAL_TO|GREATER_THEN_OR_EQUAL_TO|NOT|NOT_EQUAL;
 expression
     : term      #termExpression
-    | expression operator=('+'|'-') term  #additiveExpression
+    | expression operator=(ADD|MINUS) term  #additiveExpression
     ;
 term
     : factor #factorTerm
-    | term operator=('*'|'/'|'%') factor #multiplicativeExpression
+    | term operator=(MUL|DIV|MOD) factor #multiplicativeExpression
     ;
 factor
-    : sign=('+'|'-') factor #signFactor
+    : sign=(ADD|MINUS) factor #signFactor
     | conditionalPower #conditioanlPowerFactor
     ;
-conditionalPower: atomExpression ('**' exponent=factor)?;
+conditionalPower: atomExpression (POWER exponent=factor)?;
 atomExpression: atom trailer*;
 
 
 atom
-    : '(' (arguments) ')'           #conditionalTupleAtom
-    | '[' (arguments)? ']'          #listAtom
-    | '{' (arguments) '}'          #setAtom
-    | '{' (dictionarySetMakers)? '}'   #dictorySetMakersAtom
+    : LEFT_PAREN (arguments) RIGHT_PAREN           #conditionalTupleAtom
+    | LEFT_BRACKET (arguments)? RIGHT_BRACKET          #listAtom
+    | LEFT_BRACE (arguments) RIGHT_BRACE          #setAtom
+    | LEFT_BRACE (dictionarySetMakers)? RIGHT_BRACE   #dictorySetMakersAtom
     | literal                       #literalAtom
     | IDENTIFIER                    #identifierAtom
     ;
 
-arguments: first=argument (',' argument)*;
+arguments: first=argument (COMMA argument)*;
 argument: test;
 
 dictionarySetMakers
-    : dictionarySetMaker (',' dictionarySetMaker)*
+    : dictionarySetMaker (COMMA dictionarySetMaker)*
     ;
 
 dictionarySetMaker
-    : key=test ':' value=test
+    : key=test COLON value=test
     ;
 
 trailer
-    : '(' (arguments)? ')' #trailerParenthesis
-    | '[' argument ']'     #trailerBrackets
-    | '.' IDENTIFIER      #trailerIdentifier
+    : LEFT_PAREN (arguments)? RIGHT_PAREN #trailerParenthesis
+    | LEFT_BRACKET argument RIGHT_BRACKET     #trailerBrackets
+    | DOT IDENTIFIER      #trailerIdentifier
     ;
 
 literal
@@ -199,93 +199,89 @@ literal
     | BOOLEAN_LITERAL       #booleanLiteral
     ;
 
-IF                      : 'if';
-ELSE                    : 'else';
-BREAK                   : 'break';
-ELIF                    : 'elif';
-FOR                     : 'for';
-IN                      : 'in';
-WHILE                   : 'while';
-DEF                     : 'def';
-RETURN                  : 'return';
-PASS                    : 'pass';
-IMPORT                  : 'import';
-AND                     : 'and';
-OR                      : 'or';
-NOT                     : 'not';
-ASSIGN                  : '=';
-EQUAL                   : '==';
-NOT_EQUAL               : '!=';
-GREATER_THEN           : '>';
+IF                          : 'if';
+ELSE                        : 'else';
+BREAK                       : 'break';
+ELIF                        : 'elif';
+FOR                         : 'for';
+IN                          : 'in';
+WHILE                       : 'while';
+DEF                         : 'def';
+RETURN                      : 'return';
+PASS                        : 'pass';
+IMPORT                      : 'import';
+AND                         : 'and';
+OR                          : 'or';
+NOT                         : 'not';
+ASSIGN                      : '=';
+EQUAL                       : '==';
+NOT_EQUAL                   : '!=';
+GREATER_THEN                : '>';
 GREATER_THEN_OR_EQUAL_TO    : '>=';
-LOWER_THEN              : '<';
-LOWER_THEN_OR_EQUAL_TO        : '<=';
+LOWER_THEN                  : '<';
+LOWER_THEN_OR_EQUAL_TO      : '<=';
+ADD                         : '+';
+MINUS                       : '-';
+POWER                       : '**';
+MUL                         : '*';
+DIV                         : '/';
+MOD                         : '%';
 
-LPAREN                  : '(';
-RPAREN                  : ')';
-LEFT_BRACE              : '[';
-RIGHT_BRACE             : ']';
-DOT                     : '.';
+LEFT_PAREN                  : '(';
+RIGHT_PAREN                 : ')';
+LEFT_BRACKET                : '[';
+RIGHT_BRACKET               : ']';
+LEFT_BRACE                  : '{';
+RIGHT_BRACE                 : '}';
+COMMA                       : ',';
+DOT                         : '.';
+COLON                       : ':';
 
-BOOLEAN_LITERAL         : 'True'
-                        | 'False'
-                        ;
-
-BOOLEAN                 : 'boolean';
-FLOAT                   : 'float';
-DOUBLE                  : 'double';
-INTEGER                 : 'integer';
-LONG                    : 'long';
-
-IDENTIFIER              : IDENTIFIER_START IDENTIFIER_CONTINUE*;
-
-STRING_LITERAL          : '"' .*? '"';
-
-INTEGER_LITERAL         : DECIMAL_NUMERAL;
-LONG_LITERAL            : DECIMAL_NUMERAL  LONG_TYPE_SUFFIX;
-FLOAT_LITERAL           : DECIMAL_FLOATING_POINT_LITERAL FLOAT_TYPE_SUFFIX
-                        | DECIMAL_NUMERAL FLOAT_TYPE_SUFFIX
-                        ;
-DOUBLE_LITERAL          : DECIMAL_FLOATING_POINT_LITERAL;
-
-NEWLINE
-    : ( {atStartOfInput()}?   SPACES
-         | ( '\r'? '\n' | '\r' | '\f' ) SPACES?
-         )
-         {
-           handleNewLine();
-         }
-       ;
-
-SKIP_
- : ( SPACES ) -> skip
- ;
-
-COMMENT
-    :   '/*' .*? '*/' -> skip
-    ;
-
-LINE_COMMENT
-    :   '#' ~[\r\n]* -> skip
-    ;
-
-fragment SPACES
- : [ \t]+
- ;
-
-fragment DECIMAL_NUMERAL    : '0'
-                            | NON_ZERO_DIGIT DIGITS?
+BOOLEAN_LITERAL             : 'True'
+                            | 'False'
                             ;
 
+BOOLEAN                     : 'boolean';
+FLOAT                       : 'float';
+DOUBLE                      : 'double';
+INTEGER                     : 'integer';
+LONG                        : 'long';
 
+IDENTIFIER                  : IDENTIFIER_START IDENTIFIER_CONTINUE*;
 
-fragment DIGIT          : '0'
-                        | NON_ZERO_DIGIT
-                        ;
+STRING_LITERAL              : '"' .*? '"';
 
-fragment DIGITS         : DIGIT+;
+INTEGER_LITERAL             : DECIMAL_NUMERAL;
+LONG_LITERAL                : DECIMAL_NUMERAL  LONG_TYPE_SUFFIX;
+FLOAT_LITERAL               : DECIMAL_FLOATING_POINT_LITERAL FLOAT_TYPE_SUFFIX
+                            | DECIMAL_NUMERAL FLOAT_TYPE_SUFFIX
+                            ;
+DOUBLE_LITERAL              : DECIMAL_FLOATING_POINT_LITERAL;
+
+NEWLINE
+                            : ( {atStartOfInput()}?   SPACES
+                            | ( '\r'? '\n' | '\r' | '\f' ) SPACES?) {
+                                handleNewLine();
+                              }
+                            ;
+
+WHITE_SPACES                : ( SPACES ) -> skip;
+COMMENT                     : '/*' .*? '*/' -> skip;
+LINE_COMMENT                : '#' ~[\r\n]* -> skip;
+
+fragment SPACES : [ \t]+;
 
 fragment NON_ZERO_DIGIT : [1-9];
+
+fragment DIGIT : '0'
+               | NON_ZERO_DIGIT
+               ;
+
+fragment DIGITS : DIGIT+;
+
+fragment DECIMAL_NUMERAL : '0'
+                         | NON_ZERO_DIGIT DIGITS?
+                         ;
 
 fragment LONG_TYPE_SUFFIX   : 'L' | 'l';
 
@@ -293,10 +289,10 @@ fragment FLOAT_TYPE_SUFFIX : 'f' | 'F';
 
 fragment DECIMAL_FLOATING_POINT_LITERAL : DECIMAL_NUMERAL DOT DIGITS;
 
-fragment IDENTIFIER_START   : '_'
-                            | [a-zA-Z]
-                            ;
+fragment IDENTIFIER_START : '_'
+                          | [a-zA-Z]
+                          ;
 
 fragment IDENTIFIER_CONTINUE : IDENTIFIER_START
-                              | [0-9]
-                              ;
+                             | [0-9]
+                             ;
