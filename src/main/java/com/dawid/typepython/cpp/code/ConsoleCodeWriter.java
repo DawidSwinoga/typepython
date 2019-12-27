@@ -5,8 +5,11 @@ import com.dawid.typepython.symtab.scope.Scope;
 import com.dawid.typepython.symtab.symbol.TypedSymbol;
 import lombok.Getter;
 
+import static com.dawid.typepython.TypePythonVisitor.TYPE_PYTHON_FILE_EXTENSION;
+
 @Getter
 public class ConsoleCodeWriter implements CodeWriter {
+    public static final String CPP_FILE_EXTENSION = ".cpp";
     protected StringBuilder global;
     protected StringBuilder main;
     private StringBuilder namespace;
@@ -29,8 +32,8 @@ public class ConsoleCodeWriter implements CodeWriter {
     }
 
     private String generateFileName(String fileName) {
-        if (fileName.endsWith(".tpy")) {
-            return fileName.replace(".tpy", ".cpp");
+        if (fileName.endsWith(TYPE_PYTHON_FILE_EXTENSION)) {
+            return fileName.replace(TYPE_PYTHON_FILE_EXTENSION, CPP_FILE_EXTENSION);
         } else {
             return fileName + ".cpp";
         }

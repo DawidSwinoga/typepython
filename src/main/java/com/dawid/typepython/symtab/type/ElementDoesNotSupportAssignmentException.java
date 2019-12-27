@@ -1,6 +1,7 @@
 package com.dawid.typepython.symtab.type;
 
 import com.dawid.typepython.CompilerException;
+import com.dawid.typepython.symtab.symbol.FunctionSymbol;
 import com.dawid.typepython.symtab.symbol.TypedSymbol;
 
 /**
@@ -16,6 +17,10 @@ public class ElementDoesNotSupportAssignmentException extends CompilerException 
 
     @Override
     public String getMessage() {
+        if (typedSymbol instanceof FunctionSymbol) {
+            return "Function " + typedSymbol.getDisplayText() + " does not support item assignment.";
+        }
+
         return "Object " + typedSymbol.getDisplayText() + " of type " + typedSymbol.getPythonNameType() + " does not support item assignment.";
     }
 }

@@ -21,7 +21,7 @@ public class FileWriter implements Writer {
     @Override
     public void write(String data) {
         try {
-            FileUtils.writeStringToFile(Paths.get(FileContext.getTargetPath() + filename).toFile(), data, UTF_8);
+            FileUtils.writeStringToFile(Paths.get(FileContext.getTargetPath() + "src/" + filename).toFile(), data, UTF_8);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

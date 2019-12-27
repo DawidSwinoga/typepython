@@ -58,21 +58,26 @@ import org.apache.commons.lang3.SerializationUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.dawid.typepython.PathUtils.getRelativePath;
 import static com.dawid.typepython.symtab.type.SupportedGenericType.LIST;
 import static com.dawid.typepython.symtab.type.SupportedGenericType.MAP;
 import static com.dawid.typepython.symtab.type.SupportedGenericType.SET;
 import static com.dawid.typepython.symtab.type.SupportedGenericType.TUPLE;
+import static java.util.Collections.singletonList;
+import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
 
 public class TypePythonVisitor extends com.dawid.typepython.generated.TypePythonBaseVisitor<Symbol> {
+    public static final String NAMESPACE_DELIMITER = "_";
+    public static final String IDENTIFIER_DELIMITER = ".";
+    public static final String TYPE_PYTHON_FILE_EXTENSION = ".tpy";
     private final CodeWriter codeWriter;
     private Scope currentScope;
     private List<TypedSymbol> parameters;
@@ -135,6 +140,11 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     public Symbol visitReturnStatement(TypePythonParser.ReturnStatementContext ctx) {
         Symbol returnSymbol = ofNullable(ctx.test()).map(this::visit).orElse(new Symbol("", new TokenSymbolInfo(ctx)));
         FunctionScope functionScope = currentScope.getFunctionScope();
+
+        if (functionScope == null) {
+            throw new CompilerException("Cannot define return outside of function.", new TokenSymbolInfo(ctx));
+        }
+
         Type returnType = functionScope.getReturnType();
         if (returnType != null) {
             codeWriter.write("return " + returnSymbol.getDisplayText() + ";");
@@ -171,7 +181,16 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     @Override
     public Symbol visitIfStatement(TypePythonParser.IfStatementContext ctx) {
         codeWriter.write("if (");
-        codeWriter.write(visit(ctx.test()).getDisplayText());
+        TypedSymbol visit = (TypedSymbol) visit(ctx.test());
+        String visitDisplayText = visit.getDisplayText();
+
+        if (visit.isCollection()) {
+            MatchingResult resultFunctionMatching = currentScope.findFunction("len", singletonList(visit.getVariableType()), visit.getTokenSymbolInfo());
+            FunctionSymbol function = resultFunctionMatching.minPartial(visit.getTokenSymbolInfo());
+            createTmpVariableForInlineInitilizerCollection(visit);
+            visitDisplayText = function.invoke(visit, singletonList(visit)).getDisplayText();
+        }
+        codeWriter.write(visitDisplayText);
         codeWriter.write(")");
 
         visit(ctx.suite());
@@ -431,8 +450,8 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
     @Override
     public Symbol visitAtomExpression(TypePythonParser.AtomExpressionContext ctx) {
-        Symbol symbol = super.visit(ctx.atom());
         List<TypePythonParser.TrailerContext> trailers = ctx.trailer();
+        Symbol symbol = prepareAtom(ctx.atom(), trailers);
 
         return getAtom(symbol, trailers);
     }
@@ -447,8 +466,8 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
     @Override
     public Symbol visitAtomTrailer(TypePythonParser.AtomTrailerContext ctx) {
-        Symbol symbol = super.visit(ctx.atom());
         List<TypePythonParser.TrailerContext> trailers = ctx.trailer();
+        Symbol symbol = prepareAtom(ctx.atom(), trailers);
 
         return getAtom(symbol, trailers);
     }
@@ -476,7 +495,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
             if (trailerSymbol.getSymbolType() == SymbolType.GET_COLLECTION_ELEMENT) {
                 TypedSymbol index = (TypedSymbol) createTmpVariableForInlineInitilizerCollection((CompoundTypedSymbol) trailerSymbol).get(0);
                 TypedSymbol element = SerializationUtils.clone(resultSymbol)
-                        .findMethod("[]", Collections.singletonList(index.getVariableType()), trailerSymbol.getTokenSymbolInfo())
+                        .findMethod("[]", singletonList(index.getVariableType()), trailerSymbol.getTokenSymbolInfo())
                         .minPartial(trailerSymbol.getTokenSymbolInfo());
                 element.setDisplayText(resultSymbol.getDisplayText() + trailerSymbol.getDisplayText());
                 element.setCollectionElement(true);
@@ -568,7 +587,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     @Override
     public Symbol visitTrailerBrackets(TypePythonParser.TrailerBracketsContext ctx) {
         TypedSymbol typedSymbol = (TypedSymbol) visit(ctx.argument());
-        Symbol symbol = CompoundTypedSymbol.of(typedSymbol.getVariableType(), Collections.singletonList(typedSymbol), new TokenSymbolInfo(ctx));
+        Symbol symbol = CompoundTypedSymbol.of(typedSymbol.getVariableType(), singletonList(typedSymbol), new TokenSymbolInfo(ctx));
         symbol.setSymbolType(SymbolType.GET_COLLECTION_ELEMENT);
         symbol.setDisplayText("[" + symbol.getDisplayText() + "]");
         return symbol;
@@ -635,8 +654,9 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     public Symbol visitImportStatement(TypePythonParser.ImportStatementContext ctx) {
         Symbol visit = visit(ctx.dottedIdentifier());
         String filePath = visit.getDisplayText();
-        String namespace = filePath.replaceAll("/", "_");
-        Scope compile = Compiler.compile("/" + filePath + ".tpy", new LibraryConsoleCodeWriter(filePath, namespace), new ImportScope(filePath, namespace), new TokenSymbolInfo(ctx));
+        String namespace = filePath.replaceAll(Main.JAVA_CLASSPATH_SEPARATOR, NAMESPACE_DELIMITER);
+        String scopeIdentifier = filePath.replaceAll(Main.JAVA_CLASSPATH_SEPARATOR, IDENTIFIER_DELIMITER);
+        Scope compile = Compiler.compile(filePath + TYPE_PYTHON_FILE_EXTENSION, new LibraryConsoleCodeWriter(filePath, namespace), new ImportScope(filePath, namespace, scopeIdentifier), new TokenSymbolInfo(ctx));
         currentScope.addImportScope((ImportScope) compile);
         codeWriter.writeMain(namespace + "::" + namespace + "();");
         return null;
@@ -644,17 +664,46 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
     @Override
     public Symbol visitDottedIdentifier(TypePythonParser.DottedIdentifierContext ctx) {
-        String path = ctx.IDENTIFIER().stream().map(ParseTree::getText).collect(joining("/"));
-        codeWriter.writeInclude("#include \"" + path + ".h\"");
+        String path =ctx.IDENTIFIER().stream().map(ParseTree::getText).collect(joining(Main.JAVA_CLASSPATH_SEPARATOR));
+        String pathRelative = getRelativePath(path, currentScope.getScopeFileName());
+        codeWriter.writeInclude("#include \"" + pathRelative + ".h\"");
         return new Symbol(path, new TokenSymbolInfo(ctx));
     }
 
+
+
     @Override
     public Symbol visitExecuteStatement(TypePythonParser.ExecuteStatementContext ctx) {
-        Symbol atom = visit(ctx.atom());
-        Symbol symbol = handleTrailerSymbols(ctx.trailer(), atom);
+        List<TypePythonParser.TrailerContext> trailer = ctx.trailer();
+        Symbol atom = prepareAtom(ctx.atom(), trailer);
+        Symbol symbol = handleTrailerSymbols(trailer, atom);
         codeWriter.write(symbol.getDisplayText() + ";");
         return null;
+    }
+
+    private Symbol prepareAtom(TypePythonParser.AtomContext atomContext, List<TypePythonParser.TrailerContext> trailers) {
+        Optional<Symbol> atom = empty();
+        try {
+            atom = ofNullable(visit(atomContext));
+        } catch (UndefinedSymbolException e) {
+            String text = atomContext.getText();
+            int possibleImportTrailerCount = trailers.size() - 1;
+            for (int i = 0; i < possibleImportTrailerCount; i++) {
+                text = text + trailers.get(i).getText();
+                Optional<ImportScope> importScope = currentScope.findImport(text);
+                if (importScope.isPresent()) {
+                    trailers.removeAll(trailers.subList(0, i + 1));
+                    atom = importScope.map(it -> new ImportSymbol(SymbolType.IMPORT, it));
+                    break;
+                }
+
+            }
+            if (!atom.isPresent()) {
+                throw e;
+            }
+        }
+
+        return atom.orElseThrow(() -> new UndefinedSymbolException(atomContext.getText(), new TokenSymbolInfo(atomContext)));
     }
 
     @Override
@@ -718,10 +767,6 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     public Symbol visitIdentifierAtom(TypePythonParser.IdentifierAtomContext ctx) {
         TypedSymbol typedSymbol = currentScope.findAtom(ctx.getText()).orElseThrow(() -> new UndefinedSymbolException(ctx.getText(), new TokenSymbolInfo(ctx)));
         typedSymbol.setTokenSymbolInfo(new TokenSymbolInfo(ctx));
-
-//        if (typedSymbol.getSymbolType() == SymbolType.IMPORT) {
-//            typedSymbol.getScope().ifPresent(this::pushScope);
-//        }
 
         return typedSymbol;
     }

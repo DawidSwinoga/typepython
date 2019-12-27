@@ -165,16 +165,15 @@ atomExpression: atom trailer*;
 
 
 atom
-    : LEFT_PAREN (arguments) RIGHT_PAREN           #conditionalTupleAtom
-    | LEFT_BRACKET (arguments)? RIGHT_BRACKET          #listAtom
-    | LEFT_BRACE (arguments) RIGHT_BRACE          #setAtom
+    : LEFT_PAREN (tests) RIGHT_PAREN           #conditionalTupleAtom
+    | LEFT_BRACKET (tests)? RIGHT_BRACKET          #listAtom
+    | LEFT_BRACE (tests) RIGHT_BRACE          #setAtom
     | LEFT_BRACE (dictionarySetMakers)? RIGHT_BRACE   #dictorySetMakersAtom
     | literal                       #literalAtom
     | IDENTIFIER                    #identifierAtom
     ;
 
-arguments: first=argument (COMMA argument)*;
-argument: test;
+tests: first=test (COMMA test)*;
 
 dictionarySetMakers
     : dictionarySetMaker (COMMA dictionarySetMaker)*
@@ -185,8 +184,8 @@ dictionarySetMaker
     ;
 
 trailer
-    : LEFT_PAREN (arguments)? RIGHT_PAREN #trailerParenthesis
-    | LEFT_BRACKET argument RIGHT_BRACKET     #trailerBrackets
+    : LEFT_PAREN (tests)? RIGHT_PAREN #trailerParenthesis
+    | LEFT_BRACKET tests RIGHT_BRACKET     #trailerBrackets
     | DOT IDENTIFIER      #trailerIdentifier
     ;
 

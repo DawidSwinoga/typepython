@@ -10,6 +10,7 @@ import com.dawid.typepython.symtab.symbol.TypedSymbol;
 import com.dawid.typepython.symtab.symbol.VariableSymbol;
 import com.dawid.typepython.symtab.type.SymbolType;
 import com.dawid.typepython.symtab.type.Type;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import java.util.Optional;
 
 public abstract class Scope implements Serializable {
     private String namespace;
+    private String scopeFileName;
     private Scope parentScope;
     private ScopeType scopeType;
     private List<TypedSymbol> variables = new ArrayList<>();
@@ -41,8 +43,26 @@ public abstract class Scope implements Serializable {
         functionSymbols = new ArrayList<>();
     }
 
+    public Scope(ScopeType scopeType, String namespace, String scopeFileName) {
+        this.scopeType = scopeType;
+        this.namespace = namespace;
+        this.scopeFileName = scopeFileName;
+    }
+
     public Optional<String> getNamespace() {
         return Optional.ofNullable(namespace);
+    }
+
+    public String getScopeFileName() {
+        if (StringUtils.isNotBlank(scopeFileName)) {
+            return scopeFileName;
+        }
+
+        if (parentScope != null) {
+            return parentScope.getScopeFileName();
+        }
+
+        return StringUtils.EMPTY;
     }
 
     public boolean isLocalScope() {
@@ -83,12 +103,10 @@ public abstract class Scope implements Serializable {
         return variable;
     }
 
-    private Optional<ImportScope> findImport(String name) {
+    public Optional<ImportScope> findImport(String name) {
         return importScopes
                 .stream()
-                .filter(it -> it.getNamespace()
-                        .filter(namespace -> namespace.equals(name))
-                        .isPresent())
+                .filter(it -> it.getScopeIdentifier().equals(name))
                 .findFirst();
     }
 

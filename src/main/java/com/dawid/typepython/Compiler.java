@@ -18,6 +18,10 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class Compiler {
+
+    public static final String STD_LIBRARY_LOCATION = "stdtpy/stdtpy.h";
+    public static final String CPP_INCLUDE = "#include \"";
+
     static Scope compile(String filePath, ConsoleCodeWriter codeWriter, GlobalScope scope, TokenSymbolInfo tokenSymbolInfo) {
         if (!(new File(FileContext.getRootPath() + filePath).exists())) {
             throw new FileNotFoundException(filePath, tokenSymbolInfo);
@@ -65,7 +69,8 @@ public class Compiler {
         typePythonParser.getInterpreter().setPredictionMode(PredictionMode.SLL);
         FileInputContext fileInputContext = typePythonParser.fileInput();
 
-        codeWriter.writeInclude("#include \"stdtpy/stdtpy.h\"");
+        String pathRelative = PathUtils.getRelativePath(STD_LIBRARY_LOCATION, filePath);
+        codeWriter.writeInclude(CPP_INCLUDE + pathRelative + "\"");
         TypePythonVisitor visitor = new TypePythonVisitor(codeWriter, scope);
         visitor.visit(fileInputContext);
         codeWriter.finish();

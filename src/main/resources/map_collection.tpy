@@ -9,6 +9,7 @@ test.clear()
 print(len(test))
 
 aa = {1:2, 3:4}
+aa[1] = 10
 dd : list<int>
 a : int
 ddd : map<int,int>

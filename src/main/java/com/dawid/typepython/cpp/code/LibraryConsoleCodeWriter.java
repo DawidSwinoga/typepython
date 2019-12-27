@@ -3,6 +3,8 @@ package com.dawid.typepython.cpp.code;
 import com.dawid.typepython.WriterFactory;
 import com.dawid.typepython.symtab.symbol.TypedSymbol;
 
+import java.nio.file.Paths;
+
 /**
  * Created by Dawid on 05.10.2019 at 17:13.
  */
@@ -23,7 +25,7 @@ public class LibraryConsoleCodeWriter extends ConsoleCodeWriter {
         headerFile.append("namespace ").append(namespace).append(" {\n");
         headerFileName = fileName + ".h";
         this.writer = WriterFactory.create(headerFileName);
-        super.writeInclude("#include " + "\"" + headerFileName + "\"\n");
+        super.writeInclude("#include \"" + Paths.get(headerFileName).getFileName().toString() + "\"");
     }
 
     @Override
@@ -64,7 +66,7 @@ public class LibraryConsoleCodeWriter extends ConsoleCodeWriter {
         StringBuilder all = new StringBuilder();
         all.append(headerFileIncludeSection);
         headerFile.append("}");
-        writer.writeFileHeader(headerFileName);
+        writer.writeFileHeader(Paths.get(headerFileName).getFileName().toString());
         all.append(headerFile);
         writer.write(all.toString());
     }

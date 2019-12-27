@@ -1,15 +1,14 @@
 package com.dawid.typepython.symtab.scope;
 
+import lombok.Getter;
+
+@Getter
 public class GlobalScope extends Scope {
-    public GlobalScope() {
-        super(ScopeType.MAIN);
+    public GlobalScope(String scopeFileName) {
+        super(ScopeType.MAIN, null, scopeFileName);
     }
 
-    public GlobalScope(ScopeType type ) {
-        super(type);
-    }
-
-    public GlobalScope(ScopeType scopeType, String namespace) {
-        super(scopeType, namespace);
+    public GlobalScope(ScopeType scopeType, String namespace, String scopeFileName) {
+        super(scopeType, namespace, scopeFileName);
     }
 }
