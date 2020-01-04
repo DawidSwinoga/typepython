@@ -8,4 +8,4 @@ test = filter(test, predicate)
 print("Test: ")
 
 for t in test:
-    print(t)
+    println(t)

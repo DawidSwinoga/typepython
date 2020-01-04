@@ -55,7 +55,7 @@ public class TypeAnalyzer {
             return CppVariableType.STRING;
         }
 
-        throw new TypeAnalyzerException("Collection cannot contains numeric types and string type.");
+        throw new TypeAnalyzerException("Collection cannot contains mixed types.");
     }
 
     private boolean allSymbolsAreString() {

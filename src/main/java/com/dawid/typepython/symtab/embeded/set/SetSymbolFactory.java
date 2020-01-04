@@ -20,7 +20,7 @@ public class SetSymbolFactory {
     public static StandardCollectionSymbol create(String name, Type templateType, TokenSymbolInfo tokenSymbolInfo) {
 
         ArrayList<MethodSymbol> methodSymbols = new ArrayList<>();
-        MethodSymbol iteratorSymbol = new MethodSymbol("iterator", new FunctionType(templateType), new ArrayList<>(), false, null);
+        MethodSymbol iteratorSymbol = new MethodSymbol("iterator", new FunctionType(templateType), new ArrayList<>(),  null);
         MethodSymbol append = new MethodSymbol("add", new FunctionType(CppVariableType.VOID), Collections.singletonList(new TypedSymbol(templateType, null)), false, null);
         append.setDisplayText("insert");
         MethodSymbol clear = new MethodSymbol("clear", new FunctionType(CppVariableType.VOID), new ArrayList<>(), false, null);

@@ -70,6 +70,10 @@ public class TypedSymbol extends Symbol {
         return variableType.match(t.getVariableType());
     }
 
+    public MatchType match(Type type) {
+        return variableType.match(type);
+    }
+
     public boolean isCollection() {
         return variableType.isCollection();
     }

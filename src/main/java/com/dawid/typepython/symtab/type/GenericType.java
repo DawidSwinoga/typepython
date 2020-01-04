@@ -5,7 +5,6 @@ import com.dawid.typepython.symtab.symbol.MethodSymbol;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,7 +77,21 @@ public class GenericType implements Type {
 
     @Override
     public String getPythonType() {
-        return genericType.getPythonType();
+        StringBuilder type = new StringBuilder();
+        type.append(genericType.getPythonType());
+
+        if (!templateNameType.isEmpty()) {
+            type.append("<");
+            String nestedType = templateNameType
+                    .values()
+                    .stream()
+                    .map(Type::getPythonType)
+                    .collect(Collectors.joining(","));
+            type.append(nestedType);
+            type.append(">");
+        }
+
+        return type.toString();
     }
 
     @Override

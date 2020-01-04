@@ -110,6 +110,16 @@ public abstract class Scope implements Serializable {
                 .findFirst();
     }
 
+    public Optional<FunctionSymbol> findFunctionByName(String name) {
+        Optional<FunctionSymbol> result = findFunction(name);
+
+        if (!result.isPresent()) {
+            result = getParentScope().flatMap(it -> it.findFunctionByName(name));
+        }
+
+        return result;
+    }
+
     private Optional<FunctionSymbol> findFunction(String name) {
         return functionSymbols.stream().filter(it -> it.getName().equals(name)).findFirst();
     }

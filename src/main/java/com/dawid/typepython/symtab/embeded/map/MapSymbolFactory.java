@@ -25,7 +25,7 @@ public class MapSymbolFactory {
         pop.setDisplayText("erase");
 
         GenericType pair = createPairGeneric(keyType, valueType);
-        MethodSymbol iteratorSymbol = new MethodSymbol("iterator", pair, new ArrayList<>(), false, null);
+        MethodSymbol iteratorSymbol = new MethodSymbol("iterator", pair, new ArrayList<>(), null);
 
         List<MethodSymbol> methods = new ArrayList<>();
         methods.add(getSymbol);

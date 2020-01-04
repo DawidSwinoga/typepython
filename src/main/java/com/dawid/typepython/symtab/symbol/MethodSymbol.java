@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 public class MethodSymbol extends FunctionSymbol {
     @Getter
-    protected boolean returnTypeAssignable;
+    protected boolean returnTypeAssignable = true;
 
     public MethodSymbol(String name, Type returnType, List<TypedSymbol> parameters, boolean returnTypeAssignable, TokenSymbolInfo tokenSymbolInfo) {
         super(name, returnType, parameters, tokenSymbolInfo);
@@ -19,7 +19,6 @@ public class MethodSymbol extends FunctionSymbol {
 
     public MethodSymbol(String name, Type returnType, List<TypedSymbol> parameters, TokenSymbolInfo tokenSymbolInfo) {
         super(name, returnType, parameters, tokenSymbolInfo);
-        this.returnTypeAssignable = true;
     }
 
     @Override
