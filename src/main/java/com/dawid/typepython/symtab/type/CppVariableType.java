@@ -6,6 +6,7 @@ import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.Arrays.stream;
 
@@ -54,11 +55,10 @@ public enum CppVariableType implements Type {
         return new ArrayList<>();
     }
 
-    public static Type translate(String pythonName) {
+    public static Optional<? extends Type> translate(String pythonName) {
         return stream(values())
                 .filter(it -> it.getPythonName().equals(pythonName))
-                .findFirst()
-                .orElseThrow(() -> new UnsupportedOperationException(pythonName));
+                .findFirst();
     }
 
     @Override

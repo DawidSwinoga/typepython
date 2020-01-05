@@ -1,5 +1,5 @@
-aa : int = "fda"
-test : int = aa
+#aa : int = "fda"
+#test : int = aa
 
 #for a in 1:
 #    print(a)
@@ -21,8 +21,8 @@ fun(True)
 
 #test(12)
 
-#test : tuple<int> = (1,2,3)
-#test[0] = 3
+test : tuple<int> = (1,2,3)
+test[0] = 3
 
 #import test2
 
@@ -47,3 +47,6 @@ a(1)
 #list = []
 
 #test: df<int>
+
+#def fun(var: ing):
+#    pass

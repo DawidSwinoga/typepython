@@ -67,6 +67,9 @@ public class TypedSymbol extends Symbol {
     }
 
     public MatchType match(TypedSymbol t) {
+        if (variableType == null || t.getVariableType() == null) {
+            return MatchType.NONE;
+        }
         return variableType.match(t.getVariableType());
     }
 

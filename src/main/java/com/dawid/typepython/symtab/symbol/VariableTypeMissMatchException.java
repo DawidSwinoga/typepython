@@ -14,6 +14,6 @@ public class VariableTypeMissMatchException extends CompilerException {
     }
 
     public VariableTypeMissMatchException(TokenSymbolInfo tokenSymbolInfo, Type expected, Type actual) {
-        super("Expected type: " + expected.getPythonType() + " | actual: " + tokenSymbolInfo.getSourceText() + " -> type: " + actual.getPythonType(), tokenSymbolInfo);
+        super("Expected type: " + (expected == null ? "" : expected.getPythonType()) + " | actual: " + tokenSymbolInfo.getSourceText() + " -> type: " + (actual == null? "" : actual.getPythonType()), tokenSymbolInfo);
     }
 }

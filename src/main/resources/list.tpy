@@ -1,3 +1,15 @@
+collection = [1, 2, 3]
+collection2 = [[3, 2], [1, 2]]
+
+collection[1]        #Odwołanie się do wartości "2"
+collection2[1][0]    #Odwołanie się do wartości "1"
+
+collection[0] = 10       #Zamiana wartości "1" na wartość "10"
+collection2[0][0] = 10   #Zamiana wartości "3" na wartość "10"
+
+#collection : list<int>
+#collection2 : list<int> = []
+
 test = [[1,2],[3,2]]
 test.append([2,3])
 

@@ -16,6 +16,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 public abstract class Scope implements Serializable {
     private String namespace;
@@ -158,6 +159,11 @@ public abstract class Scope implements Serializable {
     }
 
     public MatchingResult findFunction(String functionName, List<Type> parameterTypes, TokenSymbolInfo tokenSymbolInfo) {
+        return findFunction(functionName, parameterTypes, partialMatchingFunctions -> {
+            throw new AmbiguousFunctionCallException(functionName, parameterTypes, tokenSymbolInfo, partialMatchingFunctions);
+        });
+    }
+    public MatchingResult findFunction(String functionName, List<Type> parameterTypes, Function<List<FunctionSymbol>, MatchingResult> function) {
         List<FunctionSymbol> functions = new ArrayList<>();
         findFunction(functionName, parameterTypes, functions);
 
@@ -175,7 +181,7 @@ public abstract class Scope implements Serializable {
         }
 
         if (partialMatchingFunction.size() > 1) {
-            throw new AmbiguousFunctionCallException(functionName, parameterTypes, tokenSymbolInfo, partialMatchingFunction);
+            return function.apply(partialMatchingFunction);
         }
 
         if (partialMatchingFunction.isEmpty()) {
@@ -184,6 +190,12 @@ public abstract class Scope implements Serializable {
 
         return new MatchingResult(functionName, parameterTypes, partialMatchingFunction.get(0), MatchType.PARTIAL);
     }
+
+    public MatchingResult functionExist(String functionName, List<Type> parameterTypes, TokenSymbolInfo tokenSymbolInfo) {
+        return findFunction(functionName, parameterTypes,
+                partialMatchingFunctions -> new MatchingResult(functionName, parameterTypes, null, MatchType.PARTIAL));
+    }
+
 
     private void findFunction(String text, List<Type> parameters, List<FunctionSymbol> functions) {
         functionSymbols.stream()

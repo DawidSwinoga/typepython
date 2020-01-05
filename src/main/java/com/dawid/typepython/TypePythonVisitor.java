@@ -50,6 +50,7 @@ import com.dawid.typepython.symtab.type.SymbolType;
 import com.dawid.typepython.symtab.type.Type;
 import com.dawid.typepython.symtab.type.TypeNotDefinedException;
 import com.dawid.typepython.symtab.type.UnsupportedGenericTypeException;
+import com.dawid.typepython.symtab.type.UnsupportedTypeException;
 import com.dawid.typepython.symtab.type.collection.TypeAnalyzer;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -128,7 +129,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     }
 
     private void validateFunctionUniqueness(FunctionSymbol functionSymbol, TokenSymbolInfo tokenSymbolInfo) {
-        MatchingResult result = currentScope.findFunction(functionSymbol.getDisplayText(), functionSymbol.getParameterTypes(), tokenSymbolInfo);
+        MatchingResult result = currentScope.functionExist(functionSymbol.getDisplayText(), functionSymbol.getParameterTypes(), tokenSymbolInfo);
         if (result.getMatchType() == MatchType.FULL) {
             throw new FunctionAlreadyExistException("Function: " + functionSymbol.getDisplayText() + " already exist", tokenSymbolInfo);
         }
@@ -347,7 +348,10 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
     @Override
     public Symbol visitSimpleType(TypePythonParser.SimpleTypeContext ctx) {
-        return new TypedSymbol(ctx.getText(), CppVariableType.translate(ctx.getText()), new TokenSymbolInfo(ctx));
+        String text = ctx.getText();
+        TokenSymbolInfo tokenSymbolInfo = new TokenSymbolInfo(ctx);
+        Type type = CppVariableType.translate(text).orElseThrow(() -> new UnsupportedTypeException(text, tokenSymbolInfo));
+        return new TypedSymbol(text, type, tokenSymbolInfo);
     }
 
     @Override
@@ -718,10 +722,6 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
             throw new ElementDoesNotSupportAssignmentException(symbol);
         }
 
-        if (symbol.getVariableType() == null) {
-            throw new RuntimeException();
-        }
-
         if (assignable.getVariableType() == null) {
             if (symbol instanceof StandardCollectionSymbol) {
                 if (((GenericType) symbol.getVariableType()).getTemplateType(StandardCollectionSymbol.GENERIC_TEMPLATE_NAME) == null) {
@@ -744,9 +744,11 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
                 assignable.setVariableType(symbol.getVariableType());
             }
         } else {
-            MatchType match = symbol.match(assignable);
-            if (match == MatchType.NONE) {
-                throw new VariableTypeMissMatchException(symbol.getTokenSymbolInfo(), assignable.getVariableType(), symbol.getVariableType());
+            if (!(symbol instanceof CollectionClassSymbol && symbol.getVariableType() == null)) {
+                MatchType match = symbol.match(assignable);
+                if (match == MatchType.NONE) {
+                    throw new VariableTypeMissMatchException(symbol.getTokenSymbolInfo(), assignable.getVariableType(), symbol.getVariableType());
+                }
             }
         }
 

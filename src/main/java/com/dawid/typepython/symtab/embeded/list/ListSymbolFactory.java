@@ -34,8 +34,16 @@ public class ListSymbolFactory {
         methods.add(append);
         methods.add(pop);
         methods.add(clear);
-        GenericType variableType = new GenericType(SupportedGenericType.LIST, StandardCollectionSymbol.GENERIC_TEMPLATE_NAME, templateType, methods);
+
+        GenericType variableType = createVariableType(templateType, methods);
         return new StandardCollectionSymbol(name, variableType, tokenSymbolInfo);
+    }
+
+    private static GenericType createVariableType(Type templateType, List<MethodSymbol> methods) {
+        if (templateType != null) {
+            return new GenericType(SupportedGenericType.LIST, StandardCollectionSymbol.GENERIC_TEMPLATE_NAME, templateType, methods);
+        }
+        return null;
     }
 
 }
