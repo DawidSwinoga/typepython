@@ -425,7 +425,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
 
         Type keyType = detectType(symbols.stream().map(KeyValueSymbol::getKey).collect(Collectors.toList()), tokenSymbolInfo);
-        Type valueType = detectType(symbols.stream().map(KeyValueSymbol::getKey).collect(Collectors.toList()), tokenSymbolInfo);
+        Type valueType = detectType(symbols.stream().map(KeyValueSymbol::getValue).collect(Collectors.toList()), tokenSymbolInfo);
 
         return MapSymbolFactory.create("{" + symbolText + "}", keyType, valueType, tokenSymbolInfo);
     }
