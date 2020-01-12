@@ -38,7 +38,7 @@ public class Main {
         if (args.length < 2) {
             FileContext.setTargetPath(FileContext.getRootPath() + TARGET_BUILD_DIRECTORY_NAME + File.separator);
         } else {
-            FileContext.setTargetPath(args[1]);
+            FileContext.setTargetPath(args[1] + File.separator);
         }
 
         Paths.get(args[0]);

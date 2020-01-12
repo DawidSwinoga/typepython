@@ -33,7 +33,7 @@ public class TypeAnalyzer {
                     .append(symbols.stream().map(Symbol::getDisplayText).collect(Collectors.joining(",")))
                     .append("  ->  ")
                     .append(types.stream().map(Type::getPythonType).collect(Collectors.joining(",")));
-            throw new CollectionTypesMissMatchException(message.toString(), tokenSymbolInfo);
+            throw new TypesMissMatchException(message.toString(), tokenSymbolInfo);
         }
     }
 
@@ -55,7 +55,7 @@ public class TypeAnalyzer {
             return CppVariableType.STRING;
         }
 
-        throw new TypeAnalyzerException("Collection cannot contains mixed types.");
+        throw new TypeAnalyzerException("Expression cannot contains mixed types.");
     }
 
     private boolean allSymbolsAreString() {

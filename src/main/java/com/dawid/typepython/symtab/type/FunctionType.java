@@ -1,6 +1,7 @@
 package com.dawid.typepython.symtab.type;
 
 import com.dawid.typepython.symtab.matching.MatchType;
+import com.dawid.typepython.symtab.operator.MathOperator;
 import com.dawid.typepython.symtab.symbol.MethodSymbol;
 import lombok.EqualsAndHashCode;
 
@@ -33,6 +34,11 @@ public class FunctionType implements Type {
     @Override
     public List<MethodSymbol> getMethodSymbol() {
         return returnType.getMethodSymbol();
+    }
+
+    @Override
+    public boolean supportOperation(MathOperator mathOperator, Type type) {
+        return returnType.supportOperation(mathOperator, type);
     }
 
     @Override

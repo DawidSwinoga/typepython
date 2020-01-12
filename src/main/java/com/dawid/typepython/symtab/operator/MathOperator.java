@@ -14,7 +14,8 @@ public enum MathOperator {
     MINUS("-", "-"),
     MUL("*", "*"),
     DIV("/", "/"),
-    MOD("%", "%");
+    MOD("%", "%"),
+    POWER("**", "");
 
 
     private final String pythonOperator;
@@ -30,6 +31,13 @@ public enum MathOperator {
                 .filter(it -> it.pythonOperator.equals(pythonOperator))
                 .findFirst()
                 .map(MathOperator::getCppOperator)
+                .orElseThrow(UnsupportedLogicalOperator::new);
+    }
+
+    public static MathOperator translateFromPython(String pythonOperator) {
+        return stream(values())
+                .filter(it -> it.pythonOperator.equals(pythonOperator))
+                .findFirst()
                 .orElseThrow(UnsupportedLogicalOperator::new);
     }
 }

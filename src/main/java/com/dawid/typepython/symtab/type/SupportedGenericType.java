@@ -2,6 +2,7 @@ package com.dawid.typepython.symtab.type;
 
 import com.dawid.typepython.TokenSymbolInfo;
 import com.dawid.typepython.symtab.matching.MatchType;
+import com.dawid.typepython.symtab.operator.MathOperator;
 import lombok.AllArgsConstructor;
 
 import java.util.Arrays;
@@ -51,6 +52,11 @@ public enum SupportedGenericType implements Type {
     @Override
     public String getPythonType() {
         return genericType;
+    }
+
+    @Override
+    public boolean supportOperation(MathOperator mathOperator, Type type) {
+        return false;
     }
 
 

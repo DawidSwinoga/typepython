@@ -1,1 +1,12 @@
-aa = (1 + 2,1 * 4.1)
+tuple = ("hello", "world")
+tuple2 = ([1, 2, 3], [5, 6, 7])
+
+tuple[0]                #Dostęp do wartości "hello"
+#tuple[0] = "Hello"      #Błąd
+
+#tuple2[0] = [1, 2]      #Błąd
+tuple2[0].delete(2)     #Usunięcie z listy znajdującej się
+                        #w krotce pod indeksem 0 wartości
+                        #znajdującej się pod indeksem 2
+                        #(została usunięta wartość 3)
+

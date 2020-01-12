@@ -30,6 +30,8 @@ public class SetSymbolFactory {
         methodSymbols.add(clear);
         GenericType variableType = new GenericType(SupportedGenericType.SET, StandardCollectionSymbol.GENERIC_TEMPLATE_NAME, templateType, methodSymbols);
         String displayText = "std::set<" + templateType.getCppNameType() + ">(" + name + ")";
-        return new StandardCollectionSymbol(displayText, variableType, tokenSymbolInfo);
+        StandardCollectionSymbol standardCollectionSymbol = new StandardCollectionSymbol(displayText, variableType, tokenSymbolInfo);
+        standardCollectionSymbol.setTemporary(true);
+        return standardCollectionSymbol;
     }
 }

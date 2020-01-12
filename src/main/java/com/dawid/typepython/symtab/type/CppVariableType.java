@@ -1,6 +1,7 @@
 package com.dawid.typepython.symtab.type;
 
 import com.dawid.typepython.symtab.matching.MatchType;
+import com.dawid.typepython.symtab.operator.MathOperator;
 import com.dawid.typepython.symtab.symbol.MethodSymbol;
 import lombok.Getter;
 
@@ -55,6 +56,11 @@ public enum CppVariableType implements Type {
         return new ArrayList<>();
     }
 
+    @Override
+    public boolean supportOperation(MathOperator mathOperator, Type type) {
+        return (type.isNumeric() && this.isNumeric()) || (mathOperator == MathOperator.PLUS && type.match(STRING) != MatchType.NONE);
+    }
+
     public static Optional<? extends Type> translate(String pythonName) {
         return stream(values())
                 .filter(it -> it.getPythonName().equals(pythonName))
@@ -73,4 +79,6 @@ public enum CppVariableType implements Type {
 
         return MatchType.NONE;
     }
+
+
 }

@@ -1,8 +1,23 @@
-a = {"2","31","23","2"}
+set1 : set<int>                 #Pusty zbiór
+set2 : set<int> = {}            #Pusty zbiór
+set3 = {"Polska", "Niemcy"}     #Inicjalizacja zioru wartościami:
+                                #"Polska", "Niemcy"
 
-for value in a:
-    print(value)
+set = {"foo", "bar", "hello"}
+
+for value in set:
+    print("value: ", value, "\n")
+
+
+e1 = [4,1]
+e2 = [2,-1]
+a = {e1,e2}
+
+#for value in a:
+#    for d in value:
+#        println(d)
+#        println("--")
 
 a.clear()
-a.add("2")
+#a.add("2")
 print(len(a))

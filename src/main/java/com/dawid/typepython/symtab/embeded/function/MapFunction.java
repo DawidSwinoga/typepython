@@ -5,6 +5,7 @@ import com.dawid.typepython.symtab.embeded.list.StandardCollectionSymbol;
 import com.dawid.typepython.symtab.matching.MatchType;
 import com.dawid.typepython.symtab.symbol.Symbol;
 import com.dawid.typepython.symtab.symbol.TypedSymbol;
+import com.dawid.typepython.symtab.type.CppVariableType;
 import com.dawid.typepython.symtab.type.FunctionType;
 import com.dawid.typepython.symtab.type.GenericType;
 import com.dawid.typepython.symtab.type.Type;
@@ -32,6 +33,11 @@ public class MapFunction extends EmbeddedFunction{
 
         FunctionType functionType = (FunctionType) parameterTypes.get(1);
         GenericType genericType = (GenericType) parameterTypes.get(0);
+
+        if(functionType.getReturnType() == CppVariableType.VOID) {
+            return MatchType.NONE;
+        }
+
         Type embeddedType = genericType.getTemplateType(StandardCollectionSymbol.GENERIC_TEMPLATE_NAME);
 
         if (embeddedType.match(functionType.getParameters().get(0)) != MatchType.FULL) {

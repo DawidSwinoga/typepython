@@ -34,7 +34,9 @@ public class MapSymbolFactory {
         methods.add(iteratorSymbol);
         GenericType variableType = new GenericType(SupportedGenericType.MAP, MapSymbol.KEY_TEMPLATE, keyType, methods);
         variableType.setTemplateNameType(MapSymbol.VALUE_TEMPLATE, valueType);
-        return new MapSymbol(name, variableType, tokenSymbolInfo);
+        MapSymbol mapSymbol = new MapSymbol(name, variableType, tokenSymbolInfo);
+        mapSymbol.setTemporary(true);
+        return mapSymbol;
     }
 
     private static GenericType createPairGeneric(Type keyType, Type valueType) {

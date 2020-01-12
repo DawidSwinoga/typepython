@@ -1,11 +1,9 @@
-test = [1,2,3,-1,-2,3,1,-9]
+collection = [1,2,3,-1,-2,3,1,-9]
 
-def predicate(test: int): bool:
-    return test > 0
+def predicate(element: int): bool:
+    return element > 0
 
-test = filter(test, predicate)
+collection = filter(collection, predicate)
 
-print("Test: ")
-
-for t in test:
-    println(t)
+for element in collection:
+    print(element)

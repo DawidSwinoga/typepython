@@ -1,3 +1,34 @@
-import test.test
+#println("a" + 1) #Próba wykonania tej metody spowoduje błąd:
+#                Not supported operation "a" + 1 -> string + int
 
-test.test.test()
+
+println("a " + toString(1))
+println("a " + toString(1.1))
+
+# tupleCollection = (1,2,3)
+# listCollection = [1,2,3,4]
+# setCollection = {1, 2, 3, 4, 5}
+# mapCollection = {1: 2, 3: 4}
+#
+# println("Tuple collection size: ", len(tupleCollection))
+# println("List collection size: ", len(listCollection))
+# println("Set collection size: ", len(setCollection))
+# println("Map collection size: ", len(mapCollection))
+
+
+
+
+# hello = "Hello"
+# world = "world"
+# number = 2020
+#
+# println(hello, world, "!!!", number)
+# println(hello, world, "!!!", number)
+#
+#
+# def dd(): list<int>:
+#     pass
+#
+# for a in [1,2,3]:
+#     print(a)
+

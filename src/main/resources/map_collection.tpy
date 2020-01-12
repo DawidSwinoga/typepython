@@ -1,4 +1,21 @@
-test = {2.1: 1, 3: 2, 4: 1.2, 1: 3}
+collection = {"foo" : [1, 2], "bar" : [1, 2]}
+
+collection.delete("foo")
+
+for item in collection:
+    println("key: ", item.key())
+    for value in item.value():
+        println("value: ", value)
+    println()
+
+/*
+println("key: foo value: ", collection["foo"])
+println("key: bar value: ", collection["bar"])
+println("key: var value: ", collection["var"])
+println("key: empty value: ", collection["empty"])
+*/
+
+/*test = {2.1: 1, 3: 2, 4: 1.2, 1: 3}
 test[7] = 11
 print(len(test))
 print(test[7])
@@ -18,3 +35,4 @@ for item in aa:
     print("key: ", item.key())
     print("value: ", item.value())
 
+*/

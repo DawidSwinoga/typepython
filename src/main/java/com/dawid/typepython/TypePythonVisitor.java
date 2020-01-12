@@ -45,6 +45,7 @@ import com.dawid.typepython.symtab.type.CppVariableType;
 import com.dawid.typepython.symtab.type.ElementDoesNotSupportAssignmentException;
 import com.dawid.typepython.symtab.type.FunctionType;
 import com.dawid.typepython.symtab.type.GenericType;
+import com.dawid.typepython.symtab.type.NotSupportedOperationException;
 import com.dawid.typepython.symtab.type.SupportedGenericType;
 import com.dawid.typepython.symtab.type.SymbolType;
 import com.dawid.typepython.symtab.type.Type;
@@ -230,7 +231,6 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         return null;
     }
 
-    //TODO use reference instead of value (for (int $fd : list))
     @Override
     public Symbol visitForStatement(TypePythonParser.ForStatementContext ctx) {
         TypedSymbol variableSymbol = (TypedSymbol) visit(ctx.collection);
@@ -242,7 +242,9 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
                     .orElseThrow(() -> new UndefinedSymbolException(collectionVariableName, variableSymbol.getTokenSymbolInfo()));
         } else {
             collection = variableSymbol;
-            collection.setDisplayText(collection.getCppNameType() + collection.getDisplayText());
+            if (collection.isTemporary()) {
+                collection.setDisplayText(collection.getCppNameType() + collection.getDisplayText());
+            }
         }
 
         if (!collection.getVariableType().isCollection()) {
@@ -272,8 +274,10 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     public Symbol visitAdditiveExpression(TypePythonParser.AdditiveExpressionContext ctx) {
         TypedSymbol left = (TypedSymbol) visit(ctx.expression());
         TokenSymbolInfo tokenSymbolInfo = new TokenSymbolInfo(ctx);
-        Symbol mathOperator = new Symbol(MathOperator.translate(ctx.operator.getText()), tokenSymbolInfo);
+        String translate = MathOperator.translate(ctx.operator.getText());
+        Symbol mathOperator = new Symbol(translate, tokenSymbolInfo);
         TypedSymbol right = (TypedSymbol) visit(ctx.term());
+        validateOperation(left, MathOperator.translateFromPython(translate), right);
         return CompoundTypedSymbol.of(tokenSymbolInfo, detectAdditiveAccurateType(tokenSymbolInfo, left, right), left, mathOperator, right);
     }
 
@@ -289,8 +293,10 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
     public Symbol visitMultiplicativeExpression(TypePythonParser.MultiplicativeExpressionContext ctx) {
         TypedSymbol left = (TypedSymbol) visit(ctx.term());
         TokenSymbolInfo tokenSymbolInfo = new TokenSymbolInfo(ctx);
-        Symbol mathOperator = new Symbol(MathOperator.translate(ctx.operator.getText()), tokenSymbolInfo);
+        String translate = MathOperator.translate(ctx.operator.getText());
+        Symbol mathOperator = new Symbol(translate, tokenSymbolInfo);
         TypedSymbol right = (TypedSymbol) visit(ctx.factor());
+        validateOperation(left, MathOperator.translateFromPython(translate), right);
         return CompoundTypedSymbol.of(tokenSymbolInfo, detectAccurateType(tokenSymbolInfo, left, right), left, mathOperator, right);
     }
 
@@ -446,11 +452,20 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         if (ctx.exponent != null) {
             Symbol factor = visit(ctx.factor());
             Symbol symbol = new Symbol("std::pow(", null);
+            validateOperation(atom, MathOperator.POWER, factor);
             return CompoundTypedSymbol.of(new TokenSymbolInfo(ctx), CppVariableType.DOUBLE, symbol, atom,
                     new Symbol(",", null), factor, new Symbol(")", null));
         }
 
         return atom;
+    }
+
+    private void validateOperation(Symbol left, MathOperator mathOperator, Symbol right) {
+        boolean validType = (left instanceof TypedSymbol && right instanceof TypedSymbol);
+
+        if (!validType || !((TypedSymbol)left).getVariableType().supportOperation(mathOperator, ((TypedSymbol)right).getVariableType())) {
+            throw new NotSupportedOperationException(left.getTokenSymbolInfo(), left, mathOperator, right);
+        }
     }
 
     @Override
@@ -783,7 +798,9 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
     @Override
     public Symbol visitStringLiteral(TypePythonParser.StringLiteralContext ctx) {
-        return new VariableSymbol(ctx.getText(), CppVariableType.STRING, new TokenSymbolInfo(ctx));
+        VariableSymbol variableSymbol = new VariableSymbol(ctx.getText(), CppVariableType.STRING, new TokenSymbolInfo(ctx));
+        variableSymbol.setDisplayText("std::string(" + ctx.getText() + ")");
+        return variableSymbol;
     }
 
     @Override

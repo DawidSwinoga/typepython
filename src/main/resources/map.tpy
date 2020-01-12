@@ -1,13 +1,13 @@
-test = [1,2,3,1,2,3,4]
+collection = [1,2,3,1,2,3,4]
+
+def printc(collection: list<int>):
+    for element in collection:
+        print(element)
 
 def mul(element: int): int:
     return element * element
 
-def printv(vec: list<int>):
-    for el in vec:
-        print(el)
-
-print("before:")
-printv(test)
-print("after:")
-printv(map(test, mul))
+println("Przed wywołaniem funkcji map:")
+printc(collection)
+println("\nPo wywołaniu funkc:")
+printc(map(collection, mul))

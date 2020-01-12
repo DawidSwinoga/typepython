@@ -1,5 +1,6 @@
 package com.dawid.typepython.symtab.type;
 
+import com.dawid.typepython.symtab.operator.MathOperator;
 import com.dawid.typepython.symtab.symbol.MethodSymbol;
 
 import java.util.ArrayList;
@@ -21,4 +22,6 @@ public interface Type extends TypeMatcher {
     default List<MethodSymbol> getMethodSymbol() {
         return new ArrayList<>();
     }
+
+    boolean supportOperation(MathOperator mathOperator, Type type);
 }

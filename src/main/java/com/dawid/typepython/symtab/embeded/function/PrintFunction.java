@@ -39,7 +39,7 @@ public class PrintFunction extends EmbeddedFunction {
 
         for (Symbol symbol : parameters) {
             if (!((TypedSymbol) symbol).getVariableType().isCollection()) {
-                stringBuilder.append(" << ").append(symbol.getDisplayText()).append(" ");
+                stringBuilder.append(" << ").append(symbol.getDisplayText()).append(" ").append(" << \" \" ");
             } else {
                 throw new IllegalFunctionParameter();
             }

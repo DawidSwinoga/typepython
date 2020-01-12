@@ -1,6 +1,7 @@
 package com.dawid.typepython.symtab.type;
 
 import com.dawid.typepython.symtab.matching.MatchType;
+import com.dawid.typepython.symtab.operator.MathOperator;
 import com.dawid.typepython.symtab.symbol.MethodSymbol;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -97,6 +98,11 @@ public class GenericType implements Type {
     @Override
     public List<MethodSymbol> getMethodSymbol() {
         return methodSymbols;
+    }
+
+    @Override
+    public boolean supportOperation(MathOperator mathOperator, Type type) {
+        return false;
     }
 
     @Override
