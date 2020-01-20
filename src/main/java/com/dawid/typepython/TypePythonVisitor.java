@@ -703,25 +703,36 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         Optional<Symbol> atom = empty();
         try {
             atom = ofNullable(visit(atomContext));
+            atom = findImport(atomContext, trailers, atom);
         } catch (UndefinedSymbolException e) {
-            String text = atomContext.getText();
-            int possibleImportTrailerCount = trailers.size() - 1;
-            for (int i = 0; i < possibleImportTrailerCount; i++) {
-                text = text + trailers.get(i).getText();
-                Optional<ImportScope> importScope = currentScope.findImport(text);
-                if (importScope.isPresent()) {
-                    trailers.removeAll(trailers.subList(0, i + 1));
-                    atom = importScope.map(it -> new ImportSymbol(SymbolType.IMPORT, it));
-                    break;
-                }
-
-            }
+            atom = findImport(atomContext, trailers, atom);
             if (!atom.isPresent()) {
                 throw e;
             }
         }
 
         return atom.orElseThrow(() -> new UndefinedSymbolException(atomContext.getText(), new TokenSymbolInfo(atomContext)));
+    }
+
+    private Optional<Symbol> findImport(TypePythonParser.AtomContext atomContext, List<TypePythonParser.TrailerContext> trailers, Optional<Symbol> atom) {
+        String text = atomContext.getText();
+        int possibleImportTrailerCount = trailers.size() - 1;
+        Optional<ImportScope> importScope = empty();
+        int find = 0;
+        for (int i = 0; i < possibleImportTrailerCount; i++) {
+            text = text + trailers.get(i).getText();
+            Optional<ImportScope> tmp = currentScope.findImport(text);
+            if (tmp.isPresent()) {
+                importScope = tmp;
+                find = i;
+                atom = importScope.map(it -> new ImportSymbol(SymbolType.IMPORT, it));
+            }
+
+        }
+        if (importScope.isPresent()) {
+            trailers.removeAll(trailers.subList(0, find + 1));
+        }
+        return atom;
     }
 
     @Override

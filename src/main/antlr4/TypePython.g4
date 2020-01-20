@@ -40,7 +40,7 @@ type
     ;
 
 genericType
-    : IDENTIFIER LOWER_THEN type (COMMA type)* GREATER_THEN
+    : IDENTIFIER LOWER_THAN type (COMMA type)* GREATER_THAN
     ;
 
 simpleType
@@ -147,7 +147,7 @@ notTest
     ;
 comparison: expression (compareOperator expression)*;
 
-compareOperator: LOWER_THEN|GREATER_THEN|EQUAL|LOWER_THEN_OR_EQUAL_TO|GREATER_THEN_OR_EQUAL_TO|NOT|NOT_EQUAL;
+compareOperator: LOWER_THAN|GREATER_THAN|EQUAL|LOWER_THAN_OR_EQUAL_TO|GREATER_THAN_OR_EQUAL_TO|NOT|NOT_EQUAL;
 expression
     : term      #termExpression
     | expression operator=(ADD|MINUS) term  #additiveExpression
@@ -215,10 +215,10 @@ NOT                         : 'not';
 ASSIGN                      : '=';
 EQUAL                       : '==';
 NOT_EQUAL                   : '!=';
-GREATER_THEN                : '>';
-GREATER_THEN_OR_EQUAL_TO    : '>=';
-LOWER_THEN                  : '<';
-LOWER_THEN_OR_EQUAL_TO      : '<=';
+GREATER_THAN                : '>';
+GREATER_THAN_OR_EQUAL_TO    : '>=';
+LOWER_THAN                  : '<';
+LOWER_THAN_OR_EQUAL_TO      : '<=';
 ADD                         : '+';
 MINUS                       : '-';
 POWER                       : '**';

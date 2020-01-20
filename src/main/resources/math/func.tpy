@@ -1,0 +1,4 @@
+def pow2(value: double): double :
+    return value * value
+
+println("func.tpy")

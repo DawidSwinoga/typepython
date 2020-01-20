@@ -1,4 +1,4 @@
-numberOfDiscs = 20
+numberOfDiscs = 3
 
 def hanoi(src: int, aux: int, dst: int, n: int):
     if n == 1:
@@ -9,8 +9,8 @@ def hanoi(src: int, aux: int, dst: int, n: int):
         println(src, " => ", dst)
         hanoi(aux, src, dst, n-1)
 
-println("1 - src")
-println("2 - tmp")
-println("3 - src")
+println("1 - Początkowy słupek")
+println("2 - Środkowy słupek")
+println("3 - Docelowy słupek")
 
 hanoi(1, 2, 3, numberOfDiscs)
