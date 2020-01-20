@@ -504,7 +504,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
                 CompoundTypedSymbol compoundTypedSymbol = (CompoundTypedSymbol) trailerSymbol;
                 MatchingResult resultFunctionMatching = currentScope.findFunction(atom.getName(), compoundTypedSymbol.getVariableTypes(), atom.getTokenSymbolInfo());
-                FunctionSymbol function = resultFunctionMatching.minPartial(atom.getTokenSymbolInfo());
+                FunctionSymbol function = resultFunctionMatching.minPartial(atom.getTokenSymbolInfo() != null ? atom.getTokenSymbolInfo() : trailerSymbol.getTokenSymbolInfo());
                 FunctionResult invoke = function.invoke(resultSymbol, createTmpVariableForInlineInitilizerCollection(compoundTypedSymbol));
                 TypedSymbol typedSymbol = new TypedSymbol(invoke.getType(), compoundTypedSymbol.getTokenSymbolInfo());
                 typedSymbol.setDisplayText(invoke.getDisplayText());
@@ -739,7 +739,8 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
         if (assignable.getVariableType() == null) {
             if (symbol instanceof StandardCollectionSymbol) {
-                if (((GenericType) symbol.getVariableType()).getTemplateType(StandardCollectionSymbol.GENERIC_TEMPLATE_NAME) == null) {
+                GenericType variableType = (GenericType) symbol.getVariableType();
+                if (variableType == null || variableType.getTemplateType(StandardCollectionSymbol.GENERIC_TEMPLATE_NAME) == null) {
                     throw new TypeNotDefinedException(assignable.getDisplayText(), assignable.getTokenSymbolInfo());
                 }
                 String text = assignable.getDisplayText();

@@ -8,6 +8,7 @@ import com.dawid.typepython.CompilerException;
 import com.dawid.typepython.TokenSymbolInfo;
 import com.dawid.typepython.symtab.symbol.TypedSymbol;
 import com.dawid.typepython.symtab.type.Type;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Created by Dawid on 25.08.2019 at 02:40.
@@ -25,6 +26,14 @@ public class NoMatchingFunctionException extends CompilerException {
     @Override
     public String getMessage() {
         String parametersType = Optional.ofNullable(parameters).map(params -> parameters.stream().map(Type::getPythonType).collect(Collectors.joining(","))).orElse("");
-        return "Function " + name + " (" + parametersType + ")" + " not found.";
+        return "Function " + getFunctionAlias(parametersType) + "not found.";
+    }
+
+    private String getFunctionAlias(String parametersType) {
+        if (name != null) {
+            return name + " (" + parametersType + ") ";
+        } else {
+            return StringUtils.EMPTY;
+        }
     }
 }

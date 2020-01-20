@@ -30,7 +30,7 @@ public class TypeAnalyzer {
         } catch (TypeAnalyzerException e) {
             StringBuilder message = new StringBuilder(e.getMessage());
             message.append(" ")
-                    .append(symbols.stream().map(Symbol::getDisplayText).collect(Collectors.joining(",")))
+                    .append(symbols.stream().map(Symbol::getName).collect(Collectors.joining(",")))
                     .append("  ->  ")
                     .append(types.stream().map(Type::getPythonType).collect(Collectors.joining(",")));
             throw new TypesMissMatchException(message.toString(), tokenSymbolInfo);
