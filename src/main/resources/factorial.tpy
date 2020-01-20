@@ -1,8 +1,7 @@
 def factorial( n: int ): int:
-   if n <1:   # base case
+   if n <1:
        return 1
    else:
-       returnNumber = n * factorial( n - 1 )  # recursive call
-       return returnNumber
+       return n * factorial( n - 1 )
 
 print(factorial(10))

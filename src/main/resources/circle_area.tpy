@@ -1,0 +1,7 @@
+import math.func
+
+radius = 5
+
+println("Area = ", math.const.PI * radius ** 2 )
+print("Area = ", math.const.pi() * math.func.pow2(radius))
+

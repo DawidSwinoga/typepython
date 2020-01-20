@@ -1,16 +1,16 @@
-n = 100
-lp = 0
+n = 5
+currentCount = 0
 p = 2
 
-while lp < n:
-    t = True
+while currentCount < n:
+    flag = True
     d = 2
     while d < p:
         if p % d == 0:
-            t = False
+            flag = False
             break
         d = d + 1
-    if t:
-        print(p)
-        lp = lp + 1
+    if flag:
+        println(p)
+        currentCount = currentCount + 1
     p = p + 1

@@ -1,6 +1,0 @@
-PI = 3.14
-def pi(): double:
-    return PI
-
-def pow2(value: double): double :
-    return value * value
