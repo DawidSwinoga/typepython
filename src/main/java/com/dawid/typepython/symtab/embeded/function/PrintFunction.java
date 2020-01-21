@@ -37,9 +37,13 @@ public class PrintFunction extends EmbeddedFunction {
             stringBuilder.append("std::cout ");
         }
 
-        for (Symbol symbol : parameters) {
+        for (int i = 0; i < parameters.size(); i++) {
+            Symbol symbol = parameters.get(0);
             if (!((TypedSymbol) symbol).getVariableType().isCollection()) {
-                stringBuilder.append(" << ").append(symbol.getDisplayText()).append(" ").append(" << \" \" ");
+                stringBuilder.append(" << ").append(symbol.getDisplayText());
+                if (i != parameters.size() - 1) {
+                    stringBuilder.append(" << \" \" ");
+                }
             } else {
                 throw new IllegalFunctionParameter();
             }

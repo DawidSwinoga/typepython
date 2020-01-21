@@ -1,4 +1,4 @@
-import math.func
+import math.const
 
 radius = 5
 

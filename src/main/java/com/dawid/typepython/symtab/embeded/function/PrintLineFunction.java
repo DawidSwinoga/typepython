@@ -23,7 +23,7 @@ public class PrintLineFunction extends PrintFunction {
         if (StringUtils.isEmpty(result)) {
             result.append("std::cout ");
         }
-        return result.append(" << std::endl");
+        return result.append(" << \"\\n\"");
     }
 
     @Override
