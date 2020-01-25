@@ -1,0 +1,36 @@
+distanceMatrix = [[368, 570, 760, 910, 935], [351, 394, 838, 172, 49], [657, 718, 225, 355, 397], [38, 882, 324, 313, 216], [192, 521, 669, 61, 967]]
+
+citiesToVisit : list<int>
+cityPath = [0]
+
+cityName = 0
+
+while cityName < (len(distanceMatrix) - 1):
+    cityName = cityName + 1
+    citiesToVisit.append(cityName)
+
+def nearestCity(lastVisitedCity: int): int:
+    nearestCityIndex = 0
+    cost = distanceMatrix[lastVisitedCity][citiesToVisit[nearestCityIndex]]
+
+    index = 1
+    while index < len(citiesToVisit):
+        if cost > distanceMatrix[lastVisitedCity][citiesToVisit[index]]:
+            nearestCityIndex = index
+            cost = distanceMatrix[lastVisitedCity][citiesToVisit[index]]
+        index = index + 1
+    return nearestCityIndex
+
+
+while len(citiesToVisit) > 0:
+    nearestCityIndex = nearestCity(cityPath[len(cityPath) - 1])
+    cityPath.append(citiesToVisit[nearestCityIndex])
+    citiesToVisit.delete(nearestCityIndex)
+
+cityPath.append(cityPath[0])
+
+def printc(collection: list<int>):
+    for el in collection:
+        println(el)
+
+printc(cityPath)

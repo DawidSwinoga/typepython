@@ -362,7 +362,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
 
     @Override
     public Symbol visitTests(TypePythonParser.TestsContext ctx) {
-        VariableSymbol first = (VariableSymbol) visit(ctx.first);
+        TypedSymbol first = (TypedSymbol) visit(ctx.first);
         if (ctx.test().size() == 1) {
             return CompoundTypedSymbol.of(new TokenSymbolInfo(ctx), first.getVariableType(), first);
         }

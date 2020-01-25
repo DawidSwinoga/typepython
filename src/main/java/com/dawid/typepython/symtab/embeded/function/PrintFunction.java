@@ -38,7 +38,7 @@ public class PrintFunction extends EmbeddedFunction {
         }
 
         for (int i = 0; i < parameters.size(); i++) {
-            Symbol symbol = parameters.get(0);
+            Symbol symbol = parameters.get(i);
             if (!((TypedSymbol) symbol).getVariableType().isCollection()) {
                 stringBuilder.append(" << ").append(symbol.getDisplayText());
                 if (i != parameters.size() - 1) {

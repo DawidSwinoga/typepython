@@ -34,7 +34,7 @@ public class CompoundTypedSymbol extends VariableSymbol {
         this.symbols = symbols;
     }
 
-    public static CompoundTypedSymbol of(Type variableType, VariableSymbol first, List<Symbol> symbols, TokenSymbolInfo tokenSymbolInfo) {
+    public static CompoundTypedSymbol of(Type variableType, TypedSymbol first, List<Symbol> symbols, TokenSymbolInfo tokenSymbolInfo) {
         List<Symbol> allSymbols = new ArrayList<>();
         allSymbols.add(first);
         allSymbols.addAll(symbols);
