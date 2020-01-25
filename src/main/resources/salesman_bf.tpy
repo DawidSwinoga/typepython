@@ -1,0 +1,84 @@
+citiesCostMatrix = [[3,88,81,4],[39,77,6,2],[11,40,91,12],[66,67,51,6]]
+
+def generateFirstPermutation(vertexCount: int): list<int>:
+    permutation : list<int> = []
+    i = 0
+    while i <= vertexCount:
+        permutation.append(i)
+        i = i + 1
+    return permutation
+
+
+def calculateTourCost(path : list<int>, costMatrix : list<list<int>>): int:
+    cost = 0
+
+    i = 1
+
+    while i < len(costMatrix):
+        fromCity = path[i - 1]
+        toCity = path[i]
+        cost = cost + costMatrix[fromCity][toCity]
+        i = i + 1
+
+    costToReturnToStartVertex = costMatrix[len(costMatrix) - 1][0]
+    return cost + costToReturnToStartVertex
+
+
+def clone(sequence : list<int>): list<int>:
+    cloneList : list<int> = []
+    for el in sequence:
+        cloneList.append(el)
+    return cloneList
+
+
+def first(sequence : list<int>): int:
+    i = len(sequence) - 2
+    while i >= 0:
+        if sequence[i] < sequence[i + 1]:
+            return i
+        i = i - 1
+    return - 1
+
+
+def swap(sequence : list<int>, x: int, y: int):
+    tmp = sequence[y]
+    sequence[y] = sequence[x]
+    sequence[x] = tmp
+
+
+def nextPermutation(sequence: list<int>): bool:
+    firstElement = first(sequence)
+    if firstElement == -1:
+        return False
+    toSwap = len(sequence) - 1
+    while sequence[firstElement] >= sequence[toSwap]:
+        toSwap = toSwap - 1
+    swap(sequence, firstElement, toSwap)
+    firstElement = firstElement + 1
+    toSwap = len(sequence) - 1
+    while firstElement < toSwap:
+        swap(sequence, firstElement, toSwap)
+        firstElement = firstElement + 1
+        toSwap = toSwap - 1
+    return True
+
+
+def tsp(distanceMatrix : list<list<int>>): list<int>:
+    currentPath = generateFirstPermutation(len(distanceMatrix) - 1)
+    bestPathCost = calculateTourCost(currentPath, distanceMatrix)
+    bestPath = clone(currentPath)
+    while nextPermutation(currentPath):
+        currentCost = calculateTourCost(currentPath, distanceMatrix)
+        if currentCost < bestPathCost:
+            bestPathCost = currentCost
+            bestPath = clone(currentPath)
+
+    bestPath.append(bestPath[0])
+    return bestPath
+
+def printc(collection : list<int>):
+    for el in collection:
+        println(el)
+
+
+printc(tsp(citiesCostMatrix))

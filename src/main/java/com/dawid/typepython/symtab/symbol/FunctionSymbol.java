@@ -3,6 +3,7 @@ package com.dawid.typepython.symtab.symbol;
 import com.dawid.typepython.TokenSymbolInfo;
 import com.dawid.typepython.symtab.FunctionResult;
 import com.dawid.typepython.symtab.matching.MatchType;
+import com.dawid.typepython.symtab.type.FunctionType;
 import com.dawid.typepython.symtab.type.Type;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
@@ -63,7 +64,7 @@ public class FunctionSymbol extends VariableSymbol {
 
     public FunctionResult invoke(Symbol invoker, List<TypedSymbol> parameters) {
         String text = getDisplayText() + "(" + parameters.stream().map(Symbol::getDisplayText).collect(Collectors.joining(", ")) + ")";
-        return new FunctionResult(text, getVariableType());
+        return new FunctionResult(text, getVariableType() instanceof FunctionType ? ((FunctionType)getVariableType()).getReturnType() : getVariableType());
     }
 
     public boolean parametersCountMatch(List<Type> parameters) {
