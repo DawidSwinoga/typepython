@@ -8,22 +8,22 @@ for item in collection:
         println("value: ", value)
     println()
 
-/*
-println("key: foo value: ", collection["foo"])
-println("key: bar value: ", collection["bar"])
-println("key: var value: ", collection["var"])
-println("key: empty value: ", collection["empty"])
-*/
 
-/*test = {2.1: 1, 3: 2, 4: 1.2, 1: 3}
+println("key: foo value: ", len(collection["foo"]))
+println("key: bar value: ", collection["bar"][0])
+println("key: var value: ", len(collection["var"]))
+println("key: empty value: ", len(collection["empty"]))
+
+
+test = {2.1: 1, 3: 2, 4: 1.2, 1: 3}
 test[7] = 11
-print(len(test))
-print(test[7])
+println(len(test))
+println(test[7])
 test.delete(2.1)
-print(test[2.1])
-print(len(test))
+println(test[2.1])
+println(len(test))
 test.clear()
-print(len(test))
+println(len(test))
 
 aa = {1:2, 3:4}
 aa[1] = 10
@@ -32,7 +32,6 @@ a : int
 ddd : map<int,int>
 
 for item in aa:
-    print("key: ", item.key())
-    print("value: ", item.value())
+    println("key: ", item.key())
+    println("value: ", item.value())
 
-*/

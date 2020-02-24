@@ -21,8 +21,8 @@ fun(True)
 
 #test(12)
 
-# test : tuple<int> = (1,2,3)
-# test[0] = 3
+#test : tuple<int> = (1,2,3)
+#test[0] = 3
 
 #import test2
 
@@ -44,7 +44,7 @@ def a():
 a(1)
 */
 
-list = []
+#list = []
 
 #test: df<int>
 

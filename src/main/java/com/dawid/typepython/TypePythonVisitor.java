@@ -349,6 +349,7 @@ public class TypePythonVisitor extends com.dawid.typepython.generated.TypePython
         TypedSymbol symbol = (TypedSymbol) visit(ctx.type());
         symbol.setDisplayText(ctx.IDENTIFIER().getText());
         symbol.setName(ctx.IDENTIFIER().getText());
+        symbol.setTemporary(false);
         return symbol;
     }
 

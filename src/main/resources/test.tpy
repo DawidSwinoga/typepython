@@ -2,8 +2,13 @@
 #                Not supported operation "a" + 1 -> string + int
 
 
-println("a " + toString(1))
-println("a " + toString(1.1))
+
+
+a = "dfd"
+
+
+#println("a " + toString(1))
+#println("a " + toString(1.1))
 
 # tupleCollection = (1,2,3)
 # listCollection = [1,2,3,4]
@@ -16,7 +21,7 @@ println("a " + toString(1.1))
 # println("Map collection size: ", len(mapCollection))
 
 
-
+test: list<int> = [1,2]
 
 # hello = "Hello"
 # world = "world"
